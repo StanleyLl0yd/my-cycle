@@ -11,10 +11,6 @@ android {
 
     defaultConfig { minSdk = 26 }
 
-    sourceSets {
-        getByName("androidTest").assets.srcDir("$projectDir/schemas")
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -45,9 +41,4 @@ dependencies {
     kapt(libs.dev.hilt.compiler)
     kapt(libs.androidx.room.compiler)
 
-    androidTestImplementation(libs.androidx.room.testing)
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.rules)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.junit4)
 }
