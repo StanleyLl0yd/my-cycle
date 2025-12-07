@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.room.Room
+import com.example.mycycle.data.local.DatabaseProvider
 import com.example.mycycle.data.local.MyCycleDatabase
 import com.example.mycycle.data.local.dao.CycleDao
 import com.example.mycycle.data.local.dao.LogEntryDao
@@ -33,11 +33,9 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.util.UUID
 import javax.inject.Singleton
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 public interface CycleRepository {
     public val cycles: Flow<List<Cycle>>
@@ -227,85 +225,7 @@ internal val Context.userPrefsDataStore: DataStore<Preferences> by preferencesDa
 internal object DataModule {
     @Provides
     @Singleton
-    fun provideDatabase(context: Context): MyCycleDatabase {
-        val database = Room.databaseBuilder(
-            context,
-            MyCycleDatabase::class.java,
-            "mycycle.db"
-        ).fallbackToDestructiveMigration().build()
-
-        runBlocking(Dispatchers.IO) { seed(database) }
-        return database
-    }
-
-    private suspend fun seed(database: MyCycleDatabase) {
-        val existing = database.cycleDao().observeCycles().first()
-        if (existing.isNotEmpty()) return
-
-        val today = LocalDate.now()
-        val lastStart = today.minusDays(27)
-        val previousStart = lastStart.minusDays(30)
-        database.cycleDao().insert(
-            CycleEntity(
-                id = UUID.randomUUID().toString(),
-                startDate = lastStart,
-                endDate = today.minusDays(1),
-                averageLengthDays = 28,
-                lutealPhaseDays = 14,
-                confidence = 0.85f
-            )
-        )
-        database.cycleDao().insert(
-            CycleEntity(
-                id = UUID.randomUUID().toString(),
-                startDate = previousStart,
-                endDate = lastStart.minusDays(1),
-                averageLengthDays = 28,
-                lutealPhaseDays = 14,
-                confidence = 0.8f
-            )
-        )
-        database.logEntryDao().insert(
-            LogEntryEntity(
-                id = UUID.randomUUID().toString(),
-                date = today.minusDays(1),
-                bleedingLevel = BleedingLevel.LIGHT.name,
-                symptoms = listOf("cramps", "fatigue"),
-                mood = Mood.NEUTRAL.name,
-                temperatureCelsius = 36.7f,
-                weightKg = 62.5f,
-                notes = "Лёгкие спазмы, помог тёплый чай",
-            )
-        )
-        database.logEntryDao().insert(
-            LogEntryEntity(
-                id = UUID.randomUUID().toString(),
-                date = today.minusDays(3),
-                bleedingLevel = BleedingLevel.MEDIUM.name,
-                symptoms = listOf("headache"),
-                mood = Mood.NEGATIVE.name,
-                temperatureCelsius = null,
-                weightKg = null,
-                notes = "Головная боль ближе к вечеру",
-            )
-        )
-        database.reminderDao().insert(
-            ReminderEntity(
-                id = UUID.randomUUID().toString(),
-                type = ReminderType.CYCLE_START.name,
-                time = LocalTime.of(8, 0),
-                enabled = true
-            )
-        )
-        database.reminderDao().insert(
-            ReminderEntity(
-                id = UUID.randomUUID().toString(),
-                type = ReminderType.MEDICATION.name,
-                time = LocalTime.of(21, 30),
-                enabled = true
-            )
-        )
-    }
+    fun provideDatabase(context: Context): MyCycleDatabase = DatabaseProvider.create(context)
 
     @Provides
     @Singleton

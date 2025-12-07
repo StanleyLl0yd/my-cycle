@@ -75,6 +75,14 @@ fun RemindersScreen(titleRes: Int, viewModel: RemindersViewModel = hiltViewModel
 
 @Composable
 private fun ReminderRow(reminder: Reminder, onToggle: (Boolean) -> Unit) {
+    val typeLabel = stringResource(
+        when (reminder.type) {
+            ReminderType.CYCLE_START -> R.string.reminder_type_cycle_start
+            ReminderType.OVULATION -> R.string.reminder_type_ovulation
+            ReminderType.MEDICATION -> R.string.reminder_type_medication
+            ReminderType.GENERAL -> R.string.reminder_type_general
+        }
+    )
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -82,7 +90,7 @@ private fun ReminderRow(reminder: Reminder, onToggle: (Boolean) -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = reminder.type.name.lowercase().replaceFirstChar { it.titlecase() }, fontWeight = FontWeight.SemiBold)
+                Text(text = typeLabel, fontWeight = FontWeight.SemiBold)
                 Text(text = stringResource(id = R.string.reminders_time, reminder.time))
             }
             Switch(checked = reminder.enabled, onCheckedChange = onToggle)

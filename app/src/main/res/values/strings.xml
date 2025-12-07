@@ -37,6 +37,10 @@
     <string name="insights_not_enough_data">Not enough data</string>
     <string name="reminders_add_button">Add reminder</string>
     <string name="reminders_time">Time: %1$s</string>
+    <string name="reminder_type_cycle_start">Cycle start</string>
+    <string name="reminder_type_ovulation">Ovulation</string>
+    <string name="reminder_type_medication">Medication</string>
+    <string name="reminder_type_general">Reminder</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_analytics">Analytics opt-in</string>
     <string name="settings_units_title">Units</string>

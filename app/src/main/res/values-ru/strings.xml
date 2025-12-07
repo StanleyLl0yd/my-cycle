@@ -37,6 +37,10 @@
     <string name="insights_not_enough_data">Недостаточно данных</string>
     <string name="reminders_add_button">Добавить напоминание</string>
     <string name="reminders_time">Время: %1$s</string>
+    <string name="reminder_type_cycle_start">Начало цикла</string>
+    <string name="reminder_type_ovulation">Овуляция</string>
+    <string name="reminder_type_medication">Приём препаратов</string>
+    <string name="reminder_type_general">Напоминание</string>
     <string name="settings_notifications">Уведомления</string>
     <string name="settings_analytics">Согласие на аналитику</string>
     <string name="settings_units_title">Единицы измерения</string>
