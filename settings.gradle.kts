@@ -18,6 +18,7 @@ rootProject.name = "my-cycle"
 include(":app")
 include(":core:designsystem")
 include(":core:model")
+include(":core:data")
 include(":feature:calendar")
 include(":feature:log")
 include(":feature:insights")

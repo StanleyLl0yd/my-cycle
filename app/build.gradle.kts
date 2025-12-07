@@ -70,6 +70,7 @@ dependencies {
 
     implementation(project(":core:designsystem"))
     implementation(project(":core:model"))
+    implementation(project(":core:data"))
     implementation(project(":feature:calendar"))
     implementation(project(":feature:log"))
     implementation(project(":feature:insights"))
