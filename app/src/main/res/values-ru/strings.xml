@@ -43,10 +43,17 @@
     <string name="reminder_type_general">Напоминание</string>
     <string name="settings_notifications">Уведомления</string>
     <string name="settings_analytics">Согласие на аналитику</string>
+    <string name="settings_app_lock">Блокировка по биометрии</string>
+    <string name="settings_app_lock_unavailable">Биометрия недоступна на устройстве</string>
+    <string name="settings_storage_security">Шифрование настроек, резервное копирование отключено</string>
     <string name="settings_units_title">Единицы измерения</string>
     <string name="settings_temperature_label">Температура</string>
     <string name="settings_weight_label">Вес</string>
     <string name="settings_temperature_unit">%1$s</string>
     <string name="settings_weight_unit">%1$s</string>
     <string name="settings_theme_title">Тема</string>
+    <string name="app_lock_title">Разблокируйте My Cycle</string>
+    <string name="app_lock_subtitle">Подтвердите личность для защиты данных</string>
+    <string name="insights_cycle_trend">Динамика длины цикла</string>
+    <string name="insights_mood_chart">Распределение настроения</string>
 </resources>

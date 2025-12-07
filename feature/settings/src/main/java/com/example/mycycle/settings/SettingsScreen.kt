@@ -22,10 +22,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.biometric.BiometricManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -62,11 +64,21 @@ internal class SettingsViewModel @Inject constructor(
     fun updateTheme(theme: ThemeSetting) {
         viewModelScope.launch { preferencesRepository.updateTheme(theme) }
     }
+
+    fun toggleAppLock(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.updateAppLock(enabled) }
+    }
 }
 
 @Composable
 fun SettingsScreen(titleRes: Int, viewModel: SettingsViewModel = hiltViewModel()) {
     val prefs by viewModel.prefs.collectAsState()
+    val context = LocalContext.current
+    val biometricAvailable = remember {
+        BiometricManager.from(context).canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        ) == BiometricManager.BIOMETRIC_SUCCESS
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(title = { Text(stringResource(id = titleRes)) })
@@ -83,6 +95,31 @@ fun SettingsScreen(titleRes: Int, viewModel: SettingsViewModel = hiltViewModel()
             item {
                 PreferenceCard(title = stringResource(id = R.string.settings_analytics)) {
                     Switch(checked = prefs.analyticsOptIn, onCheckedChange = viewModel::toggleAnalytics)
+                }
+            }
+            item {
+                PreferenceCard(title = stringResource(id = R.string.settings_app_lock)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Switch(
+                            checked = prefs.appLockEnabled && biometricAvailable,
+                            enabled = biometricAvailable,
+                            onCheckedChange = viewModel::toggleAppLock
+                        )
+                        if (!biometricAvailable) {
+                            Text(
+                                text = stringResource(id = R.string.settings_app_lock_unavailable),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+            }
+            item {
+                PreferenceCard(title = stringResource(id = R.string.settings_storage_security)) {
+                    Text(
+                        text = stringResource(id = R.string.settings_storage_security),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
             item {

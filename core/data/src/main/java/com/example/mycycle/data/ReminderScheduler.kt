@@ -1,7 +1,9 @@
 package com.example.mycycle.data
 
 import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -86,11 +88,27 @@ internal class ReminderScheduler(private val context: Context) {
             ReminderType.MEDICATION -> context.getString(R.string.reminder_body_medication)
             ReminderType.GENERAL -> context.getString(R.string.reminder_body_general)
         }
+        val targetRoute = when (type) {
+            ReminderType.CYCLE_START, ReminderType.OVULATION -> "calendar"
+            ReminderType.MEDICATION, ReminderType.GENERAL -> "reminders"
+        }
+        val launchIntent = Intent().apply {
+            setClassName(context.packageName, "com.example.mycycle.MainActivity")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(KEY_TARGET_DESTINATION, targetRoute)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            reminderId.hashCode(),
+            launchIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle(context.getString(R.string.reminder_notification_title))
             .setContentText(text)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
             .build()
         manager.notify(reminderId.hashCode(), notification)
     }
@@ -111,5 +129,6 @@ internal class ReminderScheduler(private val context: Context) {
         internal const val KEY_REMINDER_ID = "reminder_id"
         internal const val KEY_REMINDER_TYPE = "reminder_type"
         internal const val KEY_REMINDER_TIME = "reminder_time"
+        internal const val KEY_TARGET_DESTINATION = "target_destination"
     }
 }

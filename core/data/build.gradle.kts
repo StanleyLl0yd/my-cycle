@@ -40,7 +40,14 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.work.runtime)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.security.crypto)
 
     kapt(libs.dev.hilt.compiler)
     kapt(libs.androidx.room.compiler)
+
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.junit4)
 }

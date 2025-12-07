@@ -1,12 +1,10 @@
 package com.example.mycycle.data
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import android.content.SharedPreferences
+import androidx.core.content.edit
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.example.mycycle.data.local.DatabaseProvider
 import com.example.mycycle.data.local.MyCycleDatabase
 import com.example.mycycle.data.local.dao.CycleDao
@@ -33,7 +31,9 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.util.UUID
 import javax.inject.Singleton
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -62,6 +62,7 @@ public interface UserPreferencesRepository {
     public suspend fun updateUnits(temperatureUnit: TemperatureUnit, weightUnit: WeightUnit)
     public suspend fun updateNotifications(enabled: Boolean)
     public suspend fun updateAnalyticsOptIn(optIn: Boolean)
+    public suspend fun updateAppLock(enabled: Boolean)
 }
 
 private class RoomCycleRepository(
@@ -140,43 +141,57 @@ private class RoomReminderRepository(
     }
 }
 
-private class DataStoreUserPreferencesRepository(
-    private val dataStore: DataStore<Preferences>
+private class SecurePreferencesUserPreferencesRepository(
+    private val prefs: SharedPreferences
 ) : UserPreferencesRepository {
 
-    private val themeKey = intPreferencesKey("theme")
-    private val tempUnitKey = intPreferencesKey("temp_unit")
-    private val weightUnitKey = intPreferencesKey("weight_unit")
-    private val notificationsKey = booleanPreferencesKey("notifications")
-    private val analyticsKey = booleanPreferencesKey("analytics")
+    private val themeKey = "theme"
+    private val tempUnitKey = "temp_unit"
+    private val weightUnitKey = "weight_unit"
+    private val notificationsKey = "notifications"
+    private val analyticsKey = "analytics"
+    private val appLockKey = "app_lock"
 
-    override val preferences: Flow<UserPreferences> = dataStore.data.map { prefs ->
-        UserPreferences(
-            theme = ThemeSetting.fromOrdinal(prefs[themeKey] ?: ThemeSetting.SYSTEM.ordinal),
-            temperatureUnit = TemperatureUnit.fromOrdinal(prefs[tempUnitKey] ?: TemperatureUnit.CELSIUS.ordinal),
-            weightUnit = WeightUnit.fromOrdinal(prefs[weightUnitKey] ?: WeightUnit.KILOGRAMS.ordinal),
-            notificationsEnabled = prefs[notificationsKey] ?: true,
-            analyticsOptIn = prefs[analyticsKey] ?: false,
-        )
+    override val preferences: Flow<UserPreferences> = callbackFlow {
+        val sendCurrent: () -> Unit = {
+            trySend(
+                UserPreferences(
+                    theme = ThemeSetting.fromOrdinal(prefs.getInt(themeKey, ThemeSetting.SYSTEM.ordinal)),
+                    temperatureUnit = TemperatureUnit.fromOrdinal(prefs.getInt(tempUnitKey, TemperatureUnit.CELSIUS.ordinal)),
+                    weightUnit = WeightUnit.fromOrdinal(prefs.getInt(weightUnitKey, WeightUnit.KILOGRAM.ordinal)),
+                    notificationsEnabled = prefs.getBoolean(notificationsKey, true),
+                    analyticsOptIn = prefs.getBoolean(analyticsKey, false),
+                    appLockEnabled = prefs.getBoolean(appLockKey, false)
+                )
+            )
+        }
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> sendCurrent() }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        sendCurrent()
+        awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
     }
 
     override suspend fun updateTheme(theme: ThemeSetting) {
-        dataStore.edit { it[themeKey] = theme.ordinal }
+        prefs.edit { putInt(themeKey, theme.ordinal) }
     }
 
     override suspend fun updateUnits(temperatureUnit: TemperatureUnit, weightUnit: WeightUnit) {
-        dataStore.edit {
-            it[tempUnitKey] = temperatureUnit.ordinal
-            it[weightUnitKey] = weightUnit.ordinal
+        prefs.edit {
+            putInt(tempUnitKey, temperatureUnit.ordinal)
+            putInt(weightUnitKey, weightUnit.ordinal)
         }
     }
 
     override suspend fun updateNotifications(enabled: Boolean) {
-        dataStore.edit { it[notificationsKey] = enabled }
+        prefs.edit { putBoolean(notificationsKey, enabled) }
     }
 
     override suspend fun updateAnalyticsOptIn(optIn: Boolean) {
-        dataStore.edit { it[analyticsKey] = optIn }
+        prefs.edit { putBoolean(analyticsKey, optIn) }
+    }
+
+    override suspend fun updateAppLock(enabled: Boolean) {
+        prefs.edit { putBoolean(appLockKey, enabled) }
     }
 }
 
@@ -218,7 +233,18 @@ private fun LogEntry.toEntity(): LogEntryEntity = LogEntryEntity(
     notes = notes
 )
 
-internal val Context.userPrefsDataStore: DataStore<Preferences> by preferencesDataStore(name = "user_prefs")
+private fun secureUserPrefs(context: Context): SharedPreferences {
+    val masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+    return EncryptedSharedPreferences.create(
+        context,
+        "user_prefs_secure",
+        masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+}
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -243,7 +269,7 @@ internal object DataModule {
     @Provides
     @Singleton
     fun provideUserPreferencesRepository(context: Context): UserPreferencesRepository =
-        DataStoreUserPreferencesRepository(context.userPrefsDataStore)
+        SecurePreferencesUserPreferencesRepository(secureUserPrefs(context))
 
     @Provides
     @Singleton

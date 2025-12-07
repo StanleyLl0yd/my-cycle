@@ -43,10 +43,17 @@
     <string name="reminder_type_general">Reminder</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_analytics">Analytics opt-in</string>
+    <string name="settings_app_lock">Biometric app lock</string>
+    <string name="settings_app_lock_unavailable">Biometrics unavailable on this device</string>
+    <string name="settings_storage_security">Encrypted preferences &amp; backups disabled</string>
     <string name="settings_units_title">Units</string>
     <string name="settings_temperature_label">Temperature</string>
     <string name="settings_weight_label">Weight</string>
     <string name="settings_temperature_unit">%1$s</string>
     <string name="settings_weight_unit">%1$s</string>
     <string name="settings_theme_title">Theme</string>
+    <string name="app_lock_title">Unlock My Cycle</string>
+    <string name="app_lock_subtitle">Authenticate to keep your data private</string>
+    <string name="insights_cycle_trend">Cycle length trend</string>
+    <string name="insights_mood_chart">Mood distribution</string>
 </resources>
