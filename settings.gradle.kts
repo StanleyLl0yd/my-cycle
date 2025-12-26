@@ -1,6 +1,12 @@
 pluginManagement {
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -14,13 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "my-cycle"
+rootProject.name = "MyCycle"
 include(":app")
-include(":core:designsystem")
-include(":core:model")
-include(":core:data")
-include(":feature:calendar")
-include(":feature:log")
-include(":feature:insights")
-include(":feature:reminders")
-include(":feature:settings")

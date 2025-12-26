@@ -1,59 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Мой цикл</string>
+    <!-- App -->
+    <string name="app_name">Мой Цикл</string>
+
+    <!-- ==================== ONBOARDING ==================== -->
+
+    <string name="onboarding_welcome_title">Добро пожаловать\nв Мой Цикл</string>
+    <string name="onboarding_welcome_subtitle">Простой и приватный трекер цикла.\nВсе данные остаются на вашем устройстве.</string>
+    <string name="onboarding_welcome_button">Начать</string>
+
+    <string name="onboarding_period_title">Когда начались\nпоследние месячные?</string>
+    <string name="onboarding_period_subtitle">Выберите первый день последней менструации</string>
+
+    <string name="onboarding_cycle_title">Сколько дней обычно\nдлится ваш цикл?</string>
+    <string name="onboarding_cycle_subtitle">Не переживайте, если не знаете точно — приложение подстроится под ваш реальный ритм</string>
+    <string name="onboarding_cycle_days_label">дней</string>
+
+    <string name="onboarding_continue">Продолжить</string>
+    <string name="onboarding_done">Готово</string>
+    <string name="onboarding_back">Назад</string>
+
+    <!-- ==================== NAVIGATION ==================== -->
+
+    <string name="nav_today">Сегодня</string>
     <string name="nav_calendar">Календарь</string>
-    <string name="nav_log">Журнал</string>
-    <string name="nav_insights">Аналитика</string>
-    <string name="nav_reminders">Напоминания</string>
+    <string name="nav_statistics">Статистика</string>
     <string name="nav_settings">Настройки</string>
-    <string name="calendar_title">Календарь цикла</string>
-    <string name="log_title">Ежедневный журнал</string>
-    <string name="insights_title">Аналитика</string>
-    <string name="reminders_title">Напоминания</string>
+
+    <!-- ==================== TODAY SCREEN ==================== -->
+
+    <string name="today_cycle_day">день цикла</string>
+    <string name="today_mark_period">Отметить сегодня</string>
+    <string name="today_period_started">Начались месячные</string>
+
+    <!-- Phase names -->
+    <string name="phase_menstrual">Менструация</string>
+    <string name="phase_follicular">Фолликулярная фаза</string>
+    <string name="phase_ovulatory">Овуляция</string>
+    <string name="phase_luteal">Лютеиновая фаза</string>
+
+    <!-- Phase descriptions -->
+    <string name="phase_menstrual_desc">Период менструации. Берегите себя.</string>
+    <string name="phase_follicular_desc">Энергия растёт. Отличное время для новых начинаний.</string>
+    <string name="phase_ovulatory_desc">Пик фертильности.</string>
+    <string name="phase_luteal_desc">Время замедлиться и прислушаться к себе.</string>
+
+    <!-- Info cards -->
+    <string name="today_until_period">До месячных</string>
+    <string name="today_fertile_window">Фертильное окно</string>
+    <string name="today_fertile_in">через %1$s</string>
+    <string name="today_fertile_now">сейчас</string>
+    <string name="today_ovulation">Овуляция</string>
+    <string name="today_period_day">День месячных: %1$d</string>
+
+    <!-- ==================== CALENDAR ==================== -->
+
+    <string name="calendar_today">Сегодня</string>
+    <string name="calendar_legend_period">Месячные</string>
+    <string name="calendar_legend_fertile">Фертильность</string>
+    <string name="calendar_legend_ovulation">Овуляция</string>
+    <string name="calendar_legend_predicted">Прогноз</string>
+
+    <!-- ==================== DAY DETAILS ==================== -->
+
+    <string name="day_details_title">Запись</string>
+    <string name="day_details_period_section">Менструация</string>
+    <string name="day_details_mood_section">Как вы себя чувствуете?</string>
+    <string name="day_details_symptoms_section">Симптомы</string>
+    <string name="day_details_notes_section">Заметки</string>
+    <string name="day_details_notes_hint">Добавить заметку…</string>
+    <string name="day_details_save">Сохранить</string>
+
+    <!-- Flow intensity -->
+    <string name="flow_none">Нет</string>
+    <string name="flow_spotting">Мажущие</string>
+    <string name="flow_light">Слабые</string>
+    <string name="flow_medium">Средние</string>
+    <string name="flow_heavy">Обильные</string>
+
+    <!-- Mood -->
+    <string name="mood_great">Отлично</string>
+    <string name="mood_good">Хорошо</string>
+    <string name="mood_okay">Нормально</string>
+    <string name="mood_bad">Не очень</string>
+
+    <!-- Symptoms -->
+    <string name="symptom_cramps">Спазмы</string>
+    <string name="symptom_headache">Головная боль</string>
+    <string name="symptom_fatigue">Усталость</string>
+    <string name="symptom_mood_swings">Перепады настроения</string>
+    <string name="symptom_bloating">Вздутие</string>
+    <string name="symptom_breast_tenderness">Чувствительность груди</string>
+    <string name="symptom_acne">Высыпания</string>
+    <string name="symptom_backache">Боль в спине</string>
+    <string name="symptom_nausea">Тошнота</string>
+    <string name="symptom_insomnia">Бессонница</string>
+    <string name="symptom_cravings">Тяга к еде</string>
+    <string name="symptom_dizziness">Головокружение</string>
+
+    <!-- ==================== STATISTICS ==================== -->
+
+    <string name="stats_title">Статистика</string>
+    <string name="stats_avg_cycle">Средняя длина цикла</string>
+    <string name="stats_avg_period">Средняя длина месячных</string>
+    <string name="stats_regularity">Регулярность</string>
+    <string name="stats_based_on_cycles">на основе %1$d циклов</string>
+    <string name="stats_regular">Регулярный</string>
+    <string name="stats_somewhat_regular">Относительно регулярный</string>
+    <string name="stats_irregular">Нерегулярный</string>
+    <string name="stats_not_enough_data">Пока недостаточно данных</string>
+    <string name="stats_history_title">История циклов</string>
+    <string name="stats_current_cycle">Текущий цикл</string>
+
+    <!-- ==================== SETTINGS ==================== -->
+
     <string name="settings_title">Настройки</string>
-    <string name="welcome_headline">Отслеживайте цикл уверенно</string>
-    <string name="welcome_body">Фиксируйте симптомы, получайте прогнозы и контролируйте свои данные.</string>
-    <string name="cycle_summary_title">Статус цикла</string>
-    <string name="cycle_next_start">Следующее начало: %1$s</string>
-    <string name="cycle_active_range">Текущий цикл: %1$s - %2$s</string>
-    <string name="cycle_end_button">Завершить</string>
-    <string name="cycle_restart_button">Начать заново</string>
-    <string name="cycle_start_button">Новый цикл</string>
-    <string name="cycle_range_label">Цикл %1$s - %2$s</string>
-    <string name="cycle_confidence_label">Уверенность %1$d%%</string>
-    <string name="log_new_entry_title">Быстрая запись</string>
-    <string name="log_bleeding_label">Интенсивность кровотечения</string>
-    <string name="log_symptoms_label">Симптомы</string>
-    <string name="log_mood_label">Настроение</string>
-    <string name="log_notes_label">Заметки</string>
-    <string name="log_save_button">Сохранить</string>
-    <string name="log_entry_date">Запись от %1$s</string>
-    <string name="log_entry_bleeding">Кровотечение: %1$s</string>
-    <string name="log_entry_symptoms">Симптомы: %1$s</string>
-    <string name="log_entry_mood">Настроение: %1$s</string>
-    <string name="insights_avg_cycle">Средняя длина цикла (дн.)</string>
-    <string name="insights_last_start">Последнее начало</string>
-    <string name="insights_common_symptom">Частый симптом</string>
-    <string name="insights_mood_balance">Динамика настроения</string>
-    <string name="insights_not_enough_data">Недостаточно данных</string>
-    <string name="reminders_add_button">Добавить напоминание</string>
-    <string name="reminders_time">Время: %1$s</string>
-    <string name="reminder_type_cycle_start">Начало цикла</string>
-    <string name="reminder_type_ovulation">Овуляция</string>
-    <string name="reminder_type_medication">Приём препаратов</string>
-    <string name="reminder_type_general">Напоминание</string>
+
+    <!-- Appearance -->
+    <string name="settings_appearance">Внешний вид</string>
+    <string name="settings_theme">Тема</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
+    <string name="settings_theme_system">Системная</string>
+    <string name="settings_dynamic_colors">Динамические цвета</string>
+    <string name="settings_dynamic_colors_desc">Использовать цвета из обоев</string>
+
+    <!-- Notifications -->
     <string name="settings_notifications">Уведомления</string>
-    <string name="settings_analytics">Согласие на аналитику</string>
-    <string name="settings_app_lock">Блокировка по биометрии</string>
-    <string name="settings_app_lock_unavailable">Биометрия недоступна на устройстве</string>
-    <string name="settings_storage_security">Шифрование настроек, резервное копирование отключено</string>
-    <string name="settings_units_title">Единицы измерения</string>
-    <string name="settings_temperature_label">Температура</string>
-    <string name="settings_weight_label">Вес</string>
-    <string name="settings_temperature_unit">%1$s</string>
-    <string name="settings_weight_unit">%1$s</string>
-    <string name="settings_theme_title">Тема</string>
-    <string name="app_lock_title">Разблокируйте My Cycle</string>
-    <string name="app_lock_subtitle">Подтвердите личность для защиты данных</string>
-    <string name="insights_cycle_trend">Динамика длины цикла</string>
-    <string name="insights_mood_chart">Распределение настроения</string>
+    <string name="settings_period_reminder">Напоминание о месячных</string>
+    <string name="settings_period_reminder_desc">Уведомление перед началом месячных</string>
+    <string name="settings_reminder_days_before">За сколько дней</string>
+    <string name="settings_daily_reminder">Ежедневное напоминание</string>
+    <string name="settings_daily_reminder_desc">Напоминание вести записи</string>
+    <string name="settings_reminder_time">Время напоминания</string>
+
+    <!-- Data -->
+    <string name="settings_data">Ваши данные</string>
+    <string name="settings_export">Экспорт данных</string>
+    <string name="settings_export_desc">Сохранить в CSV файл</string>
+    <string name="settings_import">Импорт данных</string>
+    <string name="settings_import_desc">Восстановить из резервной копии</string>
+    <string name="settings_clear_data">Удалить все данные</string>
+    <string name="settings_clear_data_desc">Удалить всю историю циклов</string>
+
+    <!-- About -->
+    <string name="settings_about">О приложении</string>
+    <string name="settings_version">Версия</string>
+    <string name="settings_privacy">Конфиденциальность</string>
+    <string name="settings_privacy_desc">Ваши данные не покидают устройство</string>
+
+    <!-- ==================== DIALOGS ==================== -->
+
+    <string name="dialog_clear_data_title">Удалить все данные?</string>
+    <string name="dialog_clear_data_message">Это удалит всю историю циклов и настройки. Это действие нельзя отменить.</string>
+    <string name="dialog_clear_data_confirm">Удалить</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="dialog_ok">ОК</string>
+
+    <string name="dialog_export_success">Данные успешно экспортированы</string>
+    <string name="dialog_import_success">Данные успешно импортированы</string>
+    <string name="dialog_import_error">Не удалось импортировать данные</string>
+
+    <!-- ==================== ACCESSIBILITY ==================== -->
+
+    <string name="a11y_selected">Выбрано</string>
+    <string name="a11y_today">Сегодня</string>
+    <string name="a11y_period_day">День месячных</string>
+    <string name="a11y_predicted_period">Прогноз месячных</string>
+    <string name="a11y_fertile_window">Фертильное окно</string>
+    <string name="a11y_ovulation_day">День овуляции</string>
+    <string name="a11y_previous_month">Предыдущий месяц</string>
+    <string name="a11y_next_month">Следующий месяц</string>
+    <string name="a11y_close">Закрыть</string>
+    <string name="a11y_navigate_back">Назад</string>
+
+    <!-- ==================== ERRORS ==================== -->
+
+    <string name="error_generic">Что-то пошло не так</string>
+    <string name="error_future_date">Нельзя отмечать будущие даты</string>
+
 </resources>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Days (1 день, 2 дня, 5 дней) -->
+    <plurals name="days">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дней</item>
+    </plurals>
+
+    <!-- Cycles (1 цикл, 2 цикла, 5 циклов) -->
+    <plurals name="cycles">
+        <item quantity="one">%d цикл</item>
+        <item quantity="few">%d цикла</item>
+        <item quantity="many">%d циклов</item>
+        <item quantity="other">%d циклов</item>
+    </plurals>
+
+    <!-- Days until period -->
+    <plurals name="days_until_period">
+        <item quantity="one">%d день до месячных</item>
+        <item quantity="few">%d дня до месячных</item>
+        <item quantity="many">%d дней до месячных</item>
+        <item quantity="other">%d дней до месячных</item>
+    </plurals>
+
+    <!-- Days ago -->
+    <plurals name="days_ago">
+        <item quantity="one">%d день назад</item>
+        <item quantity="few">%d дня назад</item>
+        <item quantity="many">%d дней назад</item>
+        <item quantity="other">%d дней назад</item>
+    </plurals>
+
+    <!-- Fertile window in N days -->
+    <plurals name="fertile_in_days">
+        <item quantity="one">через %d день</item>
+        <item quantity="few">через %d дня</item>
+        <item quantity="many">через %d дней</item>
+        <item quantity="other">через %d дней</item>
+    </plurals>
+
+    <!-- Period length -->
+    <plurals name="period_length_days">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дней</item>
+    </plurals>
+
+</resources>

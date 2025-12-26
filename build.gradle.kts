@@ -1,24 +1,8 @@
-buildscript {
-    dependencies {
-        classpath(libs.hilt.android)
-    }
-}
-
 plugins {
-    alias(libs.plugins.androidApplication) apply false
-    alias(libs.plugins.androidLibrary) apply false
-    alias(libs.plugins.kotlinAndroid) apply false
-    alias(libs.plugins.hilt) apply false
-}
-
-allprojects {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "17"
-            freeCompilerArgs += listOf(
-                "-Xjvm-default=all",
-                "-opt-in=kotlin.RequiresOptIn"
-            )
-        }
-    }
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.room) apply false
 }
