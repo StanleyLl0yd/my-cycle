@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mycycle.data.preferences.UserPreferencesRepository
 import com.example.mycycle.data.repository.CycleDayRepository
 import com.example.mycycle.domain.model.CycleDay
+import com.example.mycycle.domain.model.CycleStage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +15,7 @@ import java.time.LocalDate
 
 data class OnboardingState(
     val currentStep: Int = 0,
+    val cycleStage: CycleStage = CycleStage.ESTABLISHED,
     val lastPeriodDate: LocalDate = LocalDate.now().minusDays(14),
     val cycleLength: Int = 28,
     val isLoading: Boolean = false,
@@ -29,11 +31,15 @@ class OnboardingViewModel(
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
 
     fun nextStep() {
-        _state.update { it.copy(currentStep = it.currentStep + 1) }
+        _state.update { it.copy(currentStep = (it.currentStep + 1).coerceAtMost(3)) }
     }
 
     fun previousStep() {
         _state.update { it.copy(currentStep = (it.currentStep - 1).coerceAtLeast(0)) }
+    }
+
+    fun setCycleStage(stage: CycleStage) {
+        _state.update { it.copy(cycleStage = stage) }
     }
 
     fun setLastPeriodDate(date: LocalDate) {
@@ -42,7 +48,7 @@ class OnboardingViewModel(
     }
 
     fun setCycleLength(length: Int) {
-        _state.update { it.copy(cycleLength = length.coerceIn(21, 45)) }
+        _state.update { it.copy(cycleLength = length.coerceIn(15, 90)) }
     }
 
     fun completeOnboarding() {
@@ -60,7 +66,8 @@ class OnboardingViewModel(
 
             preferencesRepository.completeOnboarding(
                 lastPeriodDate = currentState.lastPeriodDate,
-                cycleLength = currentState.cycleLength
+                cycleLength = currentState.cycleLength,
+                cycleStage = currentState.cycleStage
             )
 
             _state.update { it.copy(isLoading = false, isComplete = true) }
