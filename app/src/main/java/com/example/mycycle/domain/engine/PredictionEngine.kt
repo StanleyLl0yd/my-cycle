@@ -27,7 +27,7 @@ class PredictionEngine {
         lastPeriodStart: LocalDate,
         cycleLength: Int,
         periodLength: Int,
-        stage: CycleStage = CycleStage.ESTABLISHED
+        stage: CycleStage = CycleStage.NOT_SET
     ): Prediction {
         if (stage == CycleStage.PERIODS_STOPPED) {
             return stoppedPrediction(periodLength, stage)
@@ -49,7 +49,7 @@ class PredictionEngine {
         cycles: List<Cycle>,
         fallbackCycleLength: Int,
         fallbackPeriodLength: Int,
-        stage: CycleStage = CycleStage.ESTABLISHED
+        stage: CycleStage = CycleStage.NOT_SET
     ): Prediction {
         if (stage == CycleStage.PERIODS_STOPPED) {
             return stoppedPrediction(fallbackPeriodLength, stage)
@@ -72,9 +72,6 @@ class PredictionEngine {
         val periodLengths = recentCycles.map { it.periodLength }
 
         val avgCycleLength = weightedAverage(lengths)
-        // Setup records only the first day of the most recent period. Until at
-        // least two cycles have finished, a one-day setup marker must not teach
-        // the app that a usual period lasts one day.
         val avgPeriodLength = if (recentCycles.size < 2) {
             fallbackPeriodLength
         } else {
@@ -122,9 +119,6 @@ class PredictionEngine {
             spread = spread
         )
 
-        // A calendar cannot observe egg release. We only show a broad possible
-        // range after several fairly similar adult cycles, and never for early
-        // years, long-term uneven, age-changing, or stopped-period patterns.
         val canEstimateOvulation = stage == CycleStage.ESTABLISHED &&
             cycleCount >= 3 &&
             !highlyVariable
@@ -173,6 +167,7 @@ class PredictionEngine {
     )
 
     private fun minimumWindowRadius(stage: CycleStage): Int = when (stage) {
+        CycleStage.NOT_SET -> 14
         CycleStage.FIRST_YEAR -> 10
         CycleStage.YEARS_ONE_TO_THREE -> 7
         CycleStage.ESTABLISHED -> 3
@@ -186,6 +181,7 @@ class PredictionEngine {
         averageLength: Int,
         spread: Int
     ): Boolean = when (stage) {
+        CycleStage.NOT_SET -> true
         CycleStage.FIRST_YEAR -> true
         CycleStage.YEARS_ONE_TO_THREE -> spread > 14 || averageLength !in 21..45
         CycleStage.ESTABLISHED -> spread > 9 || averageLength !in 21..35
@@ -209,6 +205,7 @@ class PredictionEngine {
             1f
         }
         val stageFactor = when (stage) {
+            CycleStage.NOT_SET -> 0.40f
             CycleStage.FIRST_YEAR -> 0.45f
             CycleStage.YEARS_ONE_TO_THREE -> 0.65f
             CycleStage.ESTABLISHED -> 1f
