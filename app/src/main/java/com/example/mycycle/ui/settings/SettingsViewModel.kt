@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class SettingsState(
-    val cycleStage: CycleStage = CycleStage.ESTABLISHED,
+    val cycleStage: CycleStage = CycleStage.NOT_SET,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val useDynamicColors: Boolean = true
 )
