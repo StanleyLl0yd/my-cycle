@@ -13,30 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2026-08-26
 
 ### ✨ Added
-- A simple setup choice for different times of life: the first year after periods begin, years 1–3, later years, periods changing with age, or no period for 12 months or more.
+- A simple setup choice for six common situations: periods started less than 1 year ago, 1–3 years ago, more than 3 years ago with similar gaps, more than 3 years ago with very uneven gaps, periods changing with age, or no period for 12 months or more.
 - The same choice can be changed later in Settings without deleting old records.
-- Clear notes when a very long gap between periods is worth discussing with a doctor.
-- A clear warning when bleeding is recorded after about a year without periods.
+- Clear notes when a very long gap, longer-than-usual bleeding, or bleeding after about a year without periods deserves attention.
+- If periods have stopped for 12 months or more, setup no longer asks for or creates a made-up recent period date.
 
 ### 📅 Better date estimates
 - The app now shows a **range of possible dates** for the next period instead of pretending to know one exact day.
-- Early years after periods begin use a wider date range because uneven timing is common.
-- When periods are changing with age, the app also uses a wider date range and does not guess an egg-release day.
-- Only a fairly steady history with at least 3 finished cycles can show a broad calendar range where pregnancy may be more likely.
+- The first years after periods begin use a wider date range because uneven timing is common.
+- Long-term uneven cycles and periods changing with age also use a wider range and do not get an egg-release guess.
+- Only a fairly steady adult history with at least 3 finished cycles can show a broad calendar range where pregnancy may be more likely.
 - The app never presents those calendar dates as safe birth-control days.
 - Up to the 6 most recent finished cycles are still used, with newer dates counting more.
 
 ### 🩸 Bleeding records
-- “A few spots” is now kept separate from a real period and does not start a new cycle.
+- “A few spots” is kept separate from a real period and does not start a new cycle.
 - A short gap between real periods is no longer silently hidden. The app keeps what the user actually recorded.
+- In the first years, a gap of about 3 months or more can trigger a simple note to seek advice.
+- Bleeding that continues longer than the usual range can trigger a simple attention note.
+- New bleeding after about a year without a period triggers a clear note to contact a doctor.
 
 ### 🗣️ Clearer language
 - Removed technical cycle-stage words from the main screens.
 - Replaced claims such as an exact ovulation day or “peak fertility” with plain explanations of what the calendar can and cannot know.
-- Reworked the Today, Calendar, Statistics, Settings and daily-log explanations so they can be understood without medical knowledge.
+- Reworked Today, Calendar, Statistics, Settings, setup and daily-log explanations so they can be understood without medical knowledge.
+- Statistics describe early-years, long-term uneven and age-changing patterns without turning them into a diagnosis.
 
 ### 🧪 Tests & Build
-- Added tests for wide early-year estimates, changing cycles, stopped-period mode, spotting, short cycles and range-based predictions.
+- Added tests for wide early-year estimates, long-term uneven cycles, age-changing cycles, stopped-period mode, spotting, short cycles and range-based predictions.
 - Updated source version to 1.1.0 (`versionCode` 2).
 
 ---
