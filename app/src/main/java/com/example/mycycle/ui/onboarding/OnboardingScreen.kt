@@ -59,6 +59,9 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val periodsStopped = state.cycleStage == CycleStage.PERIODS_STOPPED
+    val lastStep = if (periodsStopped) 2 else 3
+    val stepCount = lastStep + 1
 
     LaunchedEffect(state.isComplete) {
         if (state.isComplete) {
@@ -99,24 +102,24 @@ fun OnboardingScreen(
                         selectedStage = state.cycleStage,
                         onStageSelected = viewModel::setCycleStage
                     )
-                    2 -> PeriodDateStep(
-                        selectedDate = state.lastPeriodDate,
-                        onDateSelected = viewModel::setLastPeriodDate
-                    )
-                    3 -> if (state.cycleStage == CycleStage.PERIODS_STOPPED) {
+                    2 -> if (periodsStopped) {
                         PeriodsStoppedStep()
                     } else {
-                        CycleLengthStep(
-                            cycleLength = state.cycleLength,
-                            onLengthChanged = viewModel::setCycleLength
+                        PeriodDateStep(
+                            selectedDate = state.lastPeriodDate,
+                            onDateSelected = viewModel::setLastPeriodDate
                         )
                     }
+                    3 -> CycleLengthStep(
+                        cycleLength = state.cycleLength,
+                        onLengthChanged = viewModel::setCycleLength
+                    )
                 }
             }
 
             Button(
                 onClick = {
-                    if (state.currentStep < 3) {
+                    if (state.currentStep < lastStep) {
                         viewModel.nextStep()
                     } else {
                         viewModel.completeOnboarding()
@@ -126,9 +129,9 @@ fun OnboardingScreen(
                 enabled = !state.isLoading
             ) {
                 Text(
-                    text = when (state.currentStep) {
-                        0 -> stringResource(R.string.onboarding_welcome_button)
-                        3 -> stringResource(R.string.onboarding_done)
+                    text = when {
+                        state.currentStep == 0 -> stringResource(R.string.onboarding_welcome_button)
+                        state.currentStep == lastStep -> stringResource(R.string.onboarding_done)
                         else -> stringResource(R.string.onboarding_continue)
                     }
                 )
@@ -149,7 +152,7 @@ fun OnboardingScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                repeat(4) { index ->
+                repeat(stepCount) { index ->
                     Box(
                         modifier = Modifier
                             .size(8.dp)
@@ -279,9 +282,7 @@ private fun PeriodDateStep(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
-            onClick = { showDatePicker = true }
-        ) {
+        Button(onClick = { showDatePicker = true }) {
             Text(
                 text = selectedDate.format(
                     DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
