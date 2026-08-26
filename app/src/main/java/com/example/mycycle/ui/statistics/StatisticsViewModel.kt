@@ -97,17 +97,13 @@ class StatisticsViewModel(
     ): CycleRegularity? = when (stage) {
         CycleStage.FIRST_YEAR,
         CycleStage.YEARS_ONE_TO_THREE,
+        CycleStage.LONG_TERM_UNEVEN,
+        CycleStage.CHANGING_WITH_AGE,
         CycleStage.PERIODS_STOPPED -> null
 
         CycleStage.ESTABLISHED -> when {
             variationDays <= 9 -> CycleRegularity.REGULAR
             variationDays <= 14 -> CycleRegularity.SOMEWHAT_REGULAR
-            else -> CycleRegularity.IRREGULAR
-        }
-
-        CycleStage.CHANGING_WITH_AGE -> when {
-            variationDays < 7 -> CycleRegularity.REGULAR
-            variationDays < 21 -> CycleRegularity.SOMEWHAT_REGULAR
             else -> CycleRegularity.IRREGULAR
         }
     }
