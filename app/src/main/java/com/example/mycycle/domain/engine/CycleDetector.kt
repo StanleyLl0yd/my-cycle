@@ -22,25 +22,33 @@ class CycleDetector {
         var cycleId = 1
         var currentPeriodStart = sortedDays.first().date
         var currentPeriodEnd = currentPeriodStart
-        var previousDate = currentPeriodStart
+        var previousAcceptedPeriodDate = currentPeriodStart
 
         for (i in 1 until sortedDays.size) {
             val day = sortedDays[i]
-            val gap = ChronoUnit.DAYS.between(previousDate, day.date)
+            val gapFromAcceptedPeriodDay = ChronoUnit.DAYS.between(
+                previousAcceptedPeriodDate,
+                day.date
+            )
+            val daysFromCycleStart = ChronoUnit.DAYS.between(
+                currentPeriodStart,
+                day.date
+            )
 
             when {
-                gap <= MAX_PERIOD_GAP_DAYS -> {
+                gapFromAcceptedPeriodDay <= MAX_PERIOD_GAP_DAYS -> {
                     currentPeriodEnd = day.date
+                    previousAcceptedPeriodDate = day.date
                 }
 
-                gap >= MIN_CYCLE_LENGTH -> {
+                daysFromCycleStart >= MIN_CYCLE_LENGTH -> {
                     cycles.add(
                         Cycle(
                             id = cycleId++,
                             startDate = currentPeriodStart,
                             endDate = day.date.minusDays(1),
                             periodEndDate = currentPeriodEnd,
-                            length = ChronoUnit.DAYS.between(currentPeriodStart, day.date).toInt(),
+                            length = daysFromCycleStart.toInt(),
                             periodLength = ChronoUnit.DAYS.between(
                                 currentPeriodStart,
                                 currentPeriodEnd
@@ -50,13 +58,15 @@ class CycleDetector {
                     )
                     currentPeriodStart = day.date
                     currentPeriodEnd = day.date
+                    previousAcceptedPeriodDate = day.date
                 }
 
                 else -> {
-                    currentPeriodEnd = day.date
+                    // A separated bleeding/spotting mark inside the minimum cycle
+                    // window is kept in the database and calendar, but it must not
+                    // stretch the menstrual period used for cycle statistics.
                 }
             }
-            previousDate = day.date
         }
 
         cycles.add(

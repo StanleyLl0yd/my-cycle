@@ -12,7 +12,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.mycycle"
+        applicationId = "com.silverlightning.mycycle"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

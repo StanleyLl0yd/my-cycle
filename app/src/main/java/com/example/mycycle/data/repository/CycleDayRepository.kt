@@ -5,6 +5,7 @@ import com.example.mycycle.data.local.CycleDayEntity
 import com.example.mycycle.domain.model.CycleDay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.Instant
 import java.time.LocalDate
 
 class CycleDayRepository(
@@ -41,7 +42,13 @@ class CycleDayRepository(
         dao.getLastPeriodDay()?.toDomain()
 
     suspend fun save(cycleDay: CycleDay) {
-        dao.upsert(CycleDayEntity.fromDomain(cycleDay))
+        val existing = dao.getByDate(cycleDay.date)
+        val now = Instant.now()
+        val entity = CycleDayEntity.fromDomain(cycleDay).copy(
+            createdAt = existing?.createdAt ?: now,
+            updatedAt = now
+        )
+        dao.upsert(entity)
     }
 
     suspend fun delete(date: LocalDate) {

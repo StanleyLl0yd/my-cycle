@@ -12,6 +12,7 @@ import com.example.mycycle.ui.calendar.CalendarViewModel
 import com.example.mycycle.ui.daydetails.DayDetailsViewModel
 import com.example.mycycle.ui.onboarding.OnboardingViewModel
 import com.example.mycycle.ui.settings.SettingsViewModel
+import com.example.mycycle.ui.statistics.StatisticsViewModel
 import com.example.mycycle.ui.today.TodayViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
@@ -65,7 +66,8 @@ val appModule = module {
         )
     }
 
-    viewModel { SettingsViewModel(get()) }
+    viewModel { StatisticsViewModel(get(), get()) }
+    viewModel { SettingsViewModel(get(), get()) }
 
     viewModel { (dateString: String) ->
         DayDetailsViewModel(dateString, get())

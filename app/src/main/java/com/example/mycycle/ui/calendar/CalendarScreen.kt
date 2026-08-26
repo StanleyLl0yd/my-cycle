@@ -40,7 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,7 +71,7 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val locale = LocalContext.current.resources.configuration.locales[0]
+    val locale = LocalConfiguration.current.locales[0]
 
     Column(
         modifier = Modifier
@@ -79,7 +79,6 @@ fun CalendarScreen(
             .background(CycleColors.backgroundGradient)
             .padding(16.dp)
     ) {
-        // Month header
         MonthHeader(
             yearMonth = state.currentMonth,
             onPreviousMonth = viewModel::previousMonth,
@@ -89,22 +88,18 @@ fun CalendarScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Weekday headers
         WeekdayHeaders(locale = locale)
-
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Calendar grid
         AnimatedContent(
             targetState = state.currentMonth,
             transitionSpec = {
                 if (targetState > initialState) {
                     (slideInHorizontally { it / 3 } + fadeIn()) togetherWith
-                            (slideOutHorizontally { -it / 3 } + fadeOut())
+                        (slideOutHorizontally { -it / 3 } + fadeOut())
                 } else {
                     (slideInHorizontally { -it / 3 } + fadeIn()) togetherWith
-                            (slideOutHorizontally { it / 3 } + fadeOut())
+                        (slideOutHorizontally { it / 3 } + fadeOut())
                 }
             },
             label = "month_transition"
@@ -117,8 +112,6 @@ fun CalendarScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Legend
         CalendarLegend()
     }
 }
@@ -199,13 +192,9 @@ private fun MonthGrid(
 ) {
     val days = remember(yearMonth) {
         val firstOfMonth = yearMonth.atDay(1)
-        val lastOfMonth = yearMonth.atEndOfMonth()
-
         val dayOfWeekOfFirst = firstOfMonth.dayOfWeek.value
-        val leadingEmptyDays = (dayOfWeekOfFirst - 1)
-
+        val leadingEmptyDays = dayOfWeekOfFirst - 1
         val daysInMonth = yearMonth.lengthOfMonth()
-        val totalCells = leadingEmptyDays + daysInMonth
 
         buildList {
             repeat(leadingEmptyDays) { add(null) }
@@ -278,18 +267,11 @@ private fun DayCell(
             Text(
                 text = date.dayOfMonth.toString(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isToday) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
+                color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
 
-            // Indicators
             if (dayState?.periodState != PeriodState.NONE && dayState?.periodState != PeriodState.PREDICTED) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     val dots = when (dayState?.periodState) {
                         PeriodState.CONFIRMED_SPOTTING -> 1
                         PeriodState.CONFIRMED_LIGHT -> 1

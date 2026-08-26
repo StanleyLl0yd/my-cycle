@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 data class TodayState(
     val cycleDay: Int? = null,
@@ -52,7 +53,6 @@ class TodayViewModel(
                 Pair(preferences, periodDays)
             }.collect { (preferences, periodDays) ->
                 val today = LocalDate.now()
-
                 val cycles = cycleDetector.detectCycles(periodDays)
 
                 val prediction = if (cycles.isNotEmpty()) {
@@ -76,13 +76,27 @@ class TodayViewModel(
                     phaseCalculator.getCycleDay(today, it)
                 }
 
-                val phase = if (cycleDay != null) {
-                    phaseCalculator.getPhase(
+                val effectiveCycleLength = if (lastPeriodStart != null && prediction != null) {
+                    ChronoUnit.DAYS.between(lastPeriodStart, prediction.nextPeriod.start)
+                        .toInt()
+                        .takeIf { it > 0 }
+                        ?: preferences.estimatedCycleLength
+                } else {
+                    preferences.estimatedCycleLength
+                }
+                val effectivePeriodLength = prediction?.nextPeriod?.lengthDays
+                    ?: preferences.estimatedPeriodLength
+
+                val isPeriodToday = periodDays.any { it.date == today && it.hasPeriod }
+                val phase = when {
+                    isPeriodToday -> CyclePhase.MENSTRUAL
+                    cycleDay != null && cycleDay > 0 -> phaseCalculator.getPhase(
                         cycleDay = cycleDay,
-                        cycleLength = preferences.estimatedCycleLength,
-                        periodLength = preferences.estimatedPeriodLength
+                        cycleLength = effectiveCycleLength,
+                        periodLength = effectivePeriodLength
                     )
-                } else null
+                    else -> null
+                }
 
                 val daysUntilPeriod = prediction?.let {
                     phaseCalculator.getDaysUntilPeriod(today, it.nextPeriod.start)
@@ -93,7 +107,6 @@ class TodayViewModel(
                 }
 
                 val isFertileNow = prediction?.fertileWindow?.contains(today) == true
-                val isPeriodToday = periodDays.any { it.date == today && it.hasPeriod }
 
                 _state.update {
                     TodayState(

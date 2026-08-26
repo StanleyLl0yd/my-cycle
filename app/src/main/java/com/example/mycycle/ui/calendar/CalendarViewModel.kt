@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 
 data class CalendarState(
     val currentMonth: YearMonth = YearMonth.now(),
@@ -40,30 +41,33 @@ class CalendarViewModel(
     private val _state = MutableStateFlow(CalendarState())
     val state: StateFlow<CalendarState> = _state.asStateFlow()
 
+    private val selectedMonth = MutableStateFlow(YearMonth.now())
+
     init {
         loadData()
     }
 
     fun previousMonth() {
-        _state.update { it.copy(currentMonth = it.currentMonth.minusMonths(1)) }
+        selectedMonth.update { it.minusMonths(1) }
     }
 
     fun nextMonth() {
-        _state.update { it.copy(currentMonth = it.currentMonth.plusMonths(1)) }
+        selectedMonth.update { it.plusMonths(1) }
     }
 
     fun goToToday() {
-        _state.update { it.copy(currentMonth = YearMonth.now()) }
+        selectedMonth.value = YearMonth.now()
     }
 
     private fun loadData() {
         viewModelScope.launch {
             combine(
                 preferencesRepository.preferences,
-                cycleDayRepository.observeAll()
-            ) { preferences, allDays ->
-                Pair(preferences, allDays)
-            }.collect { (preferences, allDays) ->
+                cycleDayRepository.observeAll(),
+                selectedMonth
+            ) { preferences, allDays, month ->
+                Triple(preferences, allDays, month)
+            }.collect { (preferences, allDays, month) ->
                 val today = LocalDate.now()
                 val periodDays = allDays.filter { it.hasPeriod }
                 val cycles = cycleDetector.detectCycles(periodDays)
@@ -85,52 +89,31 @@ class CalendarViewModel(
                 val lastPeriodStart = cycles.lastOrNull()?.startDate
                     ?: preferences.initialPeriodDate
 
-                val dayStatesMap = mutableMapOf<LocalDate, DayState>()
-                val daysMap = allDays.associateBy { it.date }
-
-                // Build day states for a range of months
-                val startMonth = YearMonth.now().minusMonths(12)
-                val endMonth = YearMonth.now().plusMonths(3)
-
-                var month = startMonth
-                while (!month.isAfter(endMonth)) {
-                    val daysInMonth = month.lengthOfMonth()
-                    for (day in 1..daysInMonth) {
-                        val date = month.atDay(day)
-                        val cycleDay = lastPeriodStart?.let {
-                            phaseCalculator.getCycleDay(date, it)
-                        }?.takeIf { it > 0 }
-
-                        val phase = if (cycleDay != null && cycleDay <= preferences.estimatedCycleLength) {
-                            phaseCalculator.getPhase(
-                                cycleDay = cycleDay,
-                                cycleLength = preferences.estimatedCycleLength,
-                                periodLength = preferences.estimatedPeriodLength
-                            )
-                        } else null
-
-                        val existingDay = daysMap[date]
-                        val periodState = getPeriodState(date, existingDay, prediction)
-                        val fertilityState = getFertilityState(date, prediction)
-
-                        dayStatesMap[date] = DayState(
-                            date = date,
-                            cycleDay = cycleDay,
-                            phase = phase,
-                            periodState = periodState,
-                            fertilityState = fertilityState,
-                            symptoms = existingDay?.symptoms ?: emptySet(),
-                            mood = existingDay?.mood,
-                            hasNotes = !existingDay?.notes.isNullOrBlank(),
-                            isToday = date == today,
-                            isCurrentMonth = true
-                        )
-                    }
-                    month = month.plusMonths(1)
+                val effectiveCycleLength = if (lastPeriodStart != null && prediction != null) {
+                    ChronoUnit.DAYS.between(lastPeriodStart, prediction.nextPeriod.start)
+                        .toInt()
+                        .takeIf { it > 0 }
+                        ?: preferences.estimatedCycleLength
+                } else {
+                    preferences.estimatedCycleLength
                 }
+                val effectivePeriodLength = prediction?.nextPeriod?.lengthDays
+                    ?: preferences.estimatedPeriodLength
+
+                val daysMap = allDays.associateBy { it.date }
+                val dayStatesMap = buildDayStates(
+                    month = month,
+                    today = today,
+                    daysMap = daysMap,
+                    lastPeriodStart = lastPeriodStart,
+                    prediction = prediction,
+                    cycleLength = effectiveCycleLength,
+                    periodLength = effectivePeriodLength
+                )
 
                 _state.update {
-                    it.copy(
+                    CalendarState(
+                        currentMonth = month,
                         dayStates = dayStatesMap,
                         prediction = prediction,
                         isLoading = false
@@ -138,6 +121,49 @@ class CalendarViewModel(
                 }
             }
         }
+    }
+
+    private fun buildDayStates(
+        month: YearMonth,
+        today: LocalDate,
+        daysMap: Map<LocalDate, CycleDay>,
+        lastPeriodStart: LocalDate?,
+        prediction: Prediction?,
+        cycleLength: Int,
+        periodLength: Int
+    ): Map<LocalDate, DayState> {
+        val result = mutableMapOf<LocalDate, DayState>()
+
+        for (day in 1..month.lengthOfMonth()) {
+            val date = month.atDay(day)
+            val cycleDay = lastPeriodStart?.let {
+                phaseCalculator.getCycleDay(date, it)
+            }?.takeIf { it > 0 }
+
+            val phase = if (cycleDay != null && cycleDay <= cycleLength) {
+                phaseCalculator.getPhase(
+                    cycleDay = cycleDay,
+                    cycleLength = cycleLength,
+                    periodLength = periodLength
+                )
+            } else null
+
+            val existingDay = daysMap[date]
+            result[date] = DayState(
+                date = date,
+                cycleDay = cycleDay,
+                phase = phase,
+                periodState = getPeriodState(date, existingDay, prediction),
+                fertilityState = getFertilityState(date, prediction),
+                symptoms = existingDay?.symptoms ?: emptySet(),
+                mood = existingDay?.mood,
+                hasNotes = !existingDay?.notes.isNullOrBlank(),
+                isToday = date == today,
+                isCurrentMonth = true
+            )
+        }
+
+        return result
     }
 
     private fun getPeriodState(

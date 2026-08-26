@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -66,7 +67,6 @@ fun TodayScreen(
         ) {
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Phase card
             state.phase?.let { phase ->
                 PhaseCard(
                     phase = phase,
@@ -77,7 +77,6 @@ fun TodayScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Info cards row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -116,11 +115,25 @@ fun TodayScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Log button
             ExtendedFloatingActionButton(
                 onClick = onLogClick,
-                icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.today_mark_period)) }
+                icon = {
+                    Icon(
+                        imageVector = if (state.isPeriodToday) Icons.Rounded.Check else Icons.Rounded.Add,
+                        contentDescription = null
+                    )
+                },
+                text = {
+                    Text(
+                        stringResource(
+                            if (state.isPeriodToday) {
+                                R.string.today_period_started
+                            } else {
+                                R.string.today_mark_period
+                            }
+                        )
+                    )
+                }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
