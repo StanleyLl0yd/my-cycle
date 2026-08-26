@@ -231,15 +231,17 @@ private fun CycleStageStep(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        CycleStage.entries.forEach { stage ->
-            FilterChip(
-                selected = selectedStage == stage,
-                onClick = { onStageSelected(stage) },
-                label = { Text(stringResource(stage.labelRes)) },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+        CycleStage.entries
+            .filterNot { it == CycleStage.NOT_SET }
+            .forEach { stage ->
+                FilterChip(
+                    selected = selectedStage == stage,
+                    onClick = { onStageSelected(stage) },
+                    label = { Text(stringResource(stage.labelRes)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
         Spacer(modifier = Modifier.height(12.dp))
 
