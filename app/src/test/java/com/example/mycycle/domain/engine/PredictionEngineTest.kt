@@ -35,6 +35,39 @@ class PredictionEngineTest {
     }
 
     @Test
+    fun unsetStageStaysWideEvenWithStableHistory() {
+        val cycles = listOf(
+            completeCycle(1, LocalDate.of(2026, 1, 1), 28, 5),
+            completeCycle(2, LocalDate.of(2026, 1, 29), 29, 5),
+            completeCycle(3, LocalDate.of(2026, 2, 27), 30, 5),
+            Cycle(
+                id = 4,
+                startDate = LocalDate.of(2026, 3, 29),
+                endDate = null,
+                periodEndDate = LocalDate.of(2026, 4, 2),
+                length = null,
+                periodLength = 5,
+                isComplete = false
+            )
+        )
+
+        val prediction = engine.predictFromHistory(
+            cycles = cycles,
+            fallbackCycleLength = 28,
+            fallbackPeriodLength = 5,
+            stage = CycleStage.NOT_SET
+        )
+
+        val window = prediction.nextPeriodStartWindow
+        assertNotNull(window)
+        assertTrue(window!!.lengthDays >= 29)
+        assertTrue(prediction.highlyVariable)
+        assertEquals(CycleStage.NOT_SET, prediction.stage)
+        assertNull(prediction.possibleOvulationWindow)
+        assertNull(prediction.possiblePregnancyWindow)
+    }
+
+    @Test
     fun firstYearUsesWideWindowAndDoesNotGuessOvulation() {
         val prediction = engine.predictFromOnboarding(
             lastPeriodStart = LocalDate.of(2026, 8, 1),
