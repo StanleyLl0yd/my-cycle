@@ -139,7 +139,11 @@ class TodayViewModel(
     ): TodayNotice? {
         if (
             bleedingToday &&
-            (stage == CycleStage.PERIODS_STOPPED || latestCompletedLength?.let { it >= 365 } == true)
+            (
+                stage == CycleStage.PERIODS_STOPPED ||
+                    latestCompletedLength?.let { it >= 365 } == true ||
+                    (currentCycleDay ?: 0) >= 365
+            )
         ) {
             return TodayNotice.BLEEDING_AFTER_YEAR_GAP
         }
