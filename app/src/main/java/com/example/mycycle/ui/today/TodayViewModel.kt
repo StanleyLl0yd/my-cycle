@@ -76,9 +76,6 @@ class TodayViewModel(
                     phaseCalculator.getCycleDay(today, it)
                 }
 
-                // PredictionEngine learns cycle and period length from history. Use the
-                // same learned values for the phase card so the UI cannot drift away
-                // from the dates shown in the prediction/calendar.
                 val effectiveCycleLength = if (lastPeriodStart != null && prediction != null) {
                     ChronoUnit.DAYS.between(lastPeriodStart, prediction.nextPeriod.start)
                         .toInt()
@@ -90,15 +87,16 @@ class TodayViewModel(
                 val effectivePeriodLength = prediction?.nextPeriod?.lengthDays
                     ?: preferences.estimatedPeriodLength
 
-                val phase = cycleDay
-                    ?.takeIf { it > 0 }
-                    ?.let {
-                        phaseCalculator.getPhase(
-                            cycleDay = it,
-                            cycleLength = effectiveCycleLength,
-                            periodLength = effectivePeriodLength
-                        )
-                    }
+                val isPeriodToday = periodDays.any { it.date == today && it.hasPeriod }
+                val phase = when {
+                    isPeriodToday -> CyclePhase.MENSTRUAL
+                    cycleDay != null && cycleDay > 0 -> phaseCalculator.getPhase(
+                        cycleDay = cycleDay,
+                        cycleLength = effectiveCycleLength,
+                        periodLength = effectivePeriodLength
+                    )
+                    else -> null
+                }
 
                 val daysUntilPeriod = prediction?.let {
                     phaseCalculator.getDaysUntilPeriod(today, it.nextPeriod.start)
@@ -109,7 +107,6 @@ class TodayViewModel(
                 }
 
                 val isFertileNow = prediction?.fertileWindow?.contains(today) == true
-                val isPeriodToday = periodDays.any { it.date == today && it.hasPeriod }
 
                 _state.update {
                     TodayState(
