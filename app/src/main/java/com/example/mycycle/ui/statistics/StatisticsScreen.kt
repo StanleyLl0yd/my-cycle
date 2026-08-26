@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mycycle.R
 import com.example.mycycle.domain.model.Cycle
+import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.ui.theme.CycleColors
 import org.koin.androidx.compose.koinViewModel
 import java.time.format.DateTimeFormatter
@@ -59,6 +60,9 @@ fun StatisticsScreen(
             return@Column
         }
 
+        StageNoteCard(state.cycleStage)
+        Spacer(modifier = Modifier.height(16.dp))
+
         val averageCycleLength = state.averageCycleLength
         val averagePeriodLength = state.averagePeriodLength
 
@@ -69,7 +73,7 @@ fun StatisticsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(vertical = 48.dp)
+                    .padding(vertical = 32.dp)
             )
             return@Column
         }
@@ -98,17 +102,24 @@ fun StatisticsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        StatCard(
-            title = stringResource(R.string.stats_regularity),
-            value = regularityLabel(state.regularity),
-            subtitle = stringResource(
-                R.string.stats_based_on_cycles,
-                state.completedCycleCount
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
+        state.cycleVariationDays?.let { variation ->
+            Spacer(modifier = Modifier.height(12.dp))
+            val regularity = state.regularity
+            StatCard(
+                title = stringResource(R.string.stats_regularity),
+                value = regularity?.let { regularityLabel(it) }
+                    ?: stringResource(R.string.stats_variation, variation),
+                subtitle = if (regularity != null) {
+                    stringResource(R.string.stats_variation, variation)
+                } else {
+                    stringResource(
+                        R.string.stats_based_on_cycles,
+                        state.completedCycleCount
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -122,6 +133,32 @@ fun StatisticsScreen(
             CycleHistoryCard(cycle)
             Spacer(modifier = Modifier.height(8.dp))
         }
+    }
+}
+
+@Composable
+private fun StageNoteCard(stage: CycleStage) {
+    val textRes = when (stage) {
+        CycleStage.FIRST_YEAR -> R.string.stats_stage_first_year_note
+        CycleStage.YEARS_ONE_TO_THREE -> R.string.stats_stage_early_years_note
+        CycleStage.ESTABLISHED -> R.string.stats_stage_established_note
+        CycleStage.CHANGING_WITH_AGE -> R.string.stats_stage_changing_age_note
+        CycleStage.PERIODS_STOPPED -> R.string.stats_stage_stopped_note
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Text(
+            text = stringResource(textRes),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
 
@@ -213,9 +250,8 @@ private fun CycleHistoryCard(cycle: Cycle) {
 }
 
 @Composable
-private fun regularityLabel(regularity: CycleRegularity?): String = when (regularity) {
+private fun regularityLabel(regularity: CycleRegularity): String = when (regularity) {
     CycleRegularity.REGULAR -> stringResource(R.string.stats_regular)
     CycleRegularity.SOMEWHAT_REGULAR -> stringResource(R.string.stats_somewhat_regular)
     CycleRegularity.IRREGULAR -> stringResource(R.string.stats_irregular)
-    null -> stringResource(R.string.stats_not_enough_data)
 }
