@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +59,26 @@ fun MyCycleApp(showOnboarding: Boolean) {
     val navController = rememberNavController()
     var selectedDayForDetails by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(showOnboarding) {
+        val currentRoute = navController.currentBackStackEntry?.destination?.route
+        when {
+            showOnboarding && currentRoute == Screen.Main.route -> {
+                selectedDayForDetails = null
+                navController.navigate(Screen.Onboarding.route) {
+                    popUpTo(Screen.Main.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+
+            !showOnboarding && currentRoute == Screen.Onboarding.route -> {
+                navController.navigate(Screen.Main.route) {
+                    popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = if (showOnboarding) Screen.Onboarding.route else Screen.Main.route
@@ -81,7 +102,6 @@ fun MyCycleApp(showOnboarding: Boolean) {
         }
     }
 
-    // Day details bottom sheet
     selectedDayForDetails?.let { dateString ->
         DayDetailsSheet(
             dateString = dateString,
