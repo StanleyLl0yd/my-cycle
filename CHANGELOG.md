@@ -1,36 +1,52 @@
 # Changelog
 
-All notable changes to My Cycle are documented in this file.
+[English](CHANGELOG.md) | [Русский](CHANGELOG_RU.md)
+
+This file records user-visible changes in public My Cycle releases.
 
 ## 1.0.0 — 2026-08-26
 
-### Added
-- Period, mood, symptom, and notes logging.
-- Calendar with confirmed period days and estimated fertile/ovulation windows.
-- Adaptive cycle and period estimates based on recent completed cycles.
-- Statistics for average cycle length, average period length, regularity, and recent cycle history.
+Initial public release.
+
+### Cycle tracking
+
+- First-run setup with the last-period start date and usual cycle length (21–45 days).
+- Daily logging of menstrual flow, mood, symptoms, and notes.
+- Future dates are protected from being saved as actual logs.
+
+### Today and predictions
+
+- Current cycle day and calculated cycle phase.
+- Estimated next period, fertile window, and ovulation date.
+- Estimates adapt to completed cycle history, using up to 6 recent cycles with greater weight for newer cycles.
+
+### Calendar
+
+- Month-by-month calendar navigation.
+- Confirmed period days with flow intensity.
+- Estimated period days, fertile window, and ovulation day.
+- Daily log access from calendar dates.
+
+### Statistics
+
+- Average cycle length.
+- Average period length.
+- Regularity classification when at least two completed cycles are available.
+- History of up to 12 recent detected cycles.
+
+### Settings and data
+
+- System, Light, and Dark themes.
+- Material You dynamic colors on Android 12+.
 - CSV export through the Android system file picker.
-- System, light, dark, and dynamic-color appearance options.
-- English and Russian localization.
-- About section with description, author, version, license, privacy information, and GitHub link.
-- Unit tests for cycle detection and prediction logic.
+- Complete deletion of cycle data and app preferences.
+- About section with app description, author, version, license, privacy information, and GitHub/license links.
+- English and Russian interface.
 
-### Fixed
-- First-run prediction no longer collapses the expected period length to one day.
-- Cycle detection handles mid-cycle spotting without shifting the next cycle incorrectly.
-- Today and Calendar use the same history-derived cycle rhythm as the prediction engine.
-- Confirmed period days take precedence over calculated phase state.
-- Calendar states are calculated for the month actually being viewed.
-- Editing an existing day preserves its original creation timestamp.
-- Future dates cannot be saved as actual logs.
-- Clearing data resets onboarding correctly.
-- Android 8.0 theme compatibility and Compose configuration-aware resource access.
+### Privacy and release
 
-### Privacy
-- No internet permission, analytics, ads, or accounts.
-- Android app-data backup and device-transfer extraction of tracked data are disabled.
-- Data remains local unless the user explicitly exports a CSV file.
-
-### Release
+- No account, analytics, ads, or Android `INTERNET` permission.
+- Android app-data backup and device-transfer extraction of app data are disabled.
 - Application ID: `com.silverlightning.mycycle`.
 - License: PolyForm Noncommercial License 1.0.0.
+- Author: Stanley Lloyd.
