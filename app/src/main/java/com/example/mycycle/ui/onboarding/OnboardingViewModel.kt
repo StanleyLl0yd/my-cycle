@@ -37,7 +37,8 @@ class OnboardingViewModel(
     }
 
     fun setLastPeriodDate(date: LocalDate) {
-        _state.update { it.copy(lastPeriodDate = date) }
+        val safeDate = if (date.isAfter(LocalDate.now())) LocalDate.now() else date
+        _state.update { it.copy(lastPeriodDate = safeDate) }
     }
 
     fun setCycleLength(length: Int) {
@@ -50,7 +51,6 @@ class OnboardingViewModel(
 
             val currentState = _state.value
 
-            // Save initial period day
             cycleDayRepository.save(
                 CycleDay(
                     date = currentState.lastPeriodDate,
@@ -58,7 +58,6 @@ class OnboardingViewModel(
                 )
             )
 
-            // Save preferences
             preferencesRepository.completeOnboarding(
                 lastPeriodDate = currentState.lastPeriodDate,
                 cycleLength = currentState.cycleLength
