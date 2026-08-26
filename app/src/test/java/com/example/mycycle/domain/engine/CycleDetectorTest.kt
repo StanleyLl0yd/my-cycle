@@ -63,6 +63,25 @@ class CycleDetectorTest {
     }
 
     @Test
+    fun midCycleSpottingDoesNotStretchPeriodOrHideNextCycle() {
+        val days = listOf(
+            CycleDay(LocalDate.of(2026, 8, 1), hasPeriod = true),
+            CycleDay(LocalDate.of(2026, 8, 2), hasPeriod = true),
+            CycleDay(LocalDate.of(2026, 8, 10), hasPeriod = true),
+            CycleDay(LocalDate.of(2026, 8, 20), hasPeriod = true),
+            CycleDay(LocalDate.of(2026, 8, 21), hasPeriod = true)
+        )
+
+        val cycles = detector.detectCycles(days)
+
+        assertEquals(2, cycles.size)
+        assertEquals(19, cycles[0].length)
+        assertEquals(2, cycles[0].periodLength)
+        assertEquals(LocalDate.of(2026, 8, 20), cycles[1].startDate)
+        assertEquals(2, cycles[1].periodLength)
+    }
+
+    @Test
     fun nonPeriodDaysAreIgnored() {
         val days = listOf(
             CycleDay(LocalDate.of(2026, 8, 1), hasPeriod = true),
