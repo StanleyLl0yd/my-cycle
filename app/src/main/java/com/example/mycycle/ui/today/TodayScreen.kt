@@ -1,29 +1,18 @@
 package com.example.mycycle.ui.today
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -34,17 +23,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mycycle.R
-import com.example.mycycle.domain.model.CyclePhase
+import com.example.mycycle.domain.model.DateRange
+import com.example.mycycle.domain.model.Prediction
 import com.example.mycycle.ui.theme.CycleColors
 import org.koin.androidx.compose.koinViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 
 @Composable
 fun TodayScreen(
@@ -52,153 +44,115 @@ fun TodayScreen(
     viewModel: TodayViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val locale = LocalConfiguration.current.locales[0]
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(CycleColors.backgroundGradient)
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-            state.phase?.let { phase ->
-                PhaseCard(
-                    phase = phase,
-                    cycleDay = state.cycleDay,
-                    modifier = Modifier.fillMaxWidth()
+        CycleDayCard(
+            cycleDay = state.cycleDay,
+            isPeriodToday = state.isPeriodToday
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        state.prediction?.let { prediction ->
+            PredictionCard(
+                prediction = prediction,
+                locale = locale
+            )
+        }
+
+        state.notice?.let { notice ->
+            Spacer(modifier = Modifier.height(16.dp))
+            NoticeCard(notice)
+        }
+
+        state.prediction?.possiblePregnancyWindow
+            ?.takeIf { !LocalDate.now().isAfter(it.end) }
+            ?.let { range ->
+                Spacer(modifier = Modifier.height(16.dp))
+                PregnancyCard(range = range, locale = locale)
+            }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        ExtendedFloatingActionButton(
+            onClick = onLogClick,
+            icon = {
+                Icon(
+                    imageVector = if (state.isPeriodToday) Icons.Rounded.Check else Icons.Rounded.Add,
+                    contentDescription = null
+                )
+            },
+            text = {
+                Text(
+                    stringResource(
+                        if (state.isPeriodToday) {
+                            R.string.today_period_started
+                        } else {
+                            R.string.today_mark_period
+                        }
+                    )
                 )
             }
+        )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                state.daysUntilPeriod?.let { days ->
-                    if (days > 0) {
-                        InfoCard(
-                            icon = Icons.Rounded.CalendarMonth,
-                            title = stringResource(R.string.today_until_period),
-                            value = pluralStringResource(R.plurals.days, days, days),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                if (state.isFertileNow) {
-                    InfoCard(
-                        icon = Icons.Rounded.Spa,
-                        title = stringResource(R.string.today_fertile_window),
-                        value = stringResource(R.string.today_fertile_now),
-                        modifier = Modifier.weight(1f)
-                    )
-                } else {
-                    state.daysUntilFertile?.let { days ->
-                        if (days > 0) {
-                            InfoCard(
-                                icon = Icons.Rounded.Spa,
-                                title = stringResource(R.string.today_fertile_window),
-                                value = pluralStringResource(R.plurals.fertile_in_days, days, days),
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            ExtendedFloatingActionButton(
-                onClick = onLogClick,
-                icon = {
-                    Icon(
-                        imageVector = if (state.isPeriodToday) Icons.Rounded.Check else Icons.Rounded.Add,
-                        contentDescription = null
-                    )
-                },
-                text = {
-                    Text(
-                        stringResource(
-                            if (state.isPeriodToday) {
-                                R.string.today_period_started
-                            } else {
-                                R.string.today_mark_period
-                            }
-                        )
-                    )
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-        }
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
 @Composable
-private fun PhaseCard(
-    phase: CyclePhase,
+private fun CycleDayCard(
     cycleDay: Int?,
-    modifier: Modifier = Modifier
+    isPeriodToday: Boolean
 ) {
-    val backgroundColor by animateColorAsState(
-        targetValue = CycleColors.getPhaseColor(phase).copy(alpha = 0.15f),
-        label = "phase_color"
-    )
-
     Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        shape = RoundedCornerShape(28.dp)
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(32.dp),
+                .padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(phase.labelRes),
+                text = stringResource(
+                    if (isPeriodToday) R.string.today_period_today else R.string.today_cycle_day_title
+                ),
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             cycleDay?.let { day ->
-                val scale by animateFloatAsState(
-                    targetValue = 1f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
-                    ),
-                    label = "day_scale"
-                )
-
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = day.toString(),
                     style = MaterialTheme.typography.displayLarge,
-                    color = CycleColors.getPhaseColor(phase),
-                    modifier = Modifier.scale(scale)
+                    color = MaterialTheme.colorScheme.primary
                 )
-
                 Text(
                     text = stringResource(R.string.today_cycle_day),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = stringResource(phase.descriptionRes),
+                text = stringResource(R.string.today_cycle_day_help),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -208,44 +162,141 @@ private fun PhaseCard(
 }
 
 @Composable
-private fun InfoCard(
-    icon: ImageVector,
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier
+private fun PredictionCard(
+    prediction: Prediction,
+    locale: Locale
 ) {
+    val today = LocalDate.now()
+    val window = prediction.nextPeriodStartWindow
+
     Card(
-        modifier = modifier,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(20.dp)
+        )
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+        Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
+                text = stringResource(R.string.today_next_period_window),
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
+            val value = when {
+                window == null -> stringResource(R.string.today_no_period_prediction)
+                today.isAfter(window.end) -> stringResource(R.string.today_prediction_passed)
+                else -> formatDateRange(window, locale)
+            }
 
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = when {
+                    prediction.nextPeriodStartWindow == null ->
+                        stringResource(R.string.today_no_period_prediction_help)
+                    prediction.basedOnCycles == 0 ->
+                        stringResource(R.string.today_learning_prediction)
+                    prediction.highlyVariable ->
+                        stringResource(R.string.today_wide_prediction)
+                    else ->
+                        stringResource(R.string.today_history_prediction)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+@Composable
+private fun PregnancyCard(
+    range: DateRange,
+    locale: Locale
+) {
+    val today = LocalDate.now()
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = stringResource(R.string.today_possible_pregnancy),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = if (today in range) {
+                    stringResource(R.string.today_possible_pregnancy_now)
+                } else {
+                    formatDateRange(range, locale)
+                },
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = stringResource(R.string.today_calendar_guess_warning),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun NoticeCard(notice: TodayNotice) {
+    val important = notice == TodayNotice.THREE_MONTH_GAP ||
+        notice == TodayNotice.BLEEDING_AFTER_YEAR_GAP
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (important) {
+                MaterialTheme.colorScheme.errorContainer
+            } else {
+                MaterialTheme.colorScheme.secondaryContainer
+            }
+        )
+    ) {
+        Text(
+            text = stringResource(
+                when (notice) {
+                    TodayNotice.FIRST_YEAR_CHANGES_ARE_COMMON -> R.string.today_notice_first_year
+                    TodayNotice.EARLY_YEARS_CHANGES_ARE_COMMON -> R.string.today_notice_early_years
+                    TodayNotice.CHANGING_WITH_AGE -> R.string.today_notice_changing_age
+                    TodayNotice.PERIODS_STOPPED -> R.string.today_notice_periods_stopped
+                    TodayNotice.THREE_MONTH_GAP -> R.string.today_notice_three_month_gap
+                    TodayNotice.BLEEDING_AFTER_YEAR_GAP -> R.string.today_notice_year_gap_bleeding
+                    TodayNotice.OUTSIDE_COMMON_RANGE -> R.string.today_notice_outside_common_range
+                }
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(20.dp),
+            color = if (important) {
+                MaterialTheme.colorScheme.onErrorContainer
+            } else {
+                MaterialTheme.colorScheme.onSecondaryContainer
+            }
+        )
+    }
+}
+
+private fun formatDateRange(range: DateRange, locale: Locale): String {
+    val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
+    return if (range.start == range.end) {
+        range.start.format(formatter)
+    } else {
+        "${range.start.format(formatter)} – ${range.end.format(formatter)}"
     }
 }
