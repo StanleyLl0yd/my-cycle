@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ✨ Added
 - A simple setup choice for six common situations: periods started less than 1 year ago, 1–3 years ago, more than 3 years ago with similar gaps, more than 3 years ago with very uneven gaps, periods changing with age, or no period for 12 months or more.
 - The same choice can be changed later in Settings without deleting old records.
+- Existing 1.0.0 installations keep all history and start in a conservative “not chosen yet” mode until the user selects the new option once in Settings.
 - Clear notes when a very long gap, longer-than-usual bleeding, or bleeding after about a year without periods deserves attention.
 - If periods have stopped for 12 months or more, setup no longer asks for or creates a made-up recent period date.
 
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The app now shows a **range of possible dates** for the next period instead of pretending to know one exact day.
 - The first years after periods begin use a wider date range because uneven timing is common.
 - Long-term uneven cycles and periods changing with age also use a wider range and do not get an egg-release guess.
+- The migration-only “not chosen yet” mode also uses a wide range and never shows an egg-release or pregnancy-likelihood estimate.
 - Only a fairly steady adult history with at least 3 finished cycles can show a broad calendar range where pregnancy may be more likely.
 - The app never presents those calendar dates as safe birth-control days.
 - Up to the 6 most recent finished cycles are still used, with newer dates counting more.
@@ -40,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Statistics describe early-years, long-term uneven and age-changing patterns without turning them into a diagnosis.
 
 ### 🧪 Tests & Build
-- Added tests for wide early-year estimates, long-term uneven cycles, age-changing cycles, stopped-period mode, spotting, short cycles and range-based predictions.
+- Added tests for wide early-year estimates, long-term uneven cycles, age-changing cycles, stopped-period mode, migration-safe unset mode, spotting, short cycles and range-based predictions.
 - Updated source version to 1.1.0 (`versionCode` 2).
 
 ---
