@@ -53,7 +53,7 @@ class UserPreferencesRepository(
                 estimatedPeriodLength = prefs[Keys.ESTIMATED_PERIOD_LENGTH] ?: 5,
                 cycleStage = prefs[Keys.CYCLE_STAGE]
                     ?.let { runCatching { CycleStage.valueOf(it) }.getOrNull() }
-                    ?: CycleStage.ESTABLISHED,
+                    ?: CycleStage.NOT_SET,
                 themeMode = prefs[Keys.THEME_MODE]
                     ?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
                     ?: ThemeMode.SYSTEM,
