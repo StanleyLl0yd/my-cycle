@@ -99,17 +99,15 @@ class TodayViewModel(
                 val isPeriodToday = todayEntry?.hasPeriod == true
                 val bleedingToday = todayEntry?.flowIntensity != null || isPeriodToday
 
-                val completedLengths = cycles
-                    .filter { it.isComplete }
-                    .mapNotNull { it.length }
-                val latestCompletedLength = completedLengths.lastOrNull()
+                val latestCompletedLength = cycles
+                    .lastOrNull { it.isComplete }
+                    ?.length
                 val currentPeriodLength = cycles.lastOrNull()
                     ?.takeIf { !it.isComplete }
                     ?.periodLength
 
                 val notice = chooseNotice(
                     stage = preferences.cycleStage,
-                    completedLengths = completedLengths,
                     latestCompletedLength = latestCompletedLength,
                     currentCycleDay = cycleDay,
                     currentPeriodLength = currentPeriodLength,
@@ -133,7 +131,6 @@ class TodayViewModel(
 
     private fun chooseNotice(
         stage: CycleStage,
-        completedLengths: List<Int>,
         latestCompletedLength: Int?,
         currentCycleDay: Int?,
         currentPeriodLength: Int?,
@@ -141,8 +138,8 @@ class TodayViewModel(
         bleedingToday: Boolean
     ): TodayNotice? {
         if (
-            (stage == CycleStage.PERIODS_STOPPED && bleedingToday) ||
-            latestCompletedLength?.let { it >= 365 } == true
+            bleedingToday &&
+            (stage == CycleStage.PERIODS_STOPPED || latestCompletedLength?.let { it >= 365 } == true)
         ) {
             return TodayNotice.BLEEDING_AFTER_YEAR_GAP
         }
@@ -162,7 +159,7 @@ class TodayViewModel(
 
         if (
             stage in setOf(CycleStage.FIRST_YEAR, CycleStage.YEARS_ONE_TO_THREE) &&
-            (completedLengths.any { it >= 90 } || (currentCycleDay ?: 0) >= 90)
+            (latestCompletedLength?.let { it >= 90 } == true || (currentCycleDay ?: 0) >= 90)
         ) {
             return TodayNotice.THREE_MONTH_GAP
         }
@@ -171,8 +168,7 @@ class TodayViewModel(
             CycleStage.YEARS_ONE_TO_THREE ->
                 latestCompletedLength?.let { it !in 21..45 } == true ||
                     (currentCycleDay ?: 0) > 45
-            CycleStage.ESTABLISHED,
-            CycleStage.LONG_TERM_UNEVEN ->
+            CycleStage.ESTABLISHED ->
                 latestCompletedLength?.let { it !in 21..35 } == true ||
                     (currentCycleDay ?: 0) > 35
             else -> false
