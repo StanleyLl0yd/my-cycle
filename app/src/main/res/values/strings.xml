@@ -13,13 +13,15 @@
     <string name="onboarding_stage_subtitle">Choose the closest answer. You can change it later. This helps the app avoid giving false exact dates.</string>
 
     <string name="cycle_stage_first_year">My periods started less than 1 year ago</string>
-    <string name="cycle_stage_first_year_desc">In the first year, periods often come at uneven times. That can be normal. The app will use a wide date range instead of pretending it knows an exact day.</string>
+    <string name="cycle_stage_first_year_desc">In the first year, periods often come after a different number of days each time. That can be normal. The app will use a wide date range instead of pretending it knows one exact day.</string>
     <string name="cycle_stage_one_to_three">My periods started 1–3 years ago</string>
     <string name="cycle_stage_one_to_three_desc">During the first few years, periods can still come earlier or later from month to month. The app will allow for that.</string>
-    <string name="cycle_stage_established">My periods have been coming for more than 3 years</string>
-    <string name="cycle_stage_established_desc">The app will learn from your recent dates. If your periods are fairly similar, its date range can become narrower.</string>
+    <string name="cycle_stage_established">My periods have been coming for more than 3 years and the gaps are usually similar</string>
+    <string name="cycle_stage_established_desc">The app will learn from your recent dates. If the gaps stay fairly similar, the date range may become narrower.</string>
+    <string name="cycle_stage_long_term_uneven">My periods have been coming for more than 3 years but the gaps still change a lot</string>
+    <string name="cycle_stage_long_term_uneven_desc">The app will use a wide date range and will not guess a day when an egg may be released. If you have never talked with a doctor about very uneven periods, it can be worth doing.</string>
     <string name="cycle_stage_changing_with_age">My periods are changing as I get older</string>
-    <string name="cycle_stage_changing_with_age_desc">As periods get closer to stopping for good, they may come earlier, later, or skip months. The app will use a wider range and will not guess an egg-release day.</string>
+    <string name="cycle_stage_changing_with_age_desc">As periods get closer to stopping for good, they may come earlier, later, or skip months. The app will use a wider range and will not guess a day when an egg may be released.</string>
     <string name="cycle_stage_periods_stopped">I have had no period for 12 months or more</string>
     <string name="cycle_stage_periods_stopped_desc">The app will stop guessing the next period. If bleeding starts after a full year without periods, it is important to tell a doctor.</string>
 
@@ -66,25 +68,27 @@
     <string name="today_possible_pregnancy_now">You are inside the rough calendar range</string>
     <string name="today_calendar_guess_warning">This is only a calendar guess. The app cannot know exactly when an egg is released. Never use these dates as “safe days” to avoid pregnancy.</string>
 
-    <string name="today_notice_first_year">Your periods started recently. In the first year it is common for them to come at uneven times. Keep recording the real dates; the app will not force them into a 28-day pattern.</string>
+    <string name="today_notice_first_year">Your periods started recently. In the first year it is common for them to come after a different number of days each time. Keep recording the real dates; the app will not force them into a 28-day pattern.</string>
     <string name="today_notice_early_years">In the first few years, periods can still come earlier or later from month to month. Keep recording what really happens.</string>
-    <string name="today_notice_changing_age">As periods get closer to stopping for good, the gaps between them often change. The app therefore uses a wide date range and does not guess an egg-release day.</string>
+    <string name="today_notice_long_term_uneven">You said the gaps between your periods usually change a lot. The app will keep showing what really happens and use a wide date range instead of forcing a fixed pattern.</string>
+    <string name="today_notice_changing_age">As periods get closer to stopping for good, the gaps between them often change. The app therefore uses a wide date range and does not guess a day when an egg may be released.</string>
     <string name="today_notice_periods_stopped">You chose “no period for 12 months or more”. The app will not guess another period. If new bleeding appears after a full year without periods, tell a doctor.</string>
-    <string name="today_notice_three_month_gap">There was a gap of about 3 months or more between periods. In the first years after periods begin, such a long gap is worth discussing with a doctor or another trusted health professional.</string>
-    <string name="today_notice_year_gap_bleeding">A new period was recorded after about a year or more without one. Please tell a doctor about this bleeding, even if it is light.</string>
-    <string name="today_notice_outside_common_range">This gap between periods is outside the range that is common for this stage. One unusual month does not give a diagnosis, but if it keeps happening or worries you, talk to a doctor.</string>
+    <string name="today_notice_three_month_gap">There has been a gap of about 3 months or more. In the first years after periods begin, such a long gap is worth discussing with a doctor or another trusted health professional.</string>
+    <string name="today_notice_year_gap_bleeding">New bleeding was recorded after about a year or more without a period. Please tell a doctor about this bleeding, even if there is only a little.</string>
+    <string name="today_notice_long_bleeding">This bleeding has lasted longer than is usual. If it is still going, is very heavy, makes you weak or dizzy, or worries you, ask a trusted adult or doctor for help.</string>
+    <string name="today_notice_outside_common_range">This gap is shorter or longer than is common at this stage. One unusual gap does not tell you why. If this keeps happening or worries you, talk with a doctor.</string>
 
-    <!-- Older internal phase labels. Kept simple in case a future screen uses them. -->
+    <!-- Older internal labels kept simple in case a future screen uses them. -->
     <string name="phase_menstrual">Period</string>
     <string name="phase_follicular">After your period</string>
     <string name="phase_ovulatory">Around the middle of the cycle</string>
     <string name="phase_luteal">Before the next period</string>
     <string name="phase_menstrual_desc">You recorded period bleeding.</string>
-    <string name="phase_follicular_desc">This is a rough place in the calendar, not a test of what your body is doing.</string>
+    <string name="phase_follicular_desc">This is only a rough place in the calendar, not a test of what your body is doing.</string>
     <string name="phase_ovulatory_desc">An egg may be released around this part of some cycles, but a calendar cannot tell the exact day.</string>
     <string name="phase_luteal_desc">This is the later part of the calendar cycle. The exact timing can change.</string>
 
-    <!-- Legacy info-card labels kept for compatibility -->
+    <!-- Older card labels kept for compatibility. -->
     <string name="today_until_period">Until period</string>
     <string name="today_fertile_window">Pregnancy may be more likely</string>
     <string name="today_fertile_in">in %1$s</string>
@@ -156,7 +160,8 @@
     <string name="stats_stage_first_year_note">In the first year after periods begin, uneven gaps are common. The numbers below are a diary summary, not a rule your body must follow.</string>
     <string name="stats_stage_early_years_note">During the first few years, the gaps can still change. The app shows what happened instead of judging it against a 28-day cycle.</string>
     <string name="stats_stage_established_note">These numbers describe your own recent history. If your pattern suddenly changes or worries you, the app cannot tell you why.</string>
-    <string name="stats_stage_changing_age_note">When periods are getting closer to stopping for good, the gaps often change and skipped months become more common. The app will not treat that as a clockwork cycle.</string>
+    <string name="stats_stage_long_term_uneven_note">You said your gaps have stayed very different even after the first few years. The app shows the real numbers without calling them a fixed cycle.</string>
+    <string name="stats_stage_changing_age_note">When periods are getting closer to stopping for good, the gaps often change and skipped months become more common. The app simply shows what happened.</string>
     <string name="stats_stage_stopped_note">You chose “no period for 12 months or more”. The history stays here, but the app does not guess another period.</string>
 
     <!-- ==================== SETTINGS ==================== -->
@@ -174,7 +179,7 @@
     <string name="settings_dynamic_colors">Use phone colors</string>
     <string name="settings_dynamic_colors_desc">Use colors based on your wallpaper</string>
 
-    <!-- Notifications: reserved strings, feature not available yet -->
+    <!-- Reserved for future features; not shown in version 1.1.0. -->
     <string name="settings_notifications">Notifications</string>
     <string name="settings_period_reminder">Period reminder</string>
     <string name="settings_period_reminder_desc">Get notified before your period</string>
@@ -194,7 +199,7 @@
 
     <!-- About -->
     <string name="settings_about">About</string>
-    <string name="settings_about_description">A private period diary that learns from your own dates. It shows ranges instead of claiming to know an exact next period or egg-release day. It is not a medical test.</string>
+    <string name="settings_about_description">A private period diary that learns from your own dates. It shows date ranges instead of claiming to know an exact next period or egg-release day. It is not a medical test.</string>
     <string name="settings_author">Author</string>
     <string name="settings_author_name">Stanley Lloyd</string>
     <string name="settings_version">Version</string>
