@@ -6,7 +6,6 @@ import com.example.mycycle.data.preferences.UserPreferencesRepository
 import com.example.mycycle.data.preferences.userPreferencesDataStore
 import com.example.mycycle.data.repository.CycleDayRepository
 import com.example.mycycle.domain.engine.CycleDetector
-import com.example.mycycle.domain.engine.CyclePhaseCalculator
 import com.example.mycycle.domain.engine.PredictionEngine
 import com.example.mycycle.ui.calendar.CalendarViewModel
 import com.example.mycycle.ui.daydetails.DayDetailsViewModel
@@ -20,7 +19,6 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    // Database
     single {
         Room.databaseBuilder(
             androidContext(),
@@ -30,20 +28,14 @@ val appModule = module {
     }
 
     single { get<AppDatabase>().cycleDayDao() }
-
-    // DataStore
     single { androidContext().userPreferencesDataStore }
 
-    // Repositories
     single { UserPreferencesRepository(get()) }
     single { CycleDayRepository(get()) }
 
-    // Domain engines
     single { CycleDetector() }
     single { PredictionEngine() }
-    single { CyclePhaseCalculator() }
 
-    // ViewModels
     viewModel { OnboardingViewModel(get(), get()) }
 
     viewModel {
@@ -51,8 +43,7 @@ val appModule = module {
             preferencesRepository = get(),
             cycleDayRepository = get(),
             cycleDetector = get(),
-            predictionEngine = get(),
-            phaseCalculator = get()
+            predictionEngine = get()
         )
     }
 
@@ -61,12 +52,18 @@ val appModule = module {
             preferencesRepository = get(),
             cycleDayRepository = get(),
             cycleDetector = get(),
-            predictionEngine = get(),
-            phaseCalculator = get()
+            predictionEngine = get()
         )
     }
 
-    viewModel { StatisticsViewModel(get(), get()) }
+    viewModel {
+        StatisticsViewModel(
+            cycleDayRepository = get(),
+            cycleDetector = get(),
+            preferencesRepository = get()
+        )
+    }
+
     viewModel { SettingsViewModel(get(), get()) }
 
     viewModel { (dateString: String) ->
