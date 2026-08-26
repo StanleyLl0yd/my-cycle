@@ -1,5 +1,8 @@
 package com.example.mycycle.ui.settings
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,6 +50,9 @@ import com.example.mycycle.ui.theme.CycleColors
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
+
+private const val GITHUB_URL = "https://github.com/StanleyLl0yd/my-cycle"
+private const val LICENSE_URL = "https://polyformproject.org/licenses/noncommercial/1.0.0"
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -155,10 +161,45 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         SettingsSection(title = stringResource(R.string.settings_about)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.settings_about_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            HorizontalDivider()
+            SettingsItem(
+                title = stringResource(R.string.settings_author),
+                subtitle = stringResource(R.string.settings_author_name),
+                onClick = null
+            )
+            HorizontalDivider()
             SettingsItem(
                 title = stringResource(R.string.settings_version),
                 subtitle = BuildConfig.VERSION_NAME,
                 onClick = null
+            )
+            HorizontalDivider()
+            SettingsItem(
+                title = stringResource(R.string.settings_license),
+                subtitle = stringResource(R.string.settings_license_value),
+                onClick = { openUrl(context, LICENSE_URL) }
+            )
+            HorizontalDivider()
+            SettingsItem(
+                title = stringResource(R.string.settings_github),
+                subtitle = stringResource(R.string.settings_github_desc),
+                onClick = { openUrl(context, GITHUB_URL) }
             )
             HorizontalDivider()
             SettingsItem(
@@ -190,6 +231,12 @@ fun SettingsScreen(
                 }
             }
         )
+    }
+}
+
+private fun openUrl(context: Context, url: String) {
+    runCatching {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
     }
 }
 
