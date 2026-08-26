@@ -19,6 +19,7 @@ import java.time.LocalDate
 enum class TodayNotice {
     FIRST_YEAR_CHANGES_ARE_COMMON,
     EARLY_YEARS_CHANGES_ARE_COMMON,
+    LONG_TERM_UNEVEN,
     CHANGING_WITH_AGE,
     PERIODS_STOPPED,
     THREE_MONTH_GAP,
@@ -75,6 +76,13 @@ class TodayViewModel(
                         periodLength = preferences.estimatedPeriodLength,
                         stage = preferences.cycleStage
                     )
+                } else if (preferences.cycleStage == CycleStage.PERIODS_STOPPED) {
+                    predictionEngine.predictFromOnboarding(
+                        lastPeriodStart = today,
+                        cycleLength = preferences.estimatedCycleLength,
+                        periodLength = preferences.estimatedPeriodLength,
+                        stage = preferences.cycleStage
+                    )
                 } else {
                     null
                 }
@@ -86,9 +94,9 @@ class TodayViewModel(
                     ?.let { java.time.temporal.ChronoUnit.DAYS.between(it, today).toInt() + 1 }
                     ?.takeIf { it > 0 }
 
-                val isPeriodToday = allDays.any {
-                    it.date == today && it.hasPeriod
-                }
+                val todayEntry = allDays.firstOrNull { it.date == today }
+                val isPeriodToday = todayEntry?.hasPeriod == true
+                val bleedingToday = todayEntry?.flowIntensity != null || isPeriodToday
 
                 val completedLengths = cycles
                     .filter { it.isComplete }
@@ -104,7 +112,8 @@ class TodayViewModel(
                     latestCompletedLength = latestCompletedLength,
                     currentCycleDay = cycleDay,
                     currentPeriodLength = currentPeriodLength,
-                    isPeriodToday = isPeriodToday
+                    isPeriodToday = isPeriodToday,
+                    bleedingToday = bleedingToday
                 )
 
                 _state.update {
@@ -127,13 +136,26 @@ class TodayViewModel(
         latestCompletedLength: Int?,
         currentCycleDay: Int?,
         currentPeriodLength: Int?,
-        isPeriodToday: Boolean
+        isPeriodToday: Boolean,
+        bleedingToday: Boolean
     ): TodayNotice? {
-        if (completedLengths.any { it >= 365 }) {
+        if (
+            (stage == CycleStage.PERIODS_STOPPED && bleedingToday) ||
+            latestCompletedLength?.let { it >= 365 } == true
+        ) {
             return TodayNotice.BLEEDING_AFTER_YEAR_GAP
         }
 
-        if (isPeriodToday && currentPeriodLength != null && currentPeriodLength > 8) {
+        val longBleedingLimit = when (stage) {
+            CycleStage.FIRST_YEAR,
+            CycleStage.YEARS_ONE_TO_THREE -> 7
+            else -> 8
+        }
+        if (
+            isPeriodToday &&
+            currentPeriodLength != null &&
+            currentPeriodLength > longBleedingLimit
+        ) {
             return TodayNotice.LONG_BLEEDING
         }
 
@@ -146,9 +168,12 @@ class TodayViewModel(
 
         val outsideCommonRange = when (stage) {
             CycleStage.YEARS_ONE_TO_THREE ->
-                latestCompletedLength?.let { it !in 21..45 } == true || (currentCycleDay ?: 0) > 45
-            CycleStage.ESTABLISHED ->
-                latestCompletedLength?.let { it !in 24..38 } == true || (currentCycleDay ?: 0) > 38
+                latestCompletedLength?.let { it !in 21..45 } == true ||
+                    (currentCycleDay ?: 0) > 45
+            CycleStage.ESTABLISHED,
+            CycleStage.LONG_TERM_UNEVEN ->
+                latestCompletedLength?.let { it !in 21..35 } == true ||
+                    (currentCycleDay ?: 0) > 35
             else -> false
         }
         if (outsideCommonRange) {
@@ -159,6 +184,7 @@ class TodayViewModel(
             CycleStage.FIRST_YEAR -> TodayNotice.FIRST_YEAR_CHANGES_ARE_COMMON
             CycleStage.YEARS_ONE_TO_THREE -> TodayNotice.EARLY_YEARS_CHANGES_ARE_COMMON
             CycleStage.ESTABLISHED -> null
+            CycleStage.LONG_TERM_UNEVEN -> TodayNotice.LONG_TERM_UNEVEN
             CycleStage.CHANGING_WITH_AGE -> TodayNotice.CHANGING_WITH_AGE
             CycleStage.PERIODS_STOPPED -> TodayNotice.PERIODS_STOPPED
         }
