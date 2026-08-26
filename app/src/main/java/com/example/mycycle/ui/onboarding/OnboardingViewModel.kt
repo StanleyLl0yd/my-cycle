@@ -39,7 +39,15 @@ class OnboardingViewModel(
     }
 
     fun setCycleStage(stage: CycleStage) {
-        _state.update { it.copy(cycleStage = stage) }
+        _state.update { current ->
+            current.copy(
+                cycleStage = stage,
+                cycleLength = when (stage) {
+                    CycleStage.FIRST_YEAR -> 32
+                    else -> current.cycleLength
+                }
+            )
+        }
     }
 
     fun setLastPeriodDate(date: LocalDate) {
@@ -56,16 +64,20 @@ class OnboardingViewModel(
             _state.update { it.copy(isLoading = true) }
 
             val currentState = _state.value
+            val periodsStopped = currentState.cycleStage == CycleStage.PERIODS_STOPPED
+            val savedLastPeriodDate = currentState.lastPeriodDate.takeUnless { periodsStopped }
 
-            cycleDayRepository.save(
-                CycleDay(
-                    date = currentState.lastPeriodDate,
-                    hasPeriod = true
+            if (savedLastPeriodDate != null) {
+                cycleDayRepository.save(
+                    CycleDay(
+                        date = savedLastPeriodDate,
+                        hasPeriod = true
+                    )
                 )
-            )
+            }
 
             preferencesRepository.completeOnboarding(
-                lastPeriodDate = currentState.lastPeriodDate,
+                lastPeriodDate = savedLastPeriodDate,
                 cycleLength = currentState.cycleLength,
                 cycleStage = currentState.cycleStage
             )
