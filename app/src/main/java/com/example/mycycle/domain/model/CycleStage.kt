@@ -7,6 +7,10 @@ enum class CycleStage(
     @StringRes val labelRes: Int,
     @StringRes val descriptionRes: Int
 ) {
+    NOT_SET(
+        R.string.cycle_stage_not_set,
+        R.string.cycle_stage_not_set_desc
+    ),
     FIRST_YEAR(
         R.string.cycle_stage_first_year,
         R.string.cycle_stage_first_year_desc
