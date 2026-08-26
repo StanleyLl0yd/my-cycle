@@ -139,6 +139,7 @@ fun StatisticsScreen(
 @Composable
 private fun StageNoteCard(stage: CycleStage) {
     val textRes = when (stage) {
+        CycleStage.NOT_SET -> R.string.stats_stage_not_set_note
         CycleStage.FIRST_YEAR -> R.string.stats_stage_first_year_note
         CycleStage.YEARS_ONE_TO_THREE -> R.string.stats_stage_early_years_note
         CycleStage.ESTABLISHED -> R.string.stats_stage_established_note
