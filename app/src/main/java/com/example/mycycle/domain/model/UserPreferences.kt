@@ -9,7 +9,7 @@ data class UserPreferences(
     val initialPeriodDate: LocalDate? = null,
     val estimatedCycleLength: Int = 28,
     val estimatedPeriodLength: Int = 5,
-    val cycleStage: CycleStage = CycleStage.ESTABLISHED,
+    val cycleStage: CycleStage = CycleStage.NOT_SET,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val useDynamicColors: Boolean = true
 )
