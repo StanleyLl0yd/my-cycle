@@ -1,80 +1,90 @@
 # 🌸 My Cycle
 
-A simple, private, and beautiful period tracker for Android.
+A simple, private period tracker for Android.
 
 ![Android](https://img.shields.io/badge/Android-26%2B-green?logo=android)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple?logo=kotlin)
-![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-1.10-blue)
+![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## ✨ Features
 
-- **Simple & Intuitive** — One tap to log your period
-- **Beautiful Design** — Warm, soft colors with smooth animations
-- **Accurate Predictions** — Learns from your actual cycle data
-- **Complete Privacy** — All data stays on your device, no accounts, no analytics
-- **Lightweight** — Fast startup, minimal battery usage
-
-## 📱 Screenshots
-
-*Coming soon*
+- **Simple logging** — Track period flow, mood, symptoms, and notes
+- **Cycle estimates** — Predictions adapt to recent completed cycles
+- **Calendar** — See confirmed period days and estimated fertile/ovulation windows
+- **Statistics** — Average cycle length, period length, regularity, and recent history
+- **CSV export** — Save your tracked data through Android's system file picker
+- **Private by design** — No account, no analytics, no ads, no internet permission
+- **English & Russian** — Full EN/RU interface localization
 
 ## 🔒 Privacy First
 
-My Cycle is designed with privacy as a core principle:
+My Cycle is designed so that tracked data remains local to the app:
 
-- ✅ No internet permissions
-- ✅ No user accounts required
-- ✅ No analytics or tracking
+- ✅ No internet permission
+- ✅ No user account
+- ✅ No analytics or tracking SDKs
 - ✅ No ads
-- ✅ All data stored locally on device
-- ✅ Export your data anytime
+- ✅ Android app-data backup disabled
+- ✅ Local Room database and DataStore preferences
+- ✅ User-controlled CSV export
+
+## ⚕️ Important note
+
+Cycle, fertile-window, and ovulation dates are estimates based on calendar history. My Cycle is not a medical device and should not be used as a contraceptive method or as a substitute for medical advice.
 
 ## 🛠 Tech Stack
 
-- **Language**: Kotlin 2.3.0
-- **UI**: Jetpack Compose with Material 3
-- **Architecture**: Clean Architecture + MVI
-- **Database**: Room
-- **DI**: Koin
-- **Async**: Coroutines + Flow
+- **Language:** Kotlin 2.3.0
+- **UI:** Jetpack Compose + Material 3
+- **Architecture:** Layered MVVM with separate data/domain/UI concerns
+- **Database:** Room
+- **Preferences:** DataStore
+- **DI:** Koin
+- **Async/state:** Coroutines + Flow
+- **CI:** GitHub Actions, JDK 21, Gradle 8.13
 
 ## 📦 Building
 
 ### Requirements
 
-- Android Studio Ladybug (2024.2.1) or newer
+- Android Studio with Android SDK 36
 - JDK 21
-- Android SDK 36
+- Gradle 8.13 if building from the command line
 
 ### Steps
 
 1. Clone the repository:
+
 ```bash
-git clone https://github.com/yourusername/mycycle.git
+git clone https://github.com/StanleyLl0yd/my-cycle.git
+cd my-cycle
 ```
 
-2. Open in Android Studio
+2. Open the project in Android Studio and sync Gradle.
 
-3. Sync Gradle and run on device/emulator
+3. Run the `app` configuration on an Android 8.0 (API 26) or newer device/emulator.
+
+For CI-equivalent command-line checks:
+
+```bash
+gradle build
+gradle lint
+```
 
 ## 🌍 Localization
 
 Currently supported languages:
+
 - 🇺🇸 English (default)
 - 🇷🇺 Russian
 
-Want to help translate? See [CONTRIBUTING.md](CONTRIBUTING.md)
+Want to help translate? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## 💜 Acknowledgments
-
-- Built with love for privacy and simplicity
-- Inspired by the need for a tracker that respects user data
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting changes.
