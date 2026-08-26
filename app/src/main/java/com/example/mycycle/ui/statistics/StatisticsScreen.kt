@@ -59,7 +59,10 @@ fun StatisticsScreen(
             return@Column
         }
 
-        if (state.averageCycleLength == null || state.averagePeriodLength == null) {
+        val averageCycleLength = state.averageCycleLength
+        val averagePeriodLength = state.averagePeriodLength
+
+        if (averageCycleLength == null || averagePeriodLength == null) {
             Text(
                 text = stringResource(R.string.stats_not_enough_data),
                 style = MaterialTheme.typography.bodyLarge,
@@ -79,8 +82,8 @@ fun StatisticsScreen(
                 title = stringResource(R.string.stats_avg_cycle),
                 value = pluralStringResource(
                     R.plurals.days,
-                    state.averageCycleLength,
-                    state.averageCycleLength
+                    averageCycleLength,
+                    averageCycleLength
                 ),
                 modifier = Modifier.weight(1f)
             )
@@ -88,8 +91,8 @@ fun StatisticsScreen(
                 title = stringResource(R.string.stats_avg_period),
                 value = pluralStringResource(
                     R.plurals.days,
-                    state.averagePeriodLength,
-                    state.averagePeriodLength
+                    averagePeriodLength,
+                    averagePeriodLength
                 ),
                 modifier = Modifier.weight(1f)
             )
@@ -163,8 +166,9 @@ private fun StatCard(
 private fun CycleHistoryCard(cycle: Cycle) {
     val locale: Locale = LocalContext.current.resources.configuration.locales[0]
     val formatter = DateTimeFormatter.ofPattern("d MMM yyyy", locale)
-    val value = if (cycle.isComplete && cycle.length != null) {
-        pluralStringResource(R.plurals.days, cycle.length, cycle.length)
+    val cycleLength = cycle.length
+    val value = if (cycle.isComplete && cycleLength != null) {
+        pluralStringResource(R.plurals.days, cycleLength, cycleLength)
     } else {
         stringResource(R.string.stats_current_cycle)
     }
