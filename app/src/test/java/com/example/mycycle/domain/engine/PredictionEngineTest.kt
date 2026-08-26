@@ -76,9 +76,10 @@ class PredictionEngineTest {
             fallbackPeriodLength = 5
         )
 
-        // Weighted average: (28*1 + 29*2 + 30*3) / 6 = 29.33 -> 29.
+        // Weighted cycle average: (28*1 + 29*2 + 30*3) / 6 = 29.33 -> 29.
         assertEquals(LocalDate.of(2026, 4, 27), prediction.nextPeriod.start)
-        assertEquals(5, prediction.nextPeriod.lengthDays)
+        // Weighted period average: (5*1 + 5*2 + 6*3) / 6 = 5.5 -> 6.
+        assertEquals(6, prediction.nextPeriod.lengthDays)
         assertEquals(3, prediction.basedOnCycles)
         assertEquals(PredictionMethod.WEIGHTED_AVERAGE, prediction.method)
         assertTrue(prediction.confidence > 0.25f)
