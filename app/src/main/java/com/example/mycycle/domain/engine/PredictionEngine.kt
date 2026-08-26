@@ -47,7 +47,10 @@ class PredictionEngine {
             return predictFromOnboarding(
                 lastPeriodStart = lastCycle?.startDate ?: LocalDate.now(),
                 cycleLength = fallbackCycleLength,
-                periodLength = lastCycle?.periodLength ?: fallbackPeriodLength
+                // The current cycle may only contain the first logged period day.
+                // Until a cycle is complete, its observed period length is partial
+                // and must not replace the user's onboarding estimate.
+                periodLength = fallbackPeriodLength
             )
         }
 
