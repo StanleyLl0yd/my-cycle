@@ -12,6 +12,8 @@
     <string name="onboarding_stage_title">Which sounds most like you?</string>
     <string name="onboarding_stage_subtitle">Choose the closest answer. You can change it later. This helps the app avoid giving false exact dates.</string>
 
+    <string name="cycle_stage_not_set">Not chosen yet</string>
+    <string name="cycle_stage_not_set_desc">Choose the option above that best fits your periods now. Until you do, the app will use a wide date range and will not guess a day when an egg may be released.</string>
     <string name="cycle_stage_first_year">My periods started less than 1 year ago</string>
     <string name="cycle_stage_first_year_desc">In the first year, periods often come after a different number of days each time. That can be normal. The app will use a wide date range instead of pretending it knows one exact day.</string>
     <string name="cycle_stage_one_to_three">My periods started 1–3 years ago</string>
@@ -68,6 +70,7 @@
     <string name="today_possible_pregnancy_now">You are inside the rough calendar range</string>
     <string name="today_calendar_guess_warning">This is only a calendar guess. The app cannot know exactly when an egg is released. Never use these dates as “safe days” to avoid pregnancy.</string>
 
+    <string name="today_notice_stage_not_set">After this update, choose what best describes your periods in Settings. Until you do, the app will use a wide date range and will not guess a day when an egg may be released.</string>
     <string name="today_notice_first_year">Your periods started recently. In the first year it is common for them to come after a different number of days each time. Keep recording the real dates; the app will not force them into a 28-day pattern.</string>
     <string name="today_notice_early_years">In the first few years, periods can still come earlier or later from month to month. Keep recording what really happens.</string>
     <string name="today_notice_long_term_uneven">You said the gaps between your periods usually change a lot. The app will keep showing what really happens and use a wide date range instead of forcing a fixed pattern.</string>
@@ -157,6 +160,7 @@
     <string name="stats_not_enough_data">There are not enough finished cycles yet. Keep adding real dates.</string>
     <string name="stats_history_title">Recent periods</string>
     <string name="stats_current_cycle">Current, not finished yet</string>
+    <string name="stats_stage_not_set_note">Choose what best describes your periods in Settings. Until then, the numbers below are shown only as your recorded history and the app will avoid narrower cycle assumptions.</string>
     <string name="stats_stage_first_year_note">In the first year after periods begin, uneven gaps are common. The numbers below are a diary summary, not a rule your body must follow.</string>
     <string name="stats_stage_early_years_note">During the first few years, the gaps can still change. The app shows what happened instead of judging it against a 28-day cycle.</string>
     <string name="stats_stage_established_note">These numbers describe your own recent history. If your pattern suddenly changes or worries you, the app cannot tell you why.</string>
