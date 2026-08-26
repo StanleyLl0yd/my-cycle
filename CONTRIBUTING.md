@@ -1,74 +1,80 @@
 # Contributing to My Cycle
 
-[English](CONTRIBUTING.md) | [Русский](CONTRIBUTING_RU.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](CONTRIBUTING.md)
+[![ru](https://img.shields.io/badge/lang-ru-blue.svg)](CONTRIBUTING.ru.md)
 
-Contributions are welcome when they fit the current scope of My Cycle: a small, private, offline menstrual cycle tracker.
+Contributions and bug reports are welcome. Please keep changes focused and preserve the project's privacy-first, offline design.
 
-## Before making a change
+## 🐛 Reporting bugs
 
-For a bug fix, open an issue if the problem is not already documented. For a larger feature or behavior change, discuss it in an issue before implementing it.
+Before opening a new issue, check whether the problem has already been reported.
 
-Please keep the current product constraints in mind:
+Include:
 
-- cycle and fertility information must remain clearly presented as estimates;
-- privacy and local-first storage are core requirements;
-- adding accounts, cloud synchronization, analytics, advertising, or network-dependent features is outside the current 1.0.0 design and should not be introduced without an explicit project decision.
+- a clear description of the problem
+- steps to reproduce it
+- expected and actual behavior
+- Android version and device model when relevant
+- screenshots when they help explain the issue
 
-## Development requirements
+Do not include personal cycle data, private notes, exported CSV files or other sensitive information in public reports.
+
+## 💡 Feature requests
+
+Open an issue and explain:
+
+- what problem the feature solves
+- how it should behave
+- whether it affects privacy, storage, permissions or network access
+
+Features that introduce accounts, cloud synchronization, analytics, advertising or background network access require especially careful privacy review.
+
+## 🧑‍💻 Code contributions
+
+1. Fork the repository.
+2. Create a focused branch.
+3. Make the smallest practical change.
+4. Add or update tests when behavior changes.
+5. Run the project checks.
+6. Open a Pull Request with a concise explanation of the change.
+
+## ✅ Project checks
+
+Requirements:
 
 - JDK 21
 - Android SDK 36
 - Gradle 8.13
 
-The repository does not currently include `gradle-wrapper.jar`, so command-line checks require an installed Gradle 8.13.
-
-Before submitting a pull request, run:
+The repository currently does not include `gradle-wrapper.jar`, so use an installed Gradle 8.13.
 
 ```bash
-gradle assembleDebug test
+gradle assembleDebug assembleRelease test
 gradle lint
 ```
 
-If your change affects release compilation, also run:
+## 🧭 Code style
 
-```bash
-gradle assembleRelease
-```
+- Follow Kotlin coding conventions.
+- Keep UI strings in Android string resources.
+- Keep domain rules out of Composables when practical.
+- Prefer small, focused functions and classes.
+- Preserve lifecycle-aware Flow collection and existing state-management patterns.
+- Do not add network permissions, analytics or advertising dependencies without an explicit project decision.
 
-## Pull requests
+## 🌍 Translations
 
-1. Fork the repository or create a working branch.
-2. Keep each change focused on one problem or feature.
-3. Add or update tests for cycle-detection or prediction logic when relevant.
-4. Keep UI text in Android string resources rather than hardcoding it in Compose code.
-5. Update documentation when behavior visible to users changes.
-6. Open a pull request with a concise description of what changed and why.
+English is the default application language. Russian is maintained alongside it.
 
-## Localization
+When changing user-facing text:
 
-English is the default application language. Russian is maintained as an additional complete localization.
+- update both English and Russian resources
+- keep wording concise enough for mobile UI
+- preserve placeholders and plurals
+- verify that the meaning is equivalent in both languages
 
-When adding or changing UI text:
+## 📄 License
 
-- update `app/src/main/res/values/strings.xml`;
-- update `app/src/main/res/values-ru/strings.xml`;
-- update both `plurals.xml` files when plurals are involved;
-- keep labels concise enough for small screens.
+My Cycle is distributed under the **PolyForm Noncommercial License 1.0.0**. Contributions to this repository are expected to be compatible with that license.
 
-For project documentation, keep the English default file and its `_RU` companion in sync where applicable.
-
-## Code style
-
-- Follow Kotlin conventions.
-- Prefer small, focused functions and clear names.
-- Do not hardcode user-visible strings.
-- Preserve the existing separation between data, domain logic, and Compose UI.
-- Avoid introducing dependencies unless they provide a clear benefit to the app.
-
-## License
-
-My Cycle is distributed under the **PolyForm Noncommercial License 1.0.0**. Contributions must be compatible with the project license. See [LICENSE](LICENSE) for the authoritative terms.
-
-## Author
-
-**Stanley Lloyd**
+See [LICENSE](LICENSE) for the authoritative terms.
