@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mycycle.data.preferences.UserPreferencesRepository
 import com.example.mycycle.data.repository.CycleDayRepository
-import com.example.mycycle.domain.model.CycleDay
 import com.example.mycycle.domain.model.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,6 +54,8 @@ class SettingsViewModel(
         val days = cycleDayRepository.observeAll().first().sortedBy { it.date }
 
         return buildString {
+            // UTF-8 BOM improves non-Latin text detection in desktop spreadsheet apps.
+            append('\uFEFF')
             appendLine("date,period,flow,mood,symptoms,notes")
             days.forEach { day ->
                 appendLine(
