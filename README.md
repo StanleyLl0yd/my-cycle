@@ -1,11 +1,11 @@
 # 🌸 My Cycle
 
-A simple, private period tracker for Android.
+A simple, private period and cycle tracker for Android.
 
 ![Android](https://img.shields.io/badge/Android-26%2B-green?logo=android)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple?logo=kotlin)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-blue)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange)
 
 ## ✨ Features
 
@@ -16,6 +16,7 @@ A simple, private period tracker for Android.
 - **CSV export** — Save your tracked data through Android's system file picker
 - **Private by design** — No account, no analytics, no ads, no internet permission
 - **English & Russian** — Full EN/RU interface localization
+- **About section** — App description, author, version, license, privacy note, and GitHub link
 
 ## 🔒 Privacy First
 
@@ -68,9 +69,13 @@ cd my-cycle
 For CI-equivalent command-line checks:
 
 ```bash
-gradle build
+gradle assembleDebug assembleRelease test
 gradle lint
 ```
+
+## 📱 Application ID
+
+`com.silverlightning.mycycle`
 
 ## 🌍 Localization
 
@@ -81,10 +86,16 @@ Currently supported languages:
 
 Want to help translate? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## 👤 Author
+
+**Stanley Lloyd**
+
 ## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE).
+This project is licensed under the **PolyForm Noncommercial License 1.0.0**. Commercial use is not granted by this license. See [LICENSE](LICENSE) for the complete terms.
+
+Official license text: <https://polyformproject.org/licenses/noncommercial/1.0.0>
 
 ## 🤝 Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting changes.
+Contributions are welcome for noncommercial use of the project. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting changes.
