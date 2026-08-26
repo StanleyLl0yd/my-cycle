@@ -23,6 +23,7 @@ enum class TodayNotice {
     PERIODS_STOPPED,
     THREE_MONTH_GAP,
     BLEEDING_AFTER_YEAR_GAP,
+    LONG_BLEEDING,
     OUTSIDE_COMMON_RANGE
 }
 
@@ -93,11 +94,17 @@ class TodayViewModel(
                     .filter { it.isComplete }
                     .mapNotNull { it.length }
                 val latestCompletedLength = completedLengths.lastOrNull()
+                val currentPeriodLength = cycles.lastOrNull()
+                    ?.takeIf { !it.isComplete }
+                    ?.periodLength
 
                 val notice = chooseNotice(
                     stage = preferences.cycleStage,
                     completedLengths = completedLengths,
-                    latestCompletedLength = latestCompletedLength
+                    latestCompletedLength = latestCompletedLength,
+                    currentCycleDay = cycleDay,
+                    currentPeriodLength = currentPeriodLength,
+                    isPeriodToday = isPeriodToday
                 )
 
                 _state.update {
@@ -117,28 +124,35 @@ class TodayViewModel(
     private fun chooseNotice(
         stage: CycleStage,
         completedLengths: List<Int>,
-        latestCompletedLength: Int?
+        latestCompletedLength: Int?,
+        currentCycleDay: Int?,
+        currentPeriodLength: Int?,
+        isPeriodToday: Boolean
     ): TodayNotice? {
         if (completedLengths.any { it >= 365 }) {
             return TodayNotice.BLEEDING_AFTER_YEAR_GAP
         }
 
+        if (isPeriodToday && currentPeriodLength != null && currentPeriodLength > 8) {
+            return TodayNotice.LONG_BLEEDING
+        }
+
         if (
             stage in setOf(CycleStage.FIRST_YEAR, CycleStage.YEARS_ONE_TO_THREE) &&
-            completedLengths.any { it >= 90 }
+            (completedLengths.any { it >= 90 } || (currentCycleDay ?: 0) >= 90)
         ) {
             return TodayNotice.THREE_MONTH_GAP
         }
 
-        if (latestCompletedLength != null) {
-            val outsideCommonRange = when (stage) {
-                CycleStage.YEARS_ONE_TO_THREE -> latestCompletedLength !in 21..45
-                CycleStage.ESTABLISHED -> latestCompletedLength !in 24..38
-                else -> false
-            }
-            if (outsideCommonRange) {
-                return TodayNotice.OUTSIDE_COMMON_RANGE
-            }
+        val outsideCommonRange = when (stage) {
+            CycleStage.YEARS_ONE_TO_THREE ->
+                latestCompletedLength?.let { it !in 21..45 } == true || (currentCycleDay ?: 0) > 45
+            CycleStage.ESTABLISHED ->
+                latestCompletedLength?.let { it !in 24..38 } == true || (currentCycleDay ?: 0) > 38
+            else -> false
+        }
+        if (outsideCommonRange) {
+            return TodayNotice.OUTSIDE_COMMON_RANGE
         }
 
         return when (stage) {
