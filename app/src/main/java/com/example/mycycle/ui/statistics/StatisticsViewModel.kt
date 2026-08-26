@@ -52,14 +52,15 @@ class StatisticsViewModel(
                 val cycles = cycleDetector.detectCycles(allDays)
                 val completed = cycles.filter { it.isComplete && it.length != null }
                 val lengths = completed.mapNotNull { it.length }
+                val enoughForAverages = completed.size >= 2
 
                 val averageCycleLength = lengths
-                    .takeIf { it.isNotEmpty() }
+                    .takeIf { enoughForAverages }
                     ?.average()
                     ?.roundToInt()
 
                 val averagePeriodLength = completed
-                    .takeIf { it.isNotEmpty() }
+                    .takeIf { enoughForAverages }
                     ?.map { it.periodLength }
                     ?.average()
                     ?.roundToInt()
