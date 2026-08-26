@@ -1,52 +1,51 @@
 # Changelog
 
-[English](CHANGELOG.md) | [Русский](CHANGELOG_RU.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](CHANGELOG.md)
+[![ru](https://img.shields.io/badge/lang-ru-blue.svg)](CHANGELOG.ru.md)
 
-This file records user-visible changes in public My Cycle releases.
+All notable changes to this project will be documented in this file.
 
-## 1.0.0 — 2026-08-26
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Initial public release.
+---
 
-### Cycle tracking
+## [1.0.0] - 2026-08-26
 
-- First-run setup with the last-period start date and usual cycle length (21–45 days).
-- Daily logging of menstrual flow, mood, symptoms, and notes.
-- Future dates are protected from being saved as actual logs.
-
-### Today and predictions
-
-- Current cycle day and calculated cycle phase.
-- Estimated next period, fertile window, and ovulation date.
-- Estimates adapt to completed cycle history, using up to 6 recent cycles with greater weight for newer cycles.
-
-### Calendar
-
-- Month-by-month calendar navigation.
-- Confirmed period days with flow intensity.
-- Estimated period days, fertile window, and ovulation day.
-- Daily log access from calendar dates.
-
-### Statistics
-
-- Average cycle length.
-- Average period length.
-- Regularity classification when at least two completed cycles are available.
-- History of up to 12 recent detected cycles.
-
-### Settings and data
-
-- System, Light, and Dark themes.
-- Material You dynamic colors on Android 12+.
+### ✨ Added
+- Initial setup with the first day of the most recent period and usual cycle length from 21 to 45 days.
+- Today screen with cycle day, calculated phase, estimated next period and fertile-window status.
+- Daily logging for menstrual flow, mood, symptoms and notes.
+- Calendar with confirmed period days, estimated next-period days, fertile window and ovulation day.
+- Statistics for average cycle length, average period length, cycle regularity and recent cycle history.
 - CSV export through the Android system file picker.
 - Complete deletion of cycle data and app preferences.
-- About section with app description, author, version, license, privacy information, and GitHub/license links.
-- English and Russian interface.
+- System, Light and Dark themes with Material You dynamic colors on Android 12+.
+- English and Russian localization.
+- About section with description, author, version, PolyForm license, privacy information and GitHub link.
 
-### Privacy and release
+### 📅 Cycle estimates
+- Initial estimates use the most recent period start date, the selected cycle length and a 5-day initial period length.
+- After completed cycles are available, predictions use up to the 6 most recent completed cycles with greater weight given to newer cycles.
+- Estimated ovulation is calculated 14 days before the estimated next period.
+- The estimated fertile window runs from 5 days before ovulation through 1 day after it.
 
-- No account, analytics, ads, or Android `INTERNET` permission.
-- Android app-data backup and device-transfer extraction of app data are disabled.
+### 🔒 Privacy
+- No Android `INTERNET` permission.
+- No account, analytics, tracking SDKs or ads.
+- Cycle data and preferences remain local unless the user explicitly creates a CSV export.
+- Android app-data backup is disabled.
+- App files, databases and preferences are excluded from cloud backup and device-transfer extraction rules.
+
+### 🧪 Tests & Build
+- Added unit tests for cycle detection and prediction logic.
+- Added GitHub Actions validation for unit tests, Android Lint, debug APK assembly and release APK assembly.
+- Release builds use R8 minification and resource shrinking.
 - Application ID: `com.silverlightning.mycycle`.
-- License: PolyForm Noncommercial License 1.0.0.
-- Author: Stanley Lloyd.
+- Min SDK: 26 (Android 8.0).
+- Target SDK: 36.
+
+### 📚 Documentation
+- Added English and Russian project documentation.
+- Added installation, build, privacy, medical disclaimer and contribution information.
+- Added PolyForm Noncommercial License 1.0.0 information and author attribution to **Stanley Lloyd**.
