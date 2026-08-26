@@ -255,8 +255,11 @@ private fun PregnancyCard(
 
 @Composable
 private fun NoticeCard(notice: TodayNotice) {
-    val important = notice == TodayNotice.THREE_MONTH_GAP ||
-        notice == TodayNotice.BLEEDING_AFTER_YEAR_GAP
+    val important = notice in setOf(
+        TodayNotice.THREE_MONTH_GAP,
+        TodayNotice.BLEEDING_AFTER_YEAR_GAP,
+        TodayNotice.LONG_BLEEDING
+    )
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -274,10 +277,12 @@ private fun NoticeCard(notice: TodayNotice) {
                 when (notice) {
                     TodayNotice.FIRST_YEAR_CHANGES_ARE_COMMON -> R.string.today_notice_first_year
                     TodayNotice.EARLY_YEARS_CHANGES_ARE_COMMON -> R.string.today_notice_early_years
+                    TodayNotice.LONG_TERM_UNEVEN -> R.string.today_notice_long_term_uneven
                     TodayNotice.CHANGING_WITH_AGE -> R.string.today_notice_changing_age
                     TodayNotice.PERIODS_STOPPED -> R.string.today_notice_periods_stopped
                     TodayNotice.THREE_MONTH_GAP -> R.string.today_notice_three_month_gap
                     TodayNotice.BLEEDING_AFTER_YEAR_GAP -> R.string.today_notice_year_gap_bleeding
+                    TodayNotice.LONG_BLEEDING -> R.string.today_notice_long_bleeding
                     TodayNotice.OUTSIDE_COMMON_RANGE -> R.string.today_notice_outside_common_range
                 }
             ),
