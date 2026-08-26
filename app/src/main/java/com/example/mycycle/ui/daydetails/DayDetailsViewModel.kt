@@ -87,6 +87,8 @@ class DayDetailsViewModel(
     fun save() {
         viewModelScope.launch {
             val currentState = _state.value
+            if (currentState.date.isAfter(LocalDate.now())) return@launch
+
             cycleDayRepository.save(
                 CycleDay(
                     date = currentState.date,
