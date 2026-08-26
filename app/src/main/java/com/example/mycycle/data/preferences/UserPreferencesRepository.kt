@@ -62,14 +62,18 @@ class UserPreferencesRepository(
         }
 
     suspend fun completeOnboarding(
-        lastPeriodDate: LocalDate,
+        lastPeriodDate: LocalDate?,
         cycleLength: Int,
         cycleStage: CycleStage,
         periodLength: Int = 5
     ) {
         dataStore.edit { prefs ->
             prefs[Keys.ONBOARDING_COMPLETED] = true
-            prefs[Keys.INITIAL_PERIOD_DATE] = lastPeriodDate.toEpochDay()
+            if (lastPeriodDate != null) {
+                prefs[Keys.INITIAL_PERIOD_DATE] = lastPeriodDate.toEpochDay()
+            } else {
+                prefs.remove(Keys.INITIAL_PERIOD_DATE)
+            }
             prefs[Keys.ESTIMATED_CYCLE_LENGTH] = cycleLength
             prefs[Keys.ESTIMATED_PERIOD_LENGTH] = periodLength
             prefs[Keys.CYCLE_STAGE] = cycleStage.name
