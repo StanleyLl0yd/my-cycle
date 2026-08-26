@@ -15,6 +15,7 @@ import com.example.mycycle.domain.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 import java.time.LocalDate
 
 val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(
@@ -34,7 +35,13 @@ class UserPreferencesRepository(
     }
 
     val preferences: Flow<UserPreferences> = dataStore.data
-        .catch { emit(emptyPreferences()) }
+        .catch { throwable ->
+            if (throwable is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw throwable
+            }
+        }
         .map { prefs ->
             UserPreferences(
                 onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: false,
