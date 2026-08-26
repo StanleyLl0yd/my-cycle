@@ -145,9 +145,16 @@
 
     <!-- About -->
     <string name="settings_about">О приложении</string>
+    <string name="settings_about_description">Простой и приватный трекер менструального цикла с ежедневными записями, календарными прогнозами, статистикой и экспортом в CSV. Прогнозы носят оценочный характер.</string>
+    <string name="settings_author">Автор</string>
+    <string name="settings_author_name">Stanley Lloyd</string>
     <string name="settings_version">Версия</string>
+    <string name="settings_license">Лицензия</string>
+    <string name="settings_license_value">PolyForm Noncommercial 1.0.0</string>
+    <string name="settings_github">GitHub</string>
+    <string name="settings_github_desc">github.com/StanleyLl0yd/my-cycle</string>
     <string name="settings_privacy">Конфиденциальность</string>
-    <string name="settings_privacy_desc">Ваши данные не покидают устройство</string>
+    <string name="settings_privacy_desc">Данные цикла остаются на этом устройстве, если вы сами не экспортируете их</string>
 
     <!-- ==================== DIALOGS ==================== -->
 
