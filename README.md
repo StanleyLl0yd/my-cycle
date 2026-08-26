@@ -1,101 +1,156 @@
-# 🌸 My Cycle
+# My Cycle
 
-A simple, private period and cycle tracker for Android.
+[English](README.md) | [Русский](README_RU.md)
 
-![Android](https://img.shields.io/badge/Android-26%2B-green?logo=android)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple?logo=kotlin)
-![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-blue)
-![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange)
+A private, offline menstrual cycle tracker for Android.
 
-## ✨ Features
+**Current version:** 1.0.0  
+**Android:** 8.0 (API 26) or newer  
+**Application ID:** `com.silverlightning.mycycle`
 
-- **Simple logging** — Track period flow, mood, symptoms, and notes
-- **Cycle estimates** — Predictions adapt to recent completed cycles
-- **Calendar** — See confirmed period days and estimated fertile/ovulation windows
-- **Statistics** — Average cycle length, period length, regularity, and recent history
-- **CSV export** — Save your tracked data through Android's system file picker
-- **Private by design** — No account, no analytics, no ads, no internet permission
-- **English & Russian** — Full EN/RU interface localization
-- **About section** — App description, author, version, license, privacy note, and GitHub link
+## Features
 
-## 🔒 Privacy First
+### Initial setup
 
-My Cycle is designed so that tracked data remains local to the app:
+On first launch, the app asks for:
 
-- ✅ No internet permission
-- ✅ No user account
-- ✅ No analytics or tracking SDKs
-- ✅ No ads
-- ✅ Android app-data backup disabled
-- ✅ Local Room database and DataStore preferences
-- ✅ User-controlled CSV export
+- the first day of the most recent period;
+- the usual cycle length, from 21 to 45 days.
 
-## ⚕️ Important note
+The initial period-length estimate is 5 days. It is later adjusted from completed cycle history.
 
-Cycle, fertile-window, and ovulation dates are estimates based on calendar history. My Cycle is not a medical device and should not be used as a contraceptive method or as a substitute for medical advice.
+### Today
 
-## 🛠 Tech Stack
+The Today screen shows, when enough data is available:
 
-- **Language:** Kotlin 2.3.0
-- **UI:** Jetpack Compose + Material 3
-- **Architecture:** Layered MVVM with separate data/domain/UI concerns
-- **Database:** Room
-- **Preferences:** DataStore
-- **DI:** Koin
-- **Async/state:** Coroutines + Flow
-- **CI:** GitHub Actions, JDK 21, Gradle 8.13
+- current cycle day;
+- calculated cycle phase;
+- estimated time until the next period;
+- whether the estimated fertile window is active or how many days remain until it starts.
 
-## 📦 Building
+The current day can be opened directly for logging.
 
-### Requirements
+### Daily log
 
-- Android Studio with Android SDK 36
-- JDK 21
-- Gradle 8.13 if building from the command line
+For today and past dates, the app can store:
 
-### Steps
+- menstrual flow: spotting, light, medium, heavy, or none;
+- mood: great, good, okay, or not great;
+- symptoms;
+- free-form notes.
 
-1. Clone the repository:
+Future dates can be viewed in the calendar but cannot be saved as actual log entries.
+
+### Calendar
+
+The calendar supports month-by-month navigation and shows:
+
+- confirmed period days with flow intensity;
+- estimated next-period days;
+- estimated fertile window;
+- estimated ovulation day.
+
+Tapping a date opens its daily log.
+
+### Statistics
+
+After completed cycles are available, the Statistics screen shows:
+
+- average cycle length;
+- average period length;
+- cycle regularity when at least two completed cycles are available;
+- up to 12 most recent detected cycles, including the current cycle when applicable.
+
+### Settings
+
+Available settings and data actions:
+
+- System, Light, and Dark themes;
+- Material You dynamic colors on Android 12+;
+- CSV export through the Android system file picker;
+- complete deletion of cycle data and app preferences;
+- About section with description, author, version, license, privacy information, and links to the license and GitHub repository.
+
+The interface is available in English and Russian.
+
+## How estimates work
+
+On first use, estimates are based on the selected cycle length, the last-period start date, and an initial 5-day period length.
+
+Once completed cycles are available, the app uses up to the 6 most recent completed cycles. Newer cycles have greater weight when calculating average cycle and period lengths.
+
+The estimated ovulation date is calculated as 14 days before the estimated next period. The estimated fertile window runs from 5 days before ovulation through 1 day after it.
+
+These are calendar-based estimates, not medical measurements.
+
+## Not included in 1.0.0
+
+The current version does **not** provide:
+
+- notifications or reminders;
+- data import;
+- account registration;
+- cloud synchronization or cloud storage;
+- analytics or advertising.
+
+## Privacy
+
+Cycle data is stored locally using Room; app preferences are stored with DataStore.
+
+The application:
+
+- does not request the Android `INTERNET` permission;
+- does not require an account;
+- contains no analytics or advertising SDKs;
+- disables Android app-data backup;
+- excludes app files, databases, and preferences from cloud backup and device-transfer extraction rules;
+- sends data outside the app only when the user explicitly creates a CSV export.
+
+The GitHub and license links in About are opened by the system in an external app such as a web browser.
+
+## Important medical note
+
+My Cycle is **not a medical device**. Period, cycle phase, fertile-window, and ovulation dates are estimates. Do not use these estimates as a contraceptive method or as a substitute for professional medical advice.
+
+## Installation
+
+The signed APK for the current public release is available on the [GitHub Releases](https://github.com/StanleyLl0yd/my-cycle/releases) page.
+
+## Building from source
+
+Requirements:
+
+- JDK 21;
+- Android SDK 36;
+- Gradle 8.13.
+
+The repository currently does not include `gradle-wrapper.jar`, so command-line builds require an installed Gradle 8.13.
 
 ```bash
 git clone https://github.com/StanleyLl0yd/my-cycle.git
 cd my-cycle
-```
-
-2. Open the project in Android Studio and sync Gradle.
-
-3. Run the `app` configuration on an Android 8.0 (API 26) or newer device/emulator.
-
-For CI-equivalent command-line checks:
-
-```bash
-gradle assembleDebug assembleRelease test
+gradle assembleDebug test
 gradle lint
 ```
 
-## 📱 Application ID
+To create an unsigned release APK:
 
-`com.silverlightning.mycycle`
+```bash
+gradle assembleRelease
+```
 
-## 🌍 Localization
+Release signing is not configured in the repository. The APK attached to the official GitHub Release is signed separately.
 
-Currently supported languages:
+## Documentation
 
-- 🇺🇸 English (default)
-- 🇷🇺 Russian
+- [Changelog](CHANGELOG.md) · [Русский](CHANGELOG_RU.md)
+- [Contributing](CONTRIBUTING.md) · [Русский](CONTRIBUTING_RU.md)
+- [License](LICENSE) · [Справка на русском](LICENSE_RU.md)
 
-Want to help translate? See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## 👤 Author
+## Author
 
 **Stanley Lloyd**
 
-## 📄 License
+## License
 
-This project is licensed under the **PolyForm Noncommercial License 1.0.0**. Commercial use is not granted by this license. See [LICENSE](LICENSE) for the complete terms.
-
-Official license text: <https://polyformproject.org/licenses/noncommercial/1.0.0>
-
-## 🤝 Contributing
-
-Contributions are welcome for noncommercial use of the project. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting changes.
+My Cycle is distributed under the **PolyForm Noncommercial License 1.0.0**. Commercial use is not granted by this license. See [LICENSE](LICENSE) for the authoritative license text.
