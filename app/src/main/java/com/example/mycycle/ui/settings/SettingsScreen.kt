@@ -124,13 +124,15 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    CycleStage.entries.forEach { stage ->
-                        FilterChip(
-                            selected = state.cycleStage == stage,
-                            onClick = { viewModel.setCycleStage(stage) },
-                            label = { Text(stringResource(stage.labelRes)) }
-                        )
-                    }
+                    CycleStage.entries
+                        .filterNot { it == CycleStage.NOT_SET }
+                        .forEach { stage ->
+                            FilterChip(
+                                selected = state.cycleStage == stage,
+                                onClick = { viewModel.setCycleStage(stage) },
+                                label = { Text(stringResource(stage.labelRes)) }
+                            )
+                        }
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
