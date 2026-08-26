@@ -5,8 +5,8 @@ import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.domain.model.PredictionMethod
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
@@ -134,6 +134,38 @@ class PredictionEngineTest {
             stage = CycleStage.ESTABLISHED
         )
 
+        assertTrue(prediction.highlyVariable)
+        assertNull(prediction.possibleOvulationWindow)
+        assertNull(prediction.possiblePregnancyWindow)
+    }
+
+    @Test
+    fun longTermUnevenStageAlwaysUsesWideWindowAndNoOvulationGuess() {
+        val cycles = listOf(
+            completeCycle(1, LocalDate.of(2026, 1, 1), 26, 5),
+            completeCycle(2, LocalDate.of(2026, 1, 27), 42, 5),
+            completeCycle(3, LocalDate.of(2026, 3, 10), 31, 5),
+            Cycle(
+                id = 4,
+                startDate = LocalDate.of(2026, 4, 10),
+                endDate = null,
+                periodEndDate = LocalDate.of(2026, 4, 14),
+                length = null,
+                periodLength = 5,
+                isComplete = false
+            )
+        )
+
+        val prediction = engine.predictFromHistory(
+            cycles = cycles,
+            fallbackCycleLength = 28,
+            fallbackPeriodLength = 5,
+            stage = CycleStage.LONG_TERM_UNEVEN
+        )
+
+        val window = prediction.nextPeriodStartWindow
+        assertNotNull(window)
+        assertTrue(window!!.lengthDays >= 29)
         assertTrue(prediction.highlyVariable)
         assertNull(prediction.possibleOvulationWindow)
         assertNull(prediction.possiblePregnancyWindow)
