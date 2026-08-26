@@ -55,6 +55,8 @@ fun SettingsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val exportSuccessMessage = stringResource(R.string.dialog_export_success)
+    val genericErrorMessage = stringResource(R.string.error_generic)
     val scope = rememberCoroutineScope()
     var showClearDialog by remember { mutableStateOf(false) }
 
@@ -72,13 +74,13 @@ fun SettingsScreen(
                     }
                     Toast.makeText(
                         context,
-                        context.getString(R.string.dialog_export_success),
+                        exportSuccessMessage,
                         Toast.LENGTH_SHORT
                     ).show()
                 } catch (_: Exception) {
                     Toast.makeText(
                         context,
-                        context.getString(R.string.error_generic),
+                        genericErrorMessage,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
