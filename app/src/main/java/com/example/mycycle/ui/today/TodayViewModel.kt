@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 data class TodayState(
     val cycleDay: Int? = null,
@@ -52,7 +53,6 @@ class TodayViewModel(
                 Pair(preferences, periodDays)
             }.collect { (preferences, periodDays) ->
                 val today = LocalDate.now()
-
                 val cycles = cycleDetector.detectCycles(periodDays)
 
                 val prediction = if (cycles.isNotEmpty()) {
@@ -76,13 +76,29 @@ class TodayViewModel(
                     phaseCalculator.getCycleDay(today, it)
                 }
 
-                val phase = if (cycleDay != null) {
-                    phaseCalculator.getPhase(
-                        cycleDay = cycleDay,
-                        cycleLength = preferences.estimatedCycleLength,
-                        periodLength = preferences.estimatedPeriodLength
-                    )
-                } else null
+                // PredictionEngine learns cycle and period length from history. Use the
+                // same learned values for the phase card so the UI cannot drift away
+                // from the dates shown in the prediction/calendar.
+                val effectiveCycleLength = if (lastPeriodStart != null && prediction != null) {
+                    ChronoUnit.DAYS.between(lastPeriodStart, prediction.nextPeriod.start)
+                        .toInt()
+                        .takeIf { it > 0 }
+                        ?: preferences.estimatedCycleLength
+                } else {
+                    preferences.estimatedCycleLength
+                }
+                val effectivePeriodLength = prediction?.nextPeriod?.lengthDays
+                    ?: preferences.estimatedPeriodLength
+
+                val phase = cycleDay
+                    ?.takeIf { it > 0 }
+                    ?.let {
+                        phaseCalculator.getPhase(
+                            cycleDay = it,
+                            cycleLength = effectiveCycleLength,
+                            periodLength = effectivePeriodLength
+                        )
+                    }
 
                 val daysUntilPeriod = prediction?.let {
                     phaseCalculator.getDaysUntilPeriod(today, it.nextPeriod.start)
