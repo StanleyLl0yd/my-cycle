@@ -49,6 +49,7 @@ import com.example.mycycle.ui.theme.PeriodMedium
 import com.example.mycycle.ui.theme.PeriodStrong
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -62,6 +63,7 @@ fun DayDetailsSheet(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val locale = LocalContext.current.resources.configuration.locales[0]
+    val isFutureDate = state.date.isAfter(LocalDate.now())
 
     LaunchedEffect(state.isSaved) {
         if (state.isSaved) {
@@ -80,7 +82,6 @@ fun DayDetailsSheet(
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp)
         ) {
-            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -96,7 +97,6 @@ fun DayDetailsSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Period section
             Text(
                 text = stringResource(R.string.day_details_period_section),
                 style = MaterialTheme.typography.titleMedium
@@ -104,8 +104,9 @@ fun DayDetailsSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 FlowOption(
                     label = stringResource(R.string.flow_none),
@@ -125,7 +126,6 @@ fun DayDetailsSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Mood section
             Text(
                 text = stringResource(R.string.day_details_mood_section),
                 style = MaterialTheme.typography.titleMedium
@@ -133,8 +133,9 @@ fun DayDetailsSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Mood.entries.forEach { mood ->
                     MoodOption(
@@ -149,7 +150,6 @@ fun DayDetailsSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Symptoms section
             Text(
                 text = stringResource(R.string.day_details_symptoms_section),
                 style = MaterialTheme.typography.titleMedium
@@ -178,7 +178,6 @@ fun DayDetailsSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Notes section
             Text(
                 text = stringResource(R.string.day_details_notes_section),
                 style = MaterialTheme.typography.titleMedium
@@ -199,10 +198,19 @@ fun DayDetailsSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Save button
+            if (isFutureDate) {
+                Text(
+                    text = stringResource(R.string.error_future_date),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             Button(
                 onClick = viewModel::save,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !state.isLoading && !isFutureDate
             ) {
                 Text(stringResource(R.string.day_details_save))
             }
