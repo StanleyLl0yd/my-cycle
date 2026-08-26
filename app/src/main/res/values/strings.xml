@@ -6,15 +6,33 @@
     <!-- ==================== ONBOARDING ==================== -->
 
     <string name="onboarding_welcome_title">Welcome to\nMy Cycle</string>
-    <string name="onboarding_welcome_subtitle">Simple and private period tracker.\nAll data stays on your device.</string>
-    <string name="onboarding_welcome_button">Get Started</string>
+    <string name="onboarding_welcome_subtitle">A simple private diary for periods. It helps you remember dates and gives a careful guess about what may happen next. All data stays on your device.</string>
+    <string name="onboarding_welcome_button">Get started</string>
+
+    <string name="onboarding_stage_title">Which sounds most like you?</string>
+    <string name="onboarding_stage_subtitle">Choose the closest answer. You can change it later. This helps the app avoid giving false exact dates.</string>
+
+    <string name="cycle_stage_first_year">My periods started less than 1 year ago</string>
+    <string name="cycle_stage_first_year_desc">In the first year, periods often come at uneven times. That can be normal. The app will use a wide date range instead of pretending it knows an exact day.</string>
+    <string name="cycle_stage_one_to_three">My periods started 1–3 years ago</string>
+    <string name="cycle_stage_one_to_three_desc">During the first few years, periods can still come earlier or later from month to month. The app will allow for that.</string>
+    <string name="cycle_stage_established">My periods have been coming for more than 3 years</string>
+    <string name="cycle_stage_established_desc">The app will learn from your recent dates. If your periods are fairly similar, its date range can become narrower.</string>
+    <string name="cycle_stage_changing_with_age">My periods are changing as I get older</string>
+    <string name="cycle_stage_changing_with_age_desc">As periods get closer to stopping for good, they may come earlier, later, or skip months. The app will use a wider range and will not guess an egg-release day.</string>
+    <string name="cycle_stage_periods_stopped">I have had no period for 12 months or more</string>
+    <string name="cycle_stage_periods_stopped_desc">The app will stop guessing the next period. If bleeding starts after a full year without periods, it is important to tell a doctor.</string>
 
     <string name="onboarding_period_title">When did your last\nperiod start?</string>
-    <string name="onboarding_period_subtitle">Select the first day of your most recent period</string>
+    <string name="onboarding_period_subtitle">Choose the first day when the bleeding looked like your usual period, not just a few spots.</string>
 
-    <string name="onboarding_cycle_title">How long is your\ncycle usually?</string>
-    <string name="onboarding_cycle_subtitle">Don\'t worry if you\'re not sure — the app will adjust to your actual rhythm</string>
+    <string name="onboarding_cycle_title">About how many days are there\nbetween your periods?</string>
+    <string name="onboarding_cycle_explain">Count from the first day of one real period to the first day of the next. For example, from the 1st to the 29th is 28 days.</string>
+    <string name="onboarding_cycle_subtitle">It is fine if you are not sure. Pick the closest number you know. The app will learn from the dates you add.</string>
     <string name="onboarding_cycle_days_label">days</string>
+
+    <string name="onboarding_stopped_title">No next-period guess</string>
+    <string name="onboarding_stopped_text">Because you have had no period for 12 months or more, My Cycle will keep your diary but will not guess when another period should come. New bleeding after a full year without periods should be checked by a doctor.</string>
 
     <string name="onboarding_continue">Continue</string>
     <string name="onboarding_done">Done</string>
@@ -29,51 +47,74 @@
 
     <!-- ==================== TODAY SCREEN ==================== -->
 
-    <string name="today_cycle_day">cycle day</string>
+    <string name="today_cycle_day">day since the last period started</string>
+    <string name="today_cycle_day_title">Since your last period started</string>
+    <string name="today_cycle_day_help">This is only a count of days. It does not tell us exactly what your body is doing today.</string>
+    <string name="today_period_today">You marked a period today</string>
     <string name="today_mark_period">Log today</string>
-    <string name="today_period_started">Period started</string>
+    <string name="today_period_started">Period logged</string>
 
-    <!-- Phase names -->
-    <string name="phase_menstrual">Menstrual Phase</string>
-    <string name="phase_follicular">Follicular Phase</string>
-    <string name="phase_ovulatory">Ovulation</string>
-    <string name="phase_luteal">Luteal Phase</string>
+    <string name="today_next_period_window">Your next period may start around</string>
+    <string name="today_no_period_prediction">No date is being guessed</string>
+    <string name="today_prediction_passed">The guessed dates have passed</string>
+    <string name="today_no_period_prediction_help">The app is keeping your records without trying to guess a next period.</string>
+    <string name="today_learning_prediction">This is a rough first guess. Add more real dates and the app will learn your pattern.</string>
+    <string name="today_wide_prediction">Your dates can change quite a lot, so the app shows a wider range instead of one exact day.</string>
+    <string name="today_history_prediction">This range is based on your recent recorded periods. It is still only a guess.</string>
 
-    <!-- Phase descriptions -->
-    <string name="phase_menstrual_desc">Your period is here. Take it easy.</string>
-    <string name="phase_follicular_desc">Energy is rising. Great time for new beginnings.</string>
-    <string name="phase_ovulatory_desc">Peak fertility window.</string>
-    <string name="phase_luteal_desc">Time to slow down and reflect.</string>
+    <string name="today_possible_pregnancy">Days when pregnancy may be more likely</string>
+    <string name="today_possible_pregnancy_now">You are inside the rough calendar range</string>
+    <string name="today_calendar_guess_warning">This is only a calendar guess. The app cannot know exactly when an egg is released. Never use these dates as “safe days” to avoid pregnancy.</string>
 
-    <!-- Info cards -->
+    <string name="today_notice_first_year">Your periods started recently. In the first year it is common for them to come at uneven times. Keep recording the real dates; the app will not force them into a 28-day pattern.</string>
+    <string name="today_notice_early_years">In the first few years, periods can still come earlier or later from month to month. Keep recording what really happens.</string>
+    <string name="today_notice_changing_age">As periods get closer to stopping for good, the gaps between them often change. The app therefore uses a wide date range and does not guess an egg-release day.</string>
+    <string name="today_notice_periods_stopped">You chose “no period for 12 months or more”. The app will not guess another period. If new bleeding appears after a full year without periods, tell a doctor.</string>
+    <string name="today_notice_three_month_gap">There was a gap of about 3 months or more between periods. In the first years after periods begin, such a long gap is worth discussing with a doctor or another trusted health professional.</string>
+    <string name="today_notice_year_gap_bleeding">A new period was recorded after about a year or more without one. Please tell a doctor about this bleeding, even if it is light.</string>
+    <string name="today_notice_outside_common_range">This gap between periods is outside the range that is common for this stage. One unusual month does not give a diagnosis, but if it keeps happening or worries you, talk to a doctor.</string>
+
+    <!-- Older internal phase labels. Kept simple in case a future screen uses them. -->
+    <string name="phase_menstrual">Period</string>
+    <string name="phase_follicular">After your period</string>
+    <string name="phase_ovulatory">Around the middle of the cycle</string>
+    <string name="phase_luteal">Before the next period</string>
+    <string name="phase_menstrual_desc">You recorded period bleeding.</string>
+    <string name="phase_follicular_desc">This is a rough place in the calendar, not a test of what your body is doing.</string>
+    <string name="phase_ovulatory_desc">An egg may be released around this part of some cycles, but a calendar cannot tell the exact day.</string>
+    <string name="phase_luteal_desc">This is the later part of the calendar cycle. The exact timing can change.</string>
+
+    <!-- Legacy info-card labels kept for compatibility -->
     <string name="today_until_period">Until period</string>
-    <string name="today_fertile_window">Fertile window</string>
+    <string name="today_fertile_window">Pregnancy may be more likely</string>
     <string name="today_fertile_in">in %1$s</string>
-    <string name="today_fertile_now">now</string>
-    <string name="today_ovulation">Ovulation</string>
+    <string name="today_fertile_now">roughly now</string>
+    <string name="today_ovulation">Egg may be released</string>
     <string name="today_period_day">Period day %1$d</string>
 
     <!-- ==================== CALENDAR ==================== -->
 
     <string name="calendar_today">Today</string>
     <string name="calendar_legend_period">Period</string>
-    <string name="calendar_legend_fertile">Fertile</string>
-    <string name="calendar_legend_ovulation">Ovulation</string>
-    <string name="calendar_legend_predicted">Predicted</string>
+    <string name="calendar_legend_fertile">Pregnancy may be more likely</string>
+    <string name="calendar_legend_ovulation">Egg may be released</string>
+    <string name="calendar_legend_predicted">Period may start</string>
+    <string name="calendar_guess_note">Pale colors are guesses from past dates. Your body does not have to follow them.</string>
 
     <!-- ==================== DAY DETAILS ==================== -->
 
     <string name="day_details_title">Log</string>
-    <string name="day_details_period_section">Period</string>
-    <string name="day_details_mood_section">How are you feeling?</string>
-    <string name="day_details_symptoms_section">Symptoms</string>
+    <string name="day_details_period_section">Bleeding today</string>
+    <string name="day_details_bleeding_help">Choose “A few spots” when there is only a little blood and it does not look like your usual period. A few spots will not start a new cycle in the app.</string>
+    <string name="day_details_mood_section">How do you feel?</string>
+    <string name="day_details_symptoms_section">How your body feels</string>
     <string name="day_details_notes_section">Notes</string>
-    <string name="day_details_notes_hint">Add a note…</string>
+    <string name="day_details_notes_hint">Write anything you want to remember…</string>
     <string name="day_details_save">Save</string>
 
     <!-- Flow intensity -->
-    <string name="flow_none">None</string>
-    <string name="flow_spotting">Spotting</string>
+    <string name="flow_none">No blood</string>
+    <string name="flow_spotting">A few spots</string>
     <string name="flow_light">Light</string>
     <string name="flow_medium">Medium</string>
     <string name="flow_heavy">Heavy</string>
@@ -82,70 +123,78 @@
     <string name="mood_great">Great</string>
     <string name="mood_good">Good</string>
     <string name="mood_okay">Okay</string>
-    <string name="mood_bad">Not great</string>
+    <string name="mood_bad">Not good</string>
 
     <!-- Symptoms -->
-    <string name="symptom_cramps">Cramps</string>
+    <string name="symptom_cramps">Lower belly pain</string>
     <string name="symptom_headache">Headache</string>
-    <string name="symptom_fatigue">Fatigue</string>
-    <string name="symptom_mood_swings">Mood swings</string>
-    <string name="symptom_bloating">Bloating</string>
-    <string name="symptom_breast_tenderness">Breast tenderness</string>
-    <string name="symptom_acne">Acne</string>
-    <string name="symptom_backache">Backache</string>
-    <string name="symptom_nausea">Nausea</string>
-    <string name="symptom_insomnia">Insomnia</string>
-    <string name="symptom_cravings">Cravings</string>
-    <string name="symptom_dizziness">Dizziness</string>
+    <string name="symptom_fatigue">Tired</string>
+    <string name="symptom_mood_swings">Mood changes</string>
+    <string name="symptom_bloating">Bloated belly</string>
+    <string name="symptom_breast_tenderness">Sore breasts</string>
+    <string name="symptom_acne">Spots on skin</string>
+    <string name="symptom_backache">Back pain</string>
+    <string name="symptom_nausea">Feeling sick</string>
+    <string name="symptom_insomnia">Trouble sleeping</string>
+    <string name="symptom_cravings">Wanting certain foods</string>
+    <string name="symptom_dizziness">Dizzy</string>
 
     <!-- ==================== STATISTICS ==================== -->
 
-    <string name="stats_title">Statistics</string>
-    <string name="stats_avg_cycle">Average cycle length</string>
-    <string name="stats_avg_period">Average period length</string>
-    <string name="stats_regularity">Regularity</string>
-    <string name="stats_based_on_cycles">based on %1$d cycles</string>
-    <string name="stats_regular">Regular</string>
-    <string name="stats_somewhat_regular">Somewhat regular</string>
-    <string name="stats_irregular">Irregular</string>
-    <string name="stats_not_enough_data">Not enough data yet</string>
-    <string name="stats_history_title">Cycle history</string>
-    <string name="stats_current_cycle">Current cycle</string>
+    <string name="stats_title">Your pattern</string>
+    <string name="stats_avg_cycle">Usual gap between periods</string>
+    <string name="stats_avg_period">Usual number of bleeding days</string>
+    <string name="stats_regularity">How much the gaps change</string>
+    <string name="stats_variation">Shortest and longest differ by about %1$d days</string>
+    <string name="stats_based_on_cycles">using %1$d finished cycles</string>
+    <string name="stats_regular">Usually about the same</string>
+    <string name="stats_somewhat_regular">Changes a little</string>
+    <string name="stats_irregular">Changes a lot</string>
+    <string name="stats_not_enough_data">There are not enough finished cycles yet. Keep adding real dates.</string>
+    <string name="stats_history_title">Recent periods</string>
+    <string name="stats_current_cycle">Current, not finished yet</string>
+    <string name="stats_stage_first_year_note">In the first year after periods begin, uneven gaps are common. The numbers below are a diary summary, not a rule your body must follow.</string>
+    <string name="stats_stage_early_years_note">During the first few years, the gaps can still change. The app shows what happened instead of judging it against a 28-day cycle.</string>
+    <string name="stats_stage_established_note">These numbers describe your own recent history. If your pattern suddenly changes or worries you, the app cannot tell you why.</string>
+    <string name="stats_stage_changing_age_note">When periods are getting closer to stopping for good, the gaps often change and skipped months become more common. The app will not treat that as a clockwork cycle.</string>
+    <string name="stats_stage_stopped_note">You chose “no period for 12 months or more”. The history stays here, but the app does not guess another period.</string>
 
     <!-- ==================== SETTINGS ==================== -->
 
     <string name="settings_title">Settings</string>
+    <string name="settings_cycle_stage">About your periods</string>
+    <string name="settings_cycle_stage_desc">Choose what fits now. You can change this at any time without deleting old records.</string>
 
     <!-- Appearance -->
     <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
-    <string name="settings_theme_system">System</string>
-    <string name="settings_dynamic_colors">Dynamic colors</string>
-    <string name="settings_dynamic_colors_desc">Use colors from your wallpaper</string>
+    <string name="settings_theme_system">Use phone setting</string>
+    <string name="settings_dynamic_colors">Use phone colors</string>
+    <string name="settings_dynamic_colors_desc">Use colors based on your wallpaper</string>
 
-    <!-- Notifications -->
+    <!-- Notifications: reserved strings, feature not available yet -->
     <string name="settings_notifications">Notifications</string>
     <string name="settings_period_reminder">Period reminder</string>
     <string name="settings_period_reminder_desc">Get notified before your period</string>
     <string name="settings_reminder_days_before">Days before</string>
-    <string name="settings_daily_reminder">Daily log reminder</string>
-    <string name="settings_daily_reminder_desc">Reminder to log your day</string>
+    <string name="settings_daily_reminder">Daily reminder</string>
+    <string name="settings_daily_reminder_desc">Reminder to write a daily note</string>
     <string name="settings_reminder_time">Reminder time</string>
 
     <!-- Data -->
     <string name="settings_data">Your data</string>
-    <string name="settings_export">Export data</string>
-    <string name="settings_export_desc">Save as CSV file</string>
+    <string name="settings_export">Save a copy</string>
+    <string name="settings_export_desc">Save your records as a CSV file</string>
     <string name="settings_import">Import data</string>
     <string name="settings_import_desc">Restore from backup</string>
-    <string name="settings_clear_data">Clear all data</string>
-    <string name="settings_clear_data_desc">Delete all your cycle data</string>
+    <string name="settings_clear_data">Delete everything</string>
+    <string name="settings_clear_data_desc">Delete all period records and app settings</string>
 
     <!-- About -->
     <string name="settings_about">About</string>
-    <string name="settings_about_description">A simple, private period and cycle tracker with daily logs, calendar estimates, statistics and CSV export. Predictions are estimates only.</string>
+    <string name="settings_about_description">A private period diary that learns from your own dates. It shows ranges instead of claiming to know an exact next period or egg-release day. It is not a medical test.</string>
     <string name="settings_author">Author</string>
     <string name="settings_author_name">Stanley Lloyd</string>
     <string name="settings_version">Version</string>
@@ -154,17 +203,17 @@
     <string name="settings_github">GitHub</string>
     <string name="settings_github_desc">github.com/StanleyLl0yd/my-cycle</string>
     <string name="settings_privacy">Privacy</string>
-    <string name="settings_privacy_desc">Your cycle data stays on this device unless you explicitly export it</string>
+    <string name="settings_privacy_desc">Your period records stay on this device unless you choose to save a CSV copy</string>
 
     <!-- ==================== DIALOGS ==================== -->
 
-    <string name="dialog_clear_data_title">Clear all data?</string>
-    <string name="dialog_clear_data_message">This will delete all your cycle history and settings. This action cannot be undone.</string>
-    <string name="dialog_clear_data_confirm">Clear data</string>
+    <string name="dialog_clear_data_title">Delete everything?</string>
+    <string name="dialog_clear_data_message">This will delete all period records and settings from the app. It cannot be undone.</string>
+    <string name="dialog_clear_data_confirm">Delete</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_ok">OK</string>
 
-    <string name="dialog_export_success">Data exported successfully</string>
+    <string name="dialog_export_success">Copy saved</string>
     <string name="dialog_import_success">Data imported successfully</string>
     <string name="dialog_import_error">Could not import data</string>
 
@@ -172,18 +221,18 @@
 
     <string name="a11y_selected">Selected</string>
     <string name="a11y_today">Today</string>
-    <string name="a11y_period_day">Period day</string>
-    <string name="a11y_predicted_period">Predicted period</string>
-    <string name="a11y_fertile_window">Fertile window</string>
-    <string name="a11y_ovulation_day">Ovulation day</string>
+    <string name="a11y_period_day">Recorded period day</string>
+    <string name="a11y_predicted_period">Day when the next period may start</string>
+    <string name="a11y_fertile_window">Day when pregnancy may be more likely</string>
+    <string name="a11y_ovulation_day">Day when an egg may be released</string>
     <string name="a11y_previous_month">Previous month</string>
     <string name="a11y_next_month">Next month</string>
     <string name="a11y_close">Close</string>
-    <string name="a11y_navigate_back">Navigate back</string>
+    <string name="a11y_navigate_back">Back</string>
 
     <!-- ==================== ERRORS ==================== -->
 
     <string name="error_generic">Something went wrong</string>
-    <string name="error_future_date">Cannot log future dates</string>
+    <string name="error_future_date">You cannot save a record for a future day</string>
 
 </resources>
