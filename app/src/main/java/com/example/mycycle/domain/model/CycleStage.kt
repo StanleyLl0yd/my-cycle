@@ -19,6 +19,10 @@ enum class CycleStage(
         R.string.cycle_stage_established,
         R.string.cycle_stage_established_desc
     ),
+    LONG_TERM_UNEVEN(
+        R.string.cycle_stage_long_term_uneven,
+        R.string.cycle_stage_long_term_uneven_desc
+    ),
     CHANGING_WITH_AGE(
         R.string.cycle_stage_changing_with_age,
         R.string.cycle_stage_changing_with_age_desc
