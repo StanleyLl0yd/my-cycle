@@ -28,7 +28,7 @@ data class StatisticsState(
     val regularity: CycleRegularity? = null,
     val completedCycleCount: Int = 0,
     val cycles: List<Cycle> = emptyList(),
-    val cycleStage: CycleStage = CycleStage.ESTABLISHED,
+    val cycleStage: CycleStage = CycleStage.NOT_SET,
     val isLoading: Boolean = true
 )
 
@@ -96,6 +96,7 @@ class StatisticsViewModel(
         variationDays: Int,
         stage: CycleStage
     ): CycleRegularity? = when (stage) {
+        CycleStage.NOT_SET,
         CycleStage.FIRST_YEAR,
         CycleStage.YEARS_ONE_TO_THREE,
         CycleStage.LONG_TERM_UNEVEN,
