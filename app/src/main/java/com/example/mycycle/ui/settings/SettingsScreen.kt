@@ -1,5 +1,8 @@
 package com.example.mycycle.ui.settings
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -14,28 +17,68 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mycycle.BuildConfig
 import com.example.mycycle.R
 import com.example.mycycle.ui.theme.CycleColors
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import java.time.LocalDate
 
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var showClearDialog by remember { mutableStateOf(false) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                try {
+                    val csv = viewModel.buildCsvExport()
+                    val output = context.contentResolver.openOutputStream(uri)
+                        ?: error("Could not open export destination")
+                    output.bufferedWriter().use { writer ->
+                        writer.write(csv)
+                    }
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.dialog_export_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } catch (_: Exception) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.error_generic),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -50,7 +93,6 @@ fun SettingsScreen(
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
-        // Appearance section
         SettingsSection(title = stringResource(R.string.settings_appearance)) {
             SettingsItemWithSwitch(
                 title = stringResource(R.string.settings_dynamic_colors),
@@ -62,24 +104,24 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Data section
         SettingsSection(title = stringResource(R.string.settings_data)) {
             SettingsItem(
                 title = stringResource(R.string.settings_export),
                 subtitle = stringResource(R.string.settings_export_desc),
-                onClick = { /* TODO */ }
+                onClick = {
+                    exportLauncher.launch("my-cycle-${LocalDate.now()}.csv")
+                }
             )
             HorizontalDivider()
             SettingsItem(
                 title = stringResource(R.string.settings_clear_data),
                 subtitle = stringResource(R.string.settings_clear_data_desc),
-                onClick = { /* TODO */ }
+                onClick = { showClearDialog = true }
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // About section
         SettingsSection(title = stringResource(R.string.settings_about)) {
             SettingsItem(
                 title = stringResource(R.string.settings_version),
@@ -93,6 +135,29 @@ fun SettingsScreen(
                 onClick = null
             )
         }
+    }
+
+    if (showClearDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearDialog = false },
+            title = { Text(stringResource(R.string.dialog_clear_data_title)) },
+            text = { Text(stringResource(R.string.dialog_clear_data_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showClearDialog = false
+                        viewModel.clearAllData()
+                    }
+                ) {
+                    Text(stringResource(R.string.dialog_clear_data_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearDialog = false }) {
+                    Text(stringResource(R.string.dialog_cancel))
+                }
+            }
+        )
     }
 }
 
