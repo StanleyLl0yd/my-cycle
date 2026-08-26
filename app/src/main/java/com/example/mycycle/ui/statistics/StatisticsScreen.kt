@@ -142,6 +142,7 @@ private fun StageNoteCard(stage: CycleStage) {
         CycleStage.FIRST_YEAR -> R.string.stats_stage_first_year_note
         CycleStage.YEARS_ONE_TO_THREE -> R.string.stats_stage_early_years_note
         CycleStage.ESTABLISHED -> R.string.stats_stage_established_note
+        CycleStage.LONG_TERM_UNEVEN -> R.string.stats_stage_long_term_uneven_note
         CycleStage.CHANGING_WITH_AGE -> R.string.stats_stage_changing_age_note
         CycleStage.PERIODS_STOPPED -> R.string.stats_stage_stopped_note
     }
