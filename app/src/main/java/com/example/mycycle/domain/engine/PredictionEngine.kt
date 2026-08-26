@@ -72,7 +72,14 @@ class PredictionEngine {
         val periodLengths = recentCycles.map { it.periodLength }
 
         val avgCycleLength = weightedAverage(lengths)
-        val avgPeriodLength = weightedAverage(periodLengths)
+        // Setup records only the first day of the most recent period. Until at
+        // least two cycles have finished, a one-day setup marker must not teach
+        // the app that a usual period lasts one day.
+        val avgPeriodLength = if (recentCycles.size < 2) {
+            fallbackPeriodLength
+        } else {
+            weightedAverage(periodLengths)
+        }
         val stdDev = standardDeviation(lengths)
         val spread = if (lengths.isEmpty()) 0 else lengths.max() - lengths.min()
 
@@ -115,9 +122,9 @@ class PredictionEngine {
             spread = spread
         )
 
-        // A calendar cannot observe ovulation. We only show a broad possible range
-        // after several fairly similar adult cycles, and never for early-years,
-        // long-term uneven, age-changing, or postmenopausal patterns.
+        // A calendar cannot observe egg release. We only show a broad possible
+        // range after several fairly similar adult cycles, and never for early
+        // years, long-term uneven, age-changing, or stopped-period patterns.
         val canEstimateOvulation = stage == CycleStage.ESTABLISHED &&
             cycleCount >= 3 &&
             !highlyVariable
