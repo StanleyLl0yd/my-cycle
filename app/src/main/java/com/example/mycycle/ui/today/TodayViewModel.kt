@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 enum class TodayNotice {
+    CYCLE_STAGE_NOT_SET,
     FIRST_YEAR_CHANGES_ARE_COMMON,
     EARLY_YEARS_CHANGES_ARE_COMMON,
     LONG_TERM_UNEVEN,
@@ -32,7 +33,7 @@ data class TodayState(
     val cycleDay: Int? = null,
     val isPeriodToday: Boolean = false,
     val prediction: Prediction? = null,
-    val cycleStage: CycleStage = CycleStage.ESTABLISHED,
+    val cycleStage: CycleStage = CycleStage.NOT_SET,
     val notice: TodayNotice? = null,
     val isLoading: Boolean = true
 )
@@ -181,6 +182,7 @@ class TodayViewModel(
         }
 
         return when (stage) {
+            CycleStage.NOT_SET -> TodayNotice.CYCLE_STAGE_NOT_SET
             CycleStage.FIRST_YEAR -> TodayNotice.FIRST_YEAR_CHANGES_ARE_COMMON
             CycleStage.YEARS_ONE_TO_THREE -> TodayNotice.EARLY_YEARS_CHANGES_ARE_COMMON
             CycleStage.ESTABLISHED -> null
