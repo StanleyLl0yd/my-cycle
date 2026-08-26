@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.mycycle.data.preferences.UserPreferencesRepository
 import com.example.mycycle.data.repository.CycleDayRepository
 import com.example.mycycle.domain.engine.CycleDetector
-import com.example.mycycle.domain.engine.CyclePhaseCalculator
 import com.example.mycycle.domain.engine.PredictionEngine
 import com.example.mycycle.domain.model.CycleDay
 import com.example.mycycle.domain.model.DayState
@@ -34,8 +33,7 @@ class CalendarViewModel(
     private val preferencesRepository: UserPreferencesRepository,
     private val cycleDayRepository: CycleDayRepository,
     private val cycleDetector: CycleDetector,
-    private val predictionEngine: PredictionEngine,
-    private val phaseCalculator: CyclePhaseCalculator
+    private val predictionEngine: PredictionEngine
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CalendarState())
@@ -69,36 +67,28 @@ class CalendarViewModel(
                 Triple(preferences, allDays, month)
             }.collect { (preferences, allDays, month) ->
                 val today = LocalDate.now()
-                val periodDays = allDays.filter { it.hasPeriod }
-                val cycles = cycleDetector.detectCycles(periodDays)
+                val cycles = cycleDetector.detectCycles(allDays)
 
                 val prediction = if (cycles.isNotEmpty()) {
                     predictionEngine.predictFromHistory(
                         cycles = cycles,
                         fallbackCycleLength = preferences.estimatedCycleLength,
-                        fallbackPeriodLength = preferences.estimatedPeriodLength
+                        fallbackPeriodLength = preferences.estimatedPeriodLength,
+                        stage = preferences.cycleStage
                     )
                 } else if (preferences.initialPeriodDate != null) {
                     predictionEngine.predictFromOnboarding(
                         lastPeriodStart = preferences.initialPeriodDate,
                         cycleLength = preferences.estimatedCycleLength,
-                        periodLength = preferences.estimatedPeriodLength
+                        periodLength = preferences.estimatedPeriodLength,
+                        stage = preferences.cycleStage
                     )
-                } else null
+                } else {
+                    null
+                }
 
                 val lastPeriodStart = cycles.lastOrNull()?.startDate
                     ?: preferences.initialPeriodDate
-
-                val effectiveCycleLength = if (lastPeriodStart != null && prediction != null) {
-                    ChronoUnit.DAYS.between(lastPeriodStart, prediction.nextPeriod.start)
-                        .toInt()
-                        .takeIf { it > 0 }
-                        ?: preferences.estimatedCycleLength
-                } else {
-                    preferences.estimatedCycleLength
-                }
-                val effectivePeriodLength = prediction?.nextPeriod?.lengthDays
-                    ?: preferences.estimatedPeriodLength
 
                 val daysMap = allDays.associateBy { it.date }
                 val dayStatesMap = buildDayStates(
@@ -106,9 +96,7 @@ class CalendarViewModel(
                     today = today,
                     daysMap = daysMap,
                     lastPeriodStart = lastPeriodStart,
-                    prediction = prediction,
-                    cycleLength = effectiveCycleLength,
-                    periodLength = effectivePeriodLength
+                    prediction = prediction
                 )
 
                 _state.update {
@@ -128,31 +116,21 @@ class CalendarViewModel(
         today: LocalDate,
         daysMap: Map<LocalDate, CycleDay>,
         lastPeriodStart: LocalDate?,
-        prediction: Prediction?,
-        cycleLength: Int,
-        periodLength: Int
+        prediction: Prediction?
     ): Map<LocalDate, DayState> {
         val result = mutableMapOf<LocalDate, DayState>()
 
         for (day in 1..month.lengthOfMonth()) {
             val date = month.atDay(day)
-            val cycleDay = lastPeriodStart?.let {
-                phaseCalculator.getCycleDay(date, it)
-            }?.takeIf { it > 0 }
-
-            val phase = if (cycleDay != null && cycleDay <= cycleLength) {
-                phaseCalculator.getPhase(
-                    cycleDay = cycleDay,
-                    cycleLength = cycleLength,
-                    periodLength = periodLength
-                )
-            } else null
-
+            val cycleDay = lastPeriodStart
+                ?.let { ChronoUnit.DAYS.between(it, date).toInt() + 1 }
+                ?.takeIf { it > 0 }
             val existingDay = daysMap[date]
+
             result[date] = DayState(
                 date = date,
                 cycleDay = cycleDay,
-                phase = phase,
+                phase = null,
                 periodState = getPeriodState(date, existingDay, prediction),
                 fertilityState = getFertilityState(date, prediction),
                 symptoms = existingDay?.symptoms ?: emptySet(),
@@ -171,17 +149,21 @@ class CalendarViewModel(
         cycleDay: CycleDay?,
         prediction: Prediction?
     ): PeriodState {
+        if (cycleDay?.flowIntensity == FlowIntensity.SPOTTING) {
+            return PeriodState.CONFIRMED_SPOTTING
+        }
+
         if (cycleDay?.hasPeriod == true) {
             return when (cycleDay.flowIntensity) {
-                FlowIntensity.SPOTTING -> PeriodState.CONFIRMED_SPOTTING
                 FlowIntensity.LIGHT -> PeriodState.CONFIRMED_LIGHT
                 FlowIntensity.MEDIUM -> PeriodState.CONFIRMED_MEDIUM
                 FlowIntensity.HEAVY -> PeriodState.CONFIRMED_HEAVY
+                FlowIntensity.SPOTTING -> PeriodState.CONFIRMED_SPOTTING
                 null -> PeriodState.CONFIRMED_MEDIUM
             }
         }
 
-        if (prediction != null && date in prediction.nextPeriod) {
+        if (prediction?.nextPeriodStartWindow?.contains(date) == true) {
             return PeriodState.PREDICTED
         }
 
@@ -194,11 +176,11 @@ class CalendarViewModel(
     ): FertilityState {
         if (prediction == null) return FertilityState.NONE
 
-        if (date == prediction.ovulationDate) {
+        if (prediction.possibleOvulationWindow?.contains(date) == true) {
             return FertilityState.OVULATION_PREDICTED
         }
 
-        if (date in prediction.fertileWindow) {
+        if (prediction.possiblePregnancyWindow?.contains(date) == true) {
             return FertilityState.FERTILE_PREDICTED
         }
 

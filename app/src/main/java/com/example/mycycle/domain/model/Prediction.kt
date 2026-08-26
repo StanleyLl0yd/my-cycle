@@ -3,12 +3,16 @@ package com.example.mycycle.domain.model
 import java.time.LocalDate
 
 data class Prediction(
-    val nextPeriod: DateRange,
-    val fertileWindow: DateRange,
-    val ovulationDate: LocalDate,
+    val nextPeriodStartWindow: DateRange?,
+    val expectedPeriodLength: Int,
+    val possiblePregnancyWindow: DateRange?,
+    val possibleOvulationWindow: DateRange?,
     val confidence: Float,
     val basedOnCycles: Int,
-    val method: PredictionMethod
+    val method: PredictionMethod,
+    val estimatedCycleLength: Int?,
+    val highlyVariable: Boolean,
+    val stage: CycleStage
 )
 
 data class DateRange(

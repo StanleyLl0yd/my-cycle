@@ -17,11 +17,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -41,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mycycle.R
+import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.ui.theme.CycleColors
 import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
@@ -55,6 +59,9 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val periodsStopped = state.cycleStage == CycleStage.PERIODS_STOPPED
+    val lastStep = if (periodsStopped) 2 else 3
+    val stepCount = lastStep + 1
 
     LaunchedEffect(state.isComplete) {
         if (state.isComplete) {
@@ -73,78 +80,91 @@ fun OnboardingScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.weight(1f))
-
             AnimatedContent(
                 targetState = state.currentStep,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
                 transitionSpec = {
                     if (targetState > initialState) {
                         (slideInHorizontally { it } + fadeIn()) togetherWith
-                                (slideOutHorizontally { -it } + fadeOut())
+                            (slideOutHorizontally { -it } + fadeOut())
                     } else {
                         (slideInHorizontally { -it } + fadeIn()) togetherWith
-                                (slideOutHorizontally { it } + fadeOut())
+                            (slideOutHorizontally { it } + fadeOut())
                     }
                 },
                 label = "onboarding_step"
             ) { step ->
                 when (step) {
                     0 -> WelcomeStep()
-                    1 -> PeriodDateStep(
-                        selectedDate = state.lastPeriodDate,
-                        onDateSelected = viewModel::setLastPeriodDate
+                    1 -> CycleStageStep(
+                        selectedStage = state.cycleStage,
+                        onStageSelected = viewModel::setCycleStage
                     )
-                    2 -> CycleLengthStep(
+                    2 -> if (periodsStopped) {
+                        PeriodsStoppedStep()
+                    } else {
+                        PeriodDateStep(
+                            selectedDate = state.lastPeriodDate,
+                            onDateSelected = viewModel::setLastPeriodDate
+                        )
+                    }
+                    3 -> CycleLengthStep(
                         cycleLength = state.cycleLength,
                         onLengthChanged = viewModel::setCycleLength
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Navigation buttons
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+            Button(
+                onClick = {
+                    if (state.currentStep < lastStep) {
+                        viewModel.nextStep()
+                    } else {
+                        viewModel.completeOnboarding()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !state.isLoading
             ) {
-                Button(
-                    onClick = {
-                        when (state.currentStep) {
-                            0, 1 -> viewModel.nextStep()
-                            2 -> viewModel.completeOnboarding()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
+                Text(
+                    text = when {
+                        state.currentStep == 0 -> stringResource(R.string.onboarding_welcome_button)
+                        state.currentStep == lastStep -> stringResource(R.string.onboarding_done)
+                        else -> stringResource(R.string.onboarding_continue)
+                    }
+                )
+            }
+
+            if (state.currentStep > 0) {
+                TextButton(
+                    onClick = viewModel::previousStep,
                     enabled = !state.isLoading
                 ) {
-                    Text(
-                        text = when (state.currentStep) {
-                            0 -> stringResource(R.string.onboarding_welcome_button)
-                            1 -> stringResource(R.string.onboarding_continue)
-                            else -> stringResource(R.string.onboarding_done)
-                        }
-                    )
+                    Text(stringResource(R.string.onboarding_back))
                 }
+            } else {
+                Spacer(modifier = Modifier.height(48.dp))
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Step indicator
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    repeat(3) { index ->
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (index == state.currentStep)
-                                        MaterialTheme.colorScheme.primary
-                                    else
-                                        MaterialTheme.colorScheme.outlineVariant
-                                )
-                        )
-                    }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                repeat(stepCount) { index ->
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (index == state.currentStep) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.outlineVariant
+                                }
+                            )
+                    )
                 }
             }
         }
@@ -154,7 +174,9 @@ fun OnboardingScreen(
 @Composable
 private fun WelcomeStep() {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "🌸",
@@ -180,6 +202,58 @@ private fun WelcomeStep() {
     }
 }
 
+@Composable
+private fun CycleStageStep(
+    selectedStage: CycleStage,
+    onStageSelected: (CycleStage) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_stage_title),
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = stringResource(R.string.onboarding_stage_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        CycleStage.entries
+            .filterNot { it == CycleStage.NOT_SET }
+            .forEach { stage ->
+                FilterChip(
+                    selected = selectedStage == stage,
+                    onClick = { onStageSelected(stage) },
+                    label = { Text(stringResource(stage.labelRes)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = stringResource(selectedStage.descriptionRes),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PeriodDateStep(
@@ -189,7 +263,9 @@ private fun PeriodDateStep(
     var showDatePicker by remember { mutableStateOf(false) }
 
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = stringResource(R.string.onboarding_period_title),
@@ -208,9 +284,7 @@ private fun PeriodDateStep(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
-            onClick = { showDatePicker = true }
-        ) {
+        Button(onClick = { showDatePicker = true }) {
             Text(
                 text = selectedDate.format(
                     DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
@@ -261,7 +335,9 @@ private fun CycleLengthStep(
     onLengthChanged: (Int) -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = stringResource(R.string.onboarding_cycle_title),
@@ -269,7 +345,16 @@ private fun CycleLengthStep(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = stringResource(R.string.onboarding_cycle_explain),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = cycleLength.toString(),
@@ -283,13 +368,13 @@ private fun CycleLengthStep(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Slider(
             value = cycleLength.toFloat(),
             onValueChange = { onLengthChanged(it.toInt()) },
-            valueRange = 21f..45f,
-            steps = 23,
+            valueRange = 15f..90f,
+            steps = 74,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -298,6 +383,28 @@ private fun CycleLengthStep(
         Text(
             text = stringResource(R.string.onboarding_cycle_subtitle),
             style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun PeriodsStoppedStep() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_stopped_title),
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.onboarding_stopped_text),
+            style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

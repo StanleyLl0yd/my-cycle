@@ -304,24 +304,60 @@ private fun DayCell(
 
 @Composable
 private fun CalendarLegend() {
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        LegendItem(color = PeriodMedium, label = stringResource(R.string.calendar_legend_period))
-        LegendItem(color = Fertile, label = stringResource(R.string.calendar_legend_fertile))
-        LegendItem(color = Ovulation, label = stringResource(R.string.calendar_legend_ovulation))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            LegendItem(
+                color = PeriodMedium,
+                label = stringResource(R.string.calendar_legend_period),
+                modifier = Modifier.weight(1f)
+            )
+            LegendItem(
+                color = PeriodPredicted,
+                label = stringResource(R.string.calendar_legend_predicted),
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            LegendItem(
+                color = Fertile,
+                label = stringResource(R.string.calendar_legend_fertile),
+                modifier = Modifier.weight(1f)
+            )
+            LegendItem(
+                color = Ovulation,
+                label = stringResource(R.string.calendar_legend_ovulation),
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Text(
+            text = stringResource(R.string.calendar_guess_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
 @Composable
 private fun LegendItem(
     color: Color,
-    label: String
+    label: String,
+    modifier: Modifier = Modifier
 ) {
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Box(
             modifier = Modifier
@@ -332,7 +368,8 @@ private fun LegendItem(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f)
         )
     }
 }

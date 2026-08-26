@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mycycle.BuildConfig
 import com.example.mycycle.R
+import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.domain.model.ThemeMode
 import com.example.mycycle.ui.theme.CycleColors
 import kotlinx.coroutines.launch
@@ -106,6 +107,43 @@ fun SettingsScreen(
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(vertical = 16.dp)
         )
+
+        SettingsSection(title = stringResource(R.string.settings_cycle_stage)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_cycle_stage_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CycleStage.entries
+                        .filterNot { it == CycleStage.NOT_SET }
+                        .forEach { stage ->
+                            FilterChip(
+                                selected = state.cycleStage == stage,
+                                onClick = { viewModel.setCycleStage(stage) },
+                                label = { Text(stringResource(stage.labelRes)) }
+                            )
+                        }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(state.cycleStage.descriptionRes),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         SettingsSection(title = stringResource(R.string.settings_appearance)) {
             Column(

@@ -60,7 +60,7 @@ class DayDetailsViewModel(
         _state.update {
             it.copy(
                 flowIntensity = intensity,
-                hasPeriod = intensity != null
+                hasPeriod = intensity != null && intensity != FlowIntensity.SPOTTING
             )
         }
     }

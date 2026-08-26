@@ -5,9 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.mycycle.data.preferences.UserPreferencesRepository
 import com.example.mycycle.data.repository.CycleDayRepository
 import com.example.mycycle.domain.engine.CycleDetector
-import com.example.mycycle.domain.engine.CyclePhaseCalculator
 import com.example.mycycle.domain.engine.PredictionEngine
-import com.example.mycycle.domain.model.CyclePhase
+import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.domain.model.Prediction
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,16 +15,26 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
+
+enum class TodayNotice {
+    CYCLE_STAGE_NOT_SET,
+    FIRST_YEAR_CHANGES_ARE_COMMON,
+    EARLY_YEARS_CHANGES_ARE_COMMON,
+    LONG_TERM_UNEVEN,
+    CHANGING_WITH_AGE,
+    PERIODS_STOPPED,
+    THREE_MONTH_GAP,
+    BLEEDING_AFTER_YEAR_GAP,
+    LONG_BLEEDING,
+    OUTSIDE_COMMON_RANGE
+}
 
 data class TodayState(
     val cycleDay: Int? = null,
-    val phase: CyclePhase? = null,
-    val daysUntilPeriod: Int? = null,
-    val daysUntilFertile: Int? = null,
-    val isFertileNow: Boolean = false,
     val isPeriodToday: Boolean = false,
     val prediction: Prediction? = null,
+    val cycleStage: CycleStage = CycleStage.NOT_SET,
+    val notice: TodayNotice? = null,
     val isLoading: Boolean = true
 )
 
@@ -33,8 +42,7 @@ class TodayViewModel(
     private val preferencesRepository: UserPreferencesRepository,
     private val cycleDayRepository: CycleDayRepository,
     private val cycleDetector: CycleDetector,
-    private val predictionEngine: PredictionEngine,
-    private val phaseCalculator: CyclePhaseCalculator
+    private val predictionEngine: PredictionEngine
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TodayState())
@@ -48,79 +56,139 @@ class TodayViewModel(
         viewModelScope.launch {
             combine(
                 preferencesRepository.preferences,
-                cycleDayRepository.observeAllPeriodDays()
-            ) { preferences, periodDays ->
-                Pair(preferences, periodDays)
-            }.collect { (preferences, periodDays) ->
+                cycleDayRepository.observeAll()
+            ) { preferences, allDays ->
+                Pair(preferences, allDays)
+            }.collect { (preferences, allDays) ->
                 val today = LocalDate.now()
-                val cycles = cycleDetector.detectCycles(periodDays)
+                val cycles = cycleDetector.detectCycles(allDays)
 
                 val prediction = if (cycles.isNotEmpty()) {
                     predictionEngine.predictFromHistory(
                         cycles = cycles,
                         fallbackCycleLength = preferences.estimatedCycleLength,
-                        fallbackPeriodLength = preferences.estimatedPeriodLength
+                        fallbackPeriodLength = preferences.estimatedPeriodLength,
+                        stage = preferences.cycleStage
                     )
                 } else if (preferences.initialPeriodDate != null) {
                     predictionEngine.predictFromOnboarding(
                         lastPeriodStart = preferences.initialPeriodDate,
                         cycleLength = preferences.estimatedCycleLength,
-                        periodLength = preferences.estimatedPeriodLength
+                        periodLength = preferences.estimatedPeriodLength,
+                        stage = preferences.cycleStage
                     )
-                } else null
+                } else if (preferences.cycleStage == CycleStage.PERIODS_STOPPED) {
+                    predictionEngine.predictFromOnboarding(
+                        lastPeriodStart = today,
+                        cycleLength = preferences.estimatedCycleLength,
+                        periodLength = preferences.estimatedPeriodLength,
+                        stage = preferences.cycleStage
+                    )
+                } else {
+                    null
+                }
 
                 val lastPeriodStart = cycles.lastOrNull()?.startDate
                     ?: preferences.initialPeriodDate
 
-                val cycleDay = lastPeriodStart?.let {
-                    phaseCalculator.getCycleDay(today, it)
-                }
+                val cycleDay = lastPeriodStart
+                    ?.let { java.time.temporal.ChronoUnit.DAYS.between(it, today).toInt() + 1 }
+                    ?.takeIf { it > 0 }
 
-                val effectiveCycleLength = if (lastPeriodStart != null && prediction != null) {
-                    ChronoUnit.DAYS.between(lastPeriodStart, prediction.nextPeriod.start)
-                        .toInt()
-                        .takeIf { it > 0 }
-                        ?: preferences.estimatedCycleLength
-                } else {
-                    preferences.estimatedCycleLength
-                }
-                val effectivePeriodLength = prediction?.nextPeriod?.lengthDays
-                    ?: preferences.estimatedPeriodLength
+                val todayEntry = allDays.firstOrNull { it.date == today }
+                val isPeriodToday = todayEntry?.hasPeriod == true
+                val bleedingToday = todayEntry?.flowIntensity != null || isPeriodToday
 
-                val isPeriodToday = periodDays.any { it.date == today && it.hasPeriod }
-                val phase = when {
-                    isPeriodToday -> CyclePhase.MENSTRUAL
-                    cycleDay != null && cycleDay > 0 -> phaseCalculator.getPhase(
-                        cycleDay = cycleDay,
-                        cycleLength = effectiveCycleLength,
-                        periodLength = effectivePeriodLength
-                    )
-                    else -> null
-                }
+                val latestCompletedLength = cycles
+                    .lastOrNull { it.isComplete }
+                    ?.length
+                val currentPeriodLength = cycles.lastOrNull()
+                    ?.takeIf { !it.isComplete }
+                    ?.periodLength
 
-                val daysUntilPeriod = prediction?.let {
-                    phaseCalculator.getDaysUntilPeriod(today, it.nextPeriod.start)
-                }
-
-                val daysUntilFertile = prediction?.let {
-                    phaseCalculator.getDaysUntilFertileWindow(today, it.fertileWindow.start)
-                }
-
-                val isFertileNow = prediction?.fertileWindow?.contains(today) == true
+                val notice = chooseNotice(
+                    stage = preferences.cycleStage,
+                    latestCompletedLength = latestCompletedLength,
+                    currentCycleDay = cycleDay,
+                    currentPeriodLength = currentPeriodLength,
+                    isPeriodToday = isPeriodToday,
+                    bleedingToday = bleedingToday
+                )
 
                 _state.update {
                     TodayState(
                         cycleDay = cycleDay,
-                        phase = phase,
-                        daysUntilPeriod = daysUntilPeriod,
-                        daysUntilFertile = daysUntilFertile,
-                        isFertileNow = isFertileNow,
                         isPeriodToday = isPeriodToday,
                         prediction = prediction,
+                        cycleStage = preferences.cycleStage,
+                        notice = notice,
                         isLoading = false
                     )
                 }
             }
+        }
+    }
+
+    private fun chooseNotice(
+        stage: CycleStage,
+        latestCompletedLength: Int?,
+        currentCycleDay: Int?,
+        currentPeriodLength: Int?,
+        isPeriodToday: Boolean,
+        bleedingToday: Boolean
+    ): TodayNotice? {
+        if (
+            bleedingToday &&
+            (
+                stage == CycleStage.PERIODS_STOPPED ||
+                    latestCompletedLength?.let { it >= 365 } == true ||
+                    (currentCycleDay ?: 0) >= 365
+            )
+        ) {
+            return TodayNotice.BLEEDING_AFTER_YEAR_GAP
+        }
+
+        val longBleedingLimit = when (stage) {
+            CycleStage.FIRST_YEAR,
+            CycleStage.YEARS_ONE_TO_THREE -> 7
+            else -> 8
+        }
+        if (
+            isPeriodToday &&
+            currentPeriodLength != null &&
+            currentPeriodLength > longBleedingLimit
+        ) {
+            return TodayNotice.LONG_BLEEDING
+        }
+
+        if (
+            stage in setOf(CycleStage.FIRST_YEAR, CycleStage.YEARS_ONE_TO_THREE) &&
+            (latestCompletedLength?.let { it >= 90 } == true || (currentCycleDay ?: 0) >= 90)
+        ) {
+            return TodayNotice.THREE_MONTH_GAP
+        }
+
+        val outsideCommonRange = when (stage) {
+            CycleStage.YEARS_ONE_TO_THREE ->
+                latestCompletedLength?.let { it !in 21..45 } == true ||
+                    (currentCycleDay ?: 0) > 45
+            CycleStage.ESTABLISHED ->
+                latestCompletedLength?.let { it !in 21..35 } == true ||
+                    (currentCycleDay ?: 0) > 35
+            else -> false
+        }
+        if (outsideCommonRange) {
+            return TodayNotice.OUTSIDE_COMMON_RANGE
+        }
+
+        return when (stage) {
+            CycleStage.NOT_SET -> TodayNotice.CYCLE_STAGE_NOT_SET
+            CycleStage.FIRST_YEAR -> TodayNotice.FIRST_YEAR_CHANGES_ARE_COMMON
+            CycleStage.YEARS_ONE_TO_THREE -> TodayNotice.EARLY_YEARS_CHANGES_ARE_COMMON
+            CycleStage.ESTABLISHED -> null
+            CycleStage.LONG_TERM_UNEVEN -> TodayNotice.LONG_TERM_UNEVEN
+            CycleStage.CHANGING_WITH_AGE -> TodayNotice.CHANGING_WITH_AGE
+            CycleStage.PERIODS_STOPPED -> TodayNotice.PERIODS_STOPPED
         }
     }
 }

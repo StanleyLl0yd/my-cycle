@@ -82,24 +82,24 @@ fun DayDetailsSheet(
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = state.date.format(
-                        DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)
-                    ),
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
+            Text(
+                text = state.date.format(
+                    DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)
+                ),
+                style = MaterialTheme.typography.titleLarge
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = stringResource(R.string.day_details_period_section),
                 style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = stringResource(R.string.day_details_bleeding_help),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(12.dp))

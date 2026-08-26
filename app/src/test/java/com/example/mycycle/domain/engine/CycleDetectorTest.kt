@@ -1,6 +1,7 @@
 package com.example.mycycle.domain.engine
 
 import com.example.mycycle.domain.model.CycleDay
+import com.example.mycycle.domain.model.FlowIntensity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -44,7 +45,7 @@ class CycleDetectorTest {
     }
 
     @Test
-    fun newPeriodAfterMinimumCycleLengthCompletesPreviousCycle() {
+    fun newPeriodCompletesPreviousCycle() {
         val days = listOf(
             CycleDay(LocalDate.of(2026, 8, 1), hasPeriod = true),
             CycleDay(LocalDate.of(2026, 8, 2), hasPeriod = true),
@@ -63,22 +64,41 @@ class CycleDetectorTest {
     }
 
     @Test
-    fun midCycleSpottingDoesNotStretchPeriodOrHideNextCycle() {
+    fun spottingDoesNotStretchPeriodOrStartNewCycle() {
         val days = listOf(
             CycleDay(LocalDate.of(2026, 8, 1), hasPeriod = true),
             CycleDay(LocalDate.of(2026, 8, 2), hasPeriod = true),
-            CycleDay(LocalDate.of(2026, 8, 10), hasPeriod = true),
-            CycleDay(LocalDate.of(2026, 8, 20), hasPeriod = true),
-            CycleDay(LocalDate.of(2026, 8, 21), hasPeriod = true)
+            CycleDay(
+                LocalDate.of(2026, 8, 10),
+                hasPeriod = true,
+                flowIntensity = FlowIntensity.SPOTTING
+            ),
+            CycleDay(LocalDate.of(2026, 8, 29), hasPeriod = true),
+            CycleDay(LocalDate.of(2026, 8, 30), hasPeriod = true)
         )
 
         val cycles = detector.detectCycles(days)
 
         assertEquals(2, cycles.size)
-        assertEquals(19, cycles[0].length)
+        assertEquals(28, cycles[0].length)
         assertEquals(2, cycles[0].periodLength)
-        assertEquals(LocalDate.of(2026, 8, 20), cycles[1].startDate)
-        assertEquals(2, cycles[1].periodLength)
+        assertEquals(LocalDate.of(2026, 8, 29), cycles[1].startDate)
+    }
+
+    @Test
+    fun shortNewCycleIsPreservedInsteadOfHidden() {
+        val days = listOf(
+            CycleDay(LocalDate.of(2026, 8, 1), hasPeriod = true),
+            CycleDay(LocalDate.of(2026, 8, 2), hasPeriod = true),
+            CycleDay(LocalDate.of(2026, 8, 13), hasPeriod = true),
+            CycleDay(LocalDate.of(2026, 8, 14), hasPeriod = true)
+        )
+
+        val cycles = detector.detectCycles(days)
+
+        assertEquals(2, cycles.size)
+        assertEquals(12, cycles[0].length)
+        assertEquals(LocalDate.of(2026, 8, 13), cycles[1].startDate)
     }
 
     @Test

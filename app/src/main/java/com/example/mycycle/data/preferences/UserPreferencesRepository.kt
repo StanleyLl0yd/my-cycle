@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.domain.model.ThemeMode
 import com.example.mycycle.domain.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +31,7 @@ class UserPreferencesRepository(
         val INITIAL_PERIOD_DATE = longPreferencesKey("initial_period_date")
         val ESTIMATED_CYCLE_LENGTH = intPreferencesKey("estimated_cycle_length")
         val ESTIMATED_PERIOD_LENGTH = intPreferencesKey("estimated_period_length")
+        val CYCLE_STAGE = stringPreferencesKey("cycle_stage")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val USE_DYNAMIC_COLORS = booleanPreferencesKey("use_dynamic_colors")
     }
@@ -49,6 +51,9 @@ class UserPreferencesRepository(
                     ?.let { LocalDate.ofEpochDay(it) },
                 estimatedCycleLength = prefs[Keys.ESTIMATED_CYCLE_LENGTH] ?: 28,
                 estimatedPeriodLength = prefs[Keys.ESTIMATED_PERIOD_LENGTH] ?: 5,
+                cycleStage = prefs[Keys.CYCLE_STAGE]
+                    ?.let { runCatching { CycleStage.valueOf(it) }.getOrNull() }
+                    ?: CycleStage.NOT_SET,
                 themeMode = prefs[Keys.THEME_MODE]
                     ?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
                     ?: ThemeMode.SYSTEM,
@@ -57,15 +62,21 @@ class UserPreferencesRepository(
         }
 
     suspend fun completeOnboarding(
-        lastPeriodDate: LocalDate,
+        lastPeriodDate: LocalDate?,
         cycleLength: Int,
+        cycleStage: CycleStage,
         periodLength: Int = 5
     ) {
         dataStore.edit { prefs ->
             prefs[Keys.ONBOARDING_COMPLETED] = true
-            prefs[Keys.INITIAL_PERIOD_DATE] = lastPeriodDate.toEpochDay()
+            if (lastPeriodDate != null) {
+                prefs[Keys.INITIAL_PERIOD_DATE] = lastPeriodDate.toEpochDay()
+            } else {
+                prefs.remove(Keys.INITIAL_PERIOD_DATE)
+            }
             prefs[Keys.ESTIMATED_CYCLE_LENGTH] = cycleLength
             prefs[Keys.ESTIMATED_PERIOD_LENGTH] = periodLength
+            prefs[Keys.CYCLE_STAGE] = cycleStage.name
         }
     }
 
@@ -79,6 +90,12 @@ class UserPreferencesRepository(
     suspend fun updateCycleLength(length: Int) {
         dataStore.edit { prefs ->
             prefs[Keys.ESTIMATED_CYCLE_LENGTH] = length
+        }
+    }
+
+    suspend fun updateCycleStage(stage: CycleStage) {
+        dataStore.edit { prefs ->
+            prefs[Keys.CYCLE_STAGE] = stage.name
         }
     }
 
