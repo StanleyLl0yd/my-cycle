@@ -275,6 +275,7 @@ private fun NoticeCard(notice: TodayNotice) {
         Text(
             text = stringResource(
                 when (notice) {
+                    TodayNotice.CYCLE_STAGE_NOT_SET -> R.string.today_notice_stage_not_set
                     TodayNotice.FIRST_YEAR_CHANGES_ARE_COMMON -> R.string.today_notice_first_year
                     TodayNotice.EARLY_YEARS_CHANGES_ARE_COMMON -> R.string.today_notice_early_years
                     TodayNotice.LONG_TERM_UNEVEN -> R.string.today_notice_long_term_uneven
