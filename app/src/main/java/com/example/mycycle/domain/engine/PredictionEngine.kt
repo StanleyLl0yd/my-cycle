@@ -74,7 +74,7 @@ class PredictionEngine {
         val avgCycleLength = weightedAverage(lengths)
         val avgPeriodLength = weightedAverage(periodLengths)
         val stdDev = standardDeviation(lengths)
-        val spread = if (lengths.isEmpty()) 0 else (lengths.max() - lengths.min())
+        val spread = if (lengths.isEmpty()) 0 else lengths.max() - lengths.min()
 
         return calculatePrediction(
             lastPeriodStart = cycles.last().startDate,
@@ -115,6 +115,9 @@ class PredictionEngine {
             spread = spread
         )
 
+        // A calendar cannot observe ovulation. We only show a broad possible range
+        // after several fairly similar adult cycles, and never for early-years,
+        // long-term uneven, age-changing, or postmenopausal patterns.
         val canEstimateOvulation = stage == CycleStage.ESTABLISHED &&
             cycleCount >= 3 &&
             !highlyVariable
@@ -166,6 +169,7 @@ class PredictionEngine {
         CycleStage.FIRST_YEAR -> 10
         CycleStage.YEARS_ONE_TO_THREE -> 7
         CycleStage.ESTABLISHED -> 3
+        CycleStage.LONG_TERM_UNEVEN -> 14
         CycleStage.CHANGING_WITH_AGE -> 14
         CycleStage.PERIODS_STOPPED -> 0
     }
@@ -177,8 +181,9 @@ class PredictionEngine {
     ): Boolean = when (stage) {
         CycleStage.FIRST_YEAR -> true
         CycleStage.YEARS_ONE_TO_THREE -> spread > 14 || averageLength !in 21..45
-        CycleStage.ESTABLISHED -> spread > 9 || averageLength !in 24..38
-        CycleStage.CHANGING_WITH_AGE -> spread >= 7 || averageLength >= 60
+        CycleStage.ESTABLISHED -> spread > 9 || averageLength !in 21..35
+        CycleStage.LONG_TERM_UNEVEN -> true
+        CycleStage.CHANGING_WITH_AGE -> true
         CycleStage.PERIODS_STOPPED -> true
     }
 
@@ -200,6 +205,7 @@ class PredictionEngine {
             CycleStage.FIRST_YEAR -> 0.45f
             CycleStage.YEARS_ONE_TO_THREE -> 0.65f
             CycleStage.ESTABLISHED -> 1f
+            CycleStage.LONG_TERM_UNEVEN -> 0.45f
             CycleStage.CHANGING_WITH_AGE -> 0.55f
             CycleStage.PERIODS_STOPPED -> 0f
         }
