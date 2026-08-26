@@ -25,6 +25,7 @@ Source version: **1.1.0** · Latest published APK: **1.0.0** · Min SDK: **26 (A
   - periods are changing as you get older
   - no period for 12 months or more
 - The choice can be changed later in Settings without deleting old records
+- When updating from 1.0.0, all old records are kept. Until one of the new options is chosen once in Settings, 1.1.0 deliberately uses a wide date range and does not show an egg-release or pregnancy-likelihood estimate
 - Today shows how many days have passed since the last recorded period and a **range of dates** when the next one may start
 - Daily records for bleeding, mood, how your body feels and free notes
 - “A few spots” is kept in the diary but does **not** start a new cycle
@@ -47,21 +48,23 @@ My Cycle treats the calendar as a **guess**, not as a measurement of the body.
 
 On first use, the app asks for the situation that fits you, the first day of the most recent real period and the usual gap between periods. If you choose “no period for 12 months or more”, it does not ask for or create a made-up recent period date and does not guess another period.
 
+When an existing 1.0.0 installation is updated, the previous diary stays untouched. Because 1.0.0 did not store the new situation choice, 1.1.0 starts conservatively: it uses a wide range and does not estimate egg release or pregnancy-likelihood days until you choose the closest option in Settings.
+
 The first guess is shown as a **date range**, not one exact day. The range is deliberately wider in the first years after periods begin, when periods have stayed very uneven for years, and when they are changing with age.
 
 After real history is available, the app uses up to the **6 most recent finished cycles**. Newer cycles count more. If the recent gaps differ a lot, the date range becomes wider.
 
-The app does **not** know when an egg is released. Only after at least **3 fairly similar finished adult cycles** can it show a broad calendar range when pregnancy may be more likely. It does not show this range in the first years, for long-term very uneven cycles, when periods are changing with age, or after periods have stopped for 12 months or more.
+The app does **not** know when an egg is released. Only after at least **3 fairly similar finished adult cycles** can it show a broad calendar range when pregnancy may be more likely. It does not show this range in the first years, for long-term very uneven cycles, when periods are changing with age, after periods have stopped for 12 months or more, or while the new situation choice is still unset after an update.
 
 Never use the calendar colors or dates as “safe days” to avoid pregnancy.
 
 The app also keeps a few simple attention rules:
 
-- in the first years, a gap of about **3 months or more** is worth discussing with a doctor or another trusted health professional
+- in the first years, a current or most recent gap of about **3 months or more** is worth discussing with a doctor or another trusted health professional
 - from 1 to 3 years after periods begin, gaps shorter than about **21 days** or longer than about **45 days** deserve attention if they happen
-- after the first 3 years, gaps shorter than about **21 days** or longer than about **35 days** deserve attention, especially if this keeps happening
+- after the first 3 years, when gaps are normally similar, gaps shorter than about **21 days** or longer than about **35 days** deserve attention, especially if this keeps happening
 - bleeding lasting more than about **7 days in the first years**, or more than about **8 days later**, can trigger a note to seek advice
-- after **12 months without a period**, any new bleeding should be discussed with a doctor, even if there is only a little blood
+- after **12 months without a period**, new bleeding should be discussed with a doctor, even if there is only a little blood
 
 These notes do not tell you what the cause is and do not give a diagnosis.
 
