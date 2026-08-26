@@ -1,73 +1,74 @@
 # Contributing to My Cycle
 
-Thank you for your interest in contributing to My Cycle! 💜
+[English](CONTRIBUTING.md) | [Русский](CONTRIBUTING_RU.md)
+
+Contributions are welcome when they fit the current scope of My Cycle: a small, private, offline menstrual cycle tracker.
+
+## Before making a change
+
+For a bug fix, open an issue if the problem is not already documented. For a larger feature or behavior change, discuss it in an issue before implementing it.
+
+Please keep the current product constraints in mind:
+
+- cycle and fertility information must remain clearly presented as estimates;
+- privacy and local-first storage are core requirements;
+- adding accounts, cloud synchronization, analytics, advertising, or network-dependent features is outside the current 1.0.0 design and should not be introduced without an explicit project decision.
+
+## Development requirements
+
+- JDK 21
+- Android SDK 36
+- Gradle 8.13
+
+The repository does not currently include `gradle-wrapper.jar`, so command-line checks require an installed Gradle 8.13.
+
+Before submitting a pull request, run:
+
+```bash
+gradle assembleDebug test
+gradle lint
+```
+
+If your change affects release compilation, also run:
+
+```bash
+gradle assembleRelease
+```
+
+## Pull requests
+
+1. Fork the repository or create a working branch.
+2. Keep each change focused on one problem or feature.
+3. Add or update tests for cycle-detection or prediction logic when relevant.
+4. Keep UI text in Android string resources rather than hardcoding it in Compose code.
+5. Update documentation when behavior visible to users changes.
+6. Open a pull request with a concise description of what changed and why.
+
+## Localization
+
+English is the default application language. Russian is maintained as an additional complete localization.
+
+When adding or changing UI text:
+
+- update `app/src/main/res/values/strings.xml`;
+- update `app/src/main/res/values-ru/strings.xml`;
+- update both `plurals.xml` files when plurals are involved;
+- keep labels concise enough for small screens.
+
+For project documentation, keep the English default file and its `_RU` companion in sync where applicable.
+
+## Code style
+
+- Follow Kotlin conventions.
+- Prefer small, focused functions and clear names.
+- Do not hardcode user-visible strings.
+- Preserve the existing separation between data, domain logic, and Compose UI.
+- Avoid introducing dependencies unless they provide a clear benefit to the app.
 
 ## License
 
-My Cycle is distributed under the **PolyForm Noncommercial License 1.0.0**. Contributions to this repository are expected to be compatible with that license. See [LICENSE](LICENSE) for the complete terms.
+My Cycle is distributed under the **PolyForm Noncommercial License 1.0.0**. Contributions must be compatible with the project license. See [LICENSE](LICENSE) for the authoritative terms.
 
-## How to Contribute
+## Author
 
-### Reporting Bugs
-
-1. Check if the bug has already been reported in [Issues](https://github.com/StanleyLl0yd/my-cycle/issues)
-2. If not, create a new issue with:
-   - Clear description of the bug
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Device info (Android version, device model)
-   - Screenshots if applicable
-
-### Suggesting Features
-
-1. Open an issue with the `enhancement` label
-2. Describe the feature and why it would be useful
-3. Keep in mind the core principles: simplicity and privacy
-
-### Code Contributions
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Make your changes following the code style
-4. Write or update tests where applicable
-5. Commit with a clear message
-6. Push and create a Pull Request
-
-### Adding Translations
-
-1. Create a new folder in `app/src/main/res/` named `values-XX` (where XX is the language code)
-2. Copy `values/strings.xml` and `values/plurals.xml` to the new folder
-3. Translate all strings
-4. Pay special attention to plurals
-5. Test the app with the new language
-
-#### Translation Guidelines
-
-- Keep translations concise — UI space is limited
-- Maintain the same warm, clear tone
-- Don't translate brand names
-- Test all screens to ensure text fits properly
-
-## Code Style
-
-- Follow Kotlin coding conventions
-- Use meaningful variable and function names
-- Keep functions small and focused
-- Add KDoc comments for public APIs where useful
-- No hardcoded UI strings — use string resources
-
-## Commit Messages
-
-Use clear, concise imperative messages, for example:
-
-- `Add cycle statistics`
-- `Fix period prediction fallback`
-- `Update Russian translations`
-- `Refactor settings state`
-- `Add prediction tests`
-
-## Questions?
-
-Feel free to open an issue with the `question` label.
-
-Thank you for helping make My Cycle better! 🌸
+**Stanley Lloyd**
