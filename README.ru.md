@@ -103,9 +103,11 @@ My Cycle — **дневник, а не врач и не медицинское �
 
 [Открыть My Cycle 1.1.1 на GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.1)
 
-[Скачать подписанный My-Cycle-v1.1.1.apk с Google Drive](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)
+[Скачать подписанный My-Cycle-v1.1.1.apk с GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/download/v1.1.1/My-Cycle-v1.1.1.apk)
 
-SHA-256 (`My-Cycle-v1.1.1.apk`): `350ffa182220785bc3a53c11fd85f35d1135d0b932b80b06d35b57d0fab589b4`
+[Зеркало на Google Drive](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)
+
+SHA-256 (`My-Cycle-v1.1.1.apk`): `7479ca24cfe8b560ee6258d98e31ac8d99c68419891b345f3e478224fa7797b0`
 
 Для установки требуется Android 8.0 или новее.
 
@@ -126,13 +128,15 @@ gradle assembleDebug test
 gradle lint
 ```
 
-Для создания неподписанного release APK:
+Без переменных для подписи эта команда создаёт неподписанный release APK:
 
 ```bash
 gradle assembleRelease
 ```
 
-Настройка подписи релиза в репозитории отсутствует. APK, прикреплённые к официальным GitHub Release, подписываются отдельно.
+Официальная подпись релизов настроена через GitHub Repository Secrets. Файл ключа и пароли не хранятся в репозитории. GitHub Actions восстанавливает ключ только для доверенных release-задач, собирает подписанный APK, проверяет сертификат автора подписи и публикует APK вместе с контрольной суммой SHA-256.
+
+Сборка использует переменные `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` и `ANDROID_KEY_PASSWORD`; GitHub Actions использует `ANDROID_KEYSTORE_BASE64`, чтобы временно восстановить файл ключа.
 
 ## 🧱 Технологии
 
@@ -155,6 +159,9 @@ GitHub Actions автоматически проверяет Pull Request'ы и 
 - Android Lint
 - сборку debug APK
 - сборку release APK с R8 и удалением ненужных ресурсов
+- сохранение подписанного release APK как artifact в доверенных запусках `main`, когда доступны Secrets для подписи
+
+Постоянный workflow `Android Release` дополнительно сверяет версию приложения с release-тегом и проверяет сертификат подписи перед публикацией официального APK.
 
 ## 🌍 Языки
 
