@@ -13,7 +13,7 @@ A simple, private period diary for Android. It keeps your real dates and gives c
 
 [⬇️ Download the latest published APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.1.1** · Latest published APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **36**
+Source version: **1.1.1** · Latest published APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Features
 
@@ -116,10 +116,10 @@ Android 8.0 or newer is required.
 Requirements:
 
 - JDK 21
-- Android SDK 36
-- Gradle 8.13
+- Android SDK 37
+- Gradle 9.5.0
 
-The repository currently does not include `gradle-wrapper.jar`, so command-line builds require an installed Gradle 8.13.
+The repository currently does not include `gradle-wrapper.jar`, so command-line builds require an installed Gradle 9.5.0.
 
 ```bash
 git clone https://github.com/StanleyLl0yd/my-cycle.git
@@ -142,14 +142,14 @@ The signing variables used by the build are `ANDROID_KEYSTORE_PATH`, `ANDROID_KE
 
 | Category | Technology |
 | --- | --- |
-| Language | Kotlin 2.3.0 |
+| Language | Kotlin 2.4.10 |
 | UI | Jetpack Compose + Material 3 |
 | App structure | Layered MVVM |
-| Dependency injection | Koin 4.1.1 |
+| Dependency injection | Koin 4.2.2 |
 | Background/state work | Kotlin Coroutines + Flow |
 | Local database | Room 2.8.4 |
-| Local settings | DataStore 1.1.4 |
-| Build | Gradle 8.13, AGP 8.13.2, Kotlin DSL |
+| Local settings | DataStore 1.2.1 |
+| Build | Gradle 9.5.0, AGP 9.3.2, Kotlin DSL |
 
 ## ✅ Quality checks
 

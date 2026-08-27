@@ -43,10 +43,10 @@ Pull Request'ы и сообщения об ошибках приветствую
 Требования:
 
 - JDK 21
-- Android SDK 36
-- Gradle 8.13
+- Android SDK 37
+- Gradle 9.5.0
 
-В репозитории сейчас нет `gradle-wrapper.jar`, поэтому используйте установленный Gradle 8.13.
+В репозитории сейчас нет `gradle-wrapper.jar`, поэтому используйте установленный Gradle 9.5.0.
 
 ```bash
 gradle assembleDebug assembleRelease test

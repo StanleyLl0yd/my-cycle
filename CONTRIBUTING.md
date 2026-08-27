@@ -43,10 +43,10 @@ Features that introduce accounts, cloud synchronization, analytics, advertising 
 Requirements:
 
 - JDK 21
-- Android SDK 36
-- Gradle 8.13
+- Android SDK 37
+- Gradle 9.5.0
 
-The repository currently does not include `gradle-wrapper.jar`, so use an installed Gradle 8.13.
+The repository currently does not include `gradle-wrapper.jar`, so use an installed Gradle 9.5.0.
 
 ```bash
 gradle assembleDebug assembleRelease test
