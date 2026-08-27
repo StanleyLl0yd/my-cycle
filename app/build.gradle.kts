@@ -18,7 +18,7 @@ val hasReleaseSigning = listOf(
 ).all { !it.isNullOrBlank() }
 
 android {
-    namespace = "com.example.mycycle"
+    namespace = "com.silverlightning.mycycle"
     compileSdk = 36
 
     defaultConfig {
