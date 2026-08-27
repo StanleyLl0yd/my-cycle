@@ -8,9 +8,6 @@ import com.silverlightning.mycycle.domain.engine.CycleDetector
 import com.silverlightning.mycycle.domain.engine.PredictionEngine
 import com.silverlightning.mycycle.domain.model.CycleDay
 import com.silverlightning.mycycle.domain.model.DayState
-import com.silverlightning.mycycle.domain.model.FertilityState
-import com.silverlightning.mycycle.domain.model.FlowIntensity
-import com.silverlightning.mycycle.domain.model.PeriodState
 import com.silverlightning.mycycle.domain.model.Prediction
 import com.silverlightning.mycycle.domain.model.UserPreferences
 import com.silverlightning.mycycle.util.currentDateFlow
@@ -154,8 +151,8 @@ class CalendarViewModel(
             result[date] = DayState(
                 date = date,
                 cycleDay = cycleDay,
-                periodState = getPeriodState(date, existingDay, prediction),
-                fertilityState = getFertilityState(date, existingDay, prediction),
+                periodState = resolvePeriodState(date, existingDay, prediction),
+                fertilityState = resolveFertilityState(date, existingDay, prediction),
                 symptoms = existingDay?.symptoms ?: emptySet(),
                 mood = existingDay?.mood,
                 hasNotes = !existingDay?.notes.isNullOrBlank(),
@@ -165,56 +162,6 @@ class CalendarViewModel(
         }
 
         return result
-    }
-
-    private fun getPeriodState(
-        date: LocalDate,
-        cycleDay: CycleDay?,
-        prediction: Prediction?
-    ): PeriodState {
-        if (cycleDay?.flowIntensity == FlowIntensity.SPOTTING) {
-            return PeriodState.CONFIRMED_SPOTTING
-        }
-
-        if (cycleDay?.isPeriodBleeding == true) {
-            return when (cycleDay.flowIntensity) {
-                FlowIntensity.LIGHT -> PeriodState.CONFIRMED_LIGHT
-                FlowIntensity.MEDIUM -> PeriodState.CONFIRMED_MEDIUM
-                FlowIntensity.HEAVY -> PeriodState.CONFIRMED_HEAVY
-                FlowIntensity.SPOTTING -> PeriodState.CONFIRMED_SPOTTING
-                null -> PeriodState.CONFIRMED_UNSPECIFIED
-            }
-        }
-
-        if (cycleDay != null) {
-            return PeriodState.NONE
-        }
-
-        if (prediction?.nextPeriodStartWindow?.contains(date) == true) {
-            return PeriodState.PREDICTED
-        }
-
-        return PeriodState.NONE
-    }
-
-    private fun getFertilityState(
-        date: LocalDate,
-        cycleDay: CycleDay?,
-        prediction: Prediction?
-    ): FertilityState {
-        if (prediction == null || cycleDay?.isPeriodBleeding == true) {
-            return FertilityState.NONE
-        }
-
-        if (prediction.possibleOvulationWindow?.contains(date) == true) {
-            return FertilityState.OVULATION_PREDICTED
-        }
-
-        if (prediction.possiblePregnancyWindow?.contains(date) == true) {
-            return FertilityState.FERTILE_PREDICTED
-        }
-
-        return FertilityState.NONE
     }
 
     private data class CalendarInput(
