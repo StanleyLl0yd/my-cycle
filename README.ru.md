@@ -13,7 +13,7 @@
 
 [⬇️ Скачать последний опубликованный APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Версия исходного кода: **1.1.1** · Последний опубликованный APK: **1.1.0** · Min SDK: **26 (Android 8.0)** · Target SDK: **36**
+Версия исходного кода: **1.1.1** · Последний опубликованный APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **36**
 
 ## ✨ Возможности
 
@@ -99,11 +99,13 @@ My Cycle — **дневник, а не врач и не медицинское �
 
 ## 📦 Установка
 
-Последний опубликованный подписанный APK сейчас имеет версию **1.1.0** и доступен в GitHub Releases. Исходный код в этой ветке уже имеет версию **1.1.1**; строка опубликованного APK будет изменена только после появления подписанного релиза 1.1.1.
+Последний опубликованный подписанный APK — **1.1.1**.
 
-[Скачать последнюю версию](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
+[Открыть My Cycle 1.1.1 на GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.1)
 
-SHA-256 (`My-Cycle-v1.1.0.apk`): `a8991c51f08421c31e0a53a1a2cb1243239e3dd044177ecfa8137e903c461f69`
+[Скачать подписанный My-Cycle-v1.1.1.apk с Google Drive](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)
+
+SHA-256 (`My-Cycle-v1.1.1.apk`): `350ffa182220785bc3a53c11fd85f35d1135d0b932b80b06d35b57d0fab589b4`
 
 Для установки требуется Android 8.0 или новее.
 

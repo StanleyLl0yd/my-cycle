@@ -13,7 +13,7 @@ A simple, private period diary for Android. It keeps your real dates and gives c
 
 [⬇️ Download the latest published APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.1.1** · Latest published APK: **1.1.0** · Min SDK: **26 (Android 8.0)** · Target SDK: **36**
+Source version: **1.1.1** · Latest published APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **36**
 
 ## ✨ Features
 
@@ -99,11 +99,13 @@ If bleeding is very heavy, you feel faint or very weak, pain is severe, you may 
 
 ## 📦 Installation
 
-The latest published signed APK is **1.1.0** and is available from GitHub Releases. The source code in this branch is already **1.1.1**; the published APK line will be updated only after the signed 1.1.1 release exists.
+The latest published signed APK is **1.1.1**.
 
-[Download latest release](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
+[Open My Cycle 1.1.1 on GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.1)
 
-SHA-256 (`My-Cycle-v1.1.0.apk`): `a8991c51f08421c31e0a53a1a2cb1243239e3dd044177ecfa8137e903c461f69`
+[Download signed My-Cycle-v1.1.1.apk from Google Drive](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)
+
+SHA-256 (`My-Cycle-v1.1.1.apk`): `350ffa182220785bc3a53c11fd85f35d1135d0b932b80b06d35b57d0fab589b4`
 
 Android 8.0 or newer is required.
 
