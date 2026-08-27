@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
 }
@@ -15,8 +14,8 @@ android {
         applicationId = "com.silverlightning.mycycle"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -50,6 +49,7 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
         }
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -73,7 +73,6 @@ android {
 }
 
 dependencies {
-    // Compose BOM
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -83,7 +82,6 @@ dependencies {
     implementation(libs.compose.animation)
     debugImplementation(libs.compose.ui.tooling)
 
-    // AndroidX
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)
     implementation(libs.lifecycle.runtime.compose)
@@ -91,24 +89,17 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.datastore.preferences)
 
-    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Koin
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
 
-    // Serialization
-    implementation(libs.kotlinx.serialization.json)
-
-    // Coroutines
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
 
-    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit.ext)
     androidTestImplementation(libs.espresso.core)
