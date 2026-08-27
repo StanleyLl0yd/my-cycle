@@ -155,7 +155,7 @@ class CalendarViewModel(
                 date = date,
                 cycleDay = cycleDay,
                 periodState = getPeriodState(date, existingDay, prediction),
-                fertilityState = getFertilityState(date, prediction),
+                fertilityState = getFertilityState(date, existingDay, prediction),
                 symptoms = existingDay?.symptoms ?: emptySet(),
                 mood = existingDay?.mood,
                 hasNotes = !existingDay?.notes.isNullOrBlank(),
@@ -186,6 +186,10 @@ class CalendarViewModel(
             }
         }
 
+        if (cycleDay != null) {
+            return PeriodState.NONE
+        }
+
         if (prediction?.nextPeriodStartWindow?.contains(date) == true) {
             return PeriodState.PREDICTED
         }
@@ -195,9 +199,12 @@ class CalendarViewModel(
 
     private fun getFertilityState(
         date: LocalDate,
+        cycleDay: CycleDay?,
         prediction: Prediction?
     ): FertilityState {
-        if (prediction == null) return FertilityState.NONE
+        if (prediction == null || cycleDay?.isPeriodBleeding == true) {
+            return FertilityState.NONE
+        }
 
         if (prediction.possibleOvulationWindow?.contains(date) == true) {
             return FertilityState.OVULATION_PREDICTED
