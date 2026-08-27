@@ -10,6 +10,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.1] - 2026-08-27
+
+### ✅ Safer setup and records
+- First setup now requires the user to choose the situation that fits before continuing. It no longer silently assumes a steady adult cycle.
+- The “periods stopped for a full year” option now clearly says it is for age-related changes or a situation already explained by a doctor.
+- An unexplained gap of about 3 months in an adult cycle can now show a simple note to talk with a doctor.
+- The single start date entered during first setup no longer becomes a made-up 1-day period. Its bleeding length stays unknown until real bleeding days are recorded.
+- A recorded “No blood” day or “A few spots” now breaks a period episode. A completely unrecorded day between nearby period days can still be treated as a missed diary entry.
+- Old 1.0.0 spotting records that were stored as period days are normalized and no longer act like real period bleeding.
+
+### 📅 Clearer estimates
+- “The gaps change a lot” is now separate from “the gaps are fairly steady but usually shorter or longer than the common range”.
+- Fairly steady adult cycles outside the common range get a wider estimate and no egg-release estimate, without being incorrectly described as highly variable.
+- The rough pregnancy-likelihood range now uses the five days before the possible egg-release range through that range itself, without adding an extra day after it.
+- Date calculations use an injected clock and screens update when the calendar day changes instead of keeping yesterday until the app is restarted.
+
+### 📊 Statistics and calendar
+- Summary numbers now use up to the 6 most recent finished cycles; up to 12 recent cycles remain visible in history.
+- History stays visible even when there is not enough information for averages.
+- Unknown bleeding length is shown as unknown instead of being invented.
+- Calendar week layout now follows the device language/region.
+- Calendar days now provide spoken descriptions for TalkBack, including recorded bleeding, spotting and estimated dates.
+- Pregnancy/egg-release legend items are hidden when those estimates are not being shown.
+
+### 🎨 Interface and reliability
+- Fixed Dark theme backgrounds so dark mode is actually dark.
+- Improved text and control contrast, including selected bleeding options.
+- Fixed the setup date picker so dates do not move by one day in some time zones.
+- CSV file writing now runs off the main UI thread and explicitly uses UTF-8.
+
+### 🧹 Code and tests
+- Removed the unused old cycle-phase calculator and its fixed “cycle length minus 14” logic.
+- Removed unused phase models, old strings, future-feature strings, Kotlin Serialization dependency and unnecessary R8 keep rules.
+- Simplified CI by removing the unused signing-tools artifact.
+- Simplified branch cleanup so it only deletes the branch of a successfully merged pull request.
+- Added regression tests for spotting migration, explicit no-blood days, unknown first-period length, long gaps, stable-but-outside-range cycles and other review findings.
+- Updated source version to 1.1.1 (`versionCode` 3).
+
+---
+
 ## [1.1.0] - 2026-08-26
 
 ### ✨ Added
@@ -63,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📅 Cycle estimates
 - Initial estimates use the most recent period start date, the selected cycle length and a 5-day initial period length.
-- After completed cycles are available, predictions use up to the 6 most recent completed cycles with greater weight given to newer cycles.
+- After completed cycles are available, predictions use up to the 6 most recent completed cycles with greater weight given to newer data.
 - Estimated ovulation is calculated 14 days before the estimated next period.
 - The estimated fertile window runs from 5 days before ovulation through 1 day after it.
 
