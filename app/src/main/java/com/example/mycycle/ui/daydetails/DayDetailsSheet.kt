@@ -108,7 +108,7 @@ fun DayDetailsSheet(
             ) {
                 FlowOption(
                     label = stringResource(R.string.flow_none),
-                    isSelected = state.flowIntensity == null,
+                    isSelected = state.flowIntensity == null && !state.hasPeriod,
                     onClick = { viewModel.setFlowIntensity(null) }
                 )
 
@@ -120,6 +120,15 @@ fun DayDetailsSheet(
                         onClick = { viewModel.setFlowIntensity(intensity) }
                     )
                 }
+            }
+
+            if (state.hasPeriod && state.flowIntensity == null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.day_details_bleeding_unknown),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
