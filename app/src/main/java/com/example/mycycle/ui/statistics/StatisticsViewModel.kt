@@ -7,13 +7,13 @@ import com.example.mycycle.data.repository.CycleDayRepository
 import com.example.mycycle.domain.engine.CycleDetector
 import com.example.mycycle.domain.model.Cycle
 import com.example.mycycle.domain.model.CycleStage
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 enum class CycleRegularity {
     REGULAR,
@@ -38,6 +38,10 @@ class StatisticsViewModel(
     private val preferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
+    companion object {
+        private const val MAX_CYCLES_FOR_SUMMARY = 6
+    }
+
     private val _state = MutableStateFlow(StatisticsState())
     val state: StateFlow<StatisticsState> = _state.asStateFlow()
 
@@ -51,17 +55,17 @@ class StatisticsViewModel(
             }.collect { (allDays, preferences) ->
                 val cycles = cycleDetector.detectCycles(allDays)
                 val completed = cycles.filter { it.isComplete && it.length != null }
-                val lengths = completed.mapNotNull { it.length }
-                val enoughForAverages = completed.size >= 2
+                val recent = completed.takeLast(MAX_CYCLES_FOR_SUMMARY)
+                val lengths = recent.mapNotNull { it.length }
+                val periodLengths = recent.mapNotNull { it.periodLength }
 
                 val averageCycleLength = lengths
-                    .takeIf { enoughForAverages }
+                    .takeIf { it.size >= 2 }
                     ?.average()
                     ?.roundToInt()
 
-                val averagePeriodLength = completed
-                    .takeIf { enoughForAverages }
-                    ?.map { it.periodLength }
+                val averagePeriodLength = periodLengths
+                    .takeIf { it.size >= 2 }
                     ?.average()
                     ?.roundToInt()
 
@@ -82,7 +86,7 @@ class StatisticsViewModel(
                         averagePeriodLength = averagePeriodLength,
                         cycleVariationDays = variation,
                         regularity = regularity,
-                        completedCycleCount = completed.size,
+                        completedCycleCount = recent.size,
                         cycles = cycles.takeLast(12).reversed(),
                         cycleStage = preferences.cycleStage,
                         isLoading = false
