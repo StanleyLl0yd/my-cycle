@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App -->
     <string name="app_name">Мой Цикл</string>
-
-    <!-- ==================== ONBOARDING ==================== -->
 
     <string name="onboarding_welcome_title">Добро пожаловать\nв Мой Цикл</string>
     <string name="onboarding_welcome_subtitle">Это простой личный дневник месячных. Он помогает помнить даты и осторожно подсказывает, когда месячные могут прийти снова. Все записи остаются на вашем устройстве.</string>
     <string name="onboarding_welcome_button">Начать</string>
-
     <string name="onboarding_stage_title">Что больше похоже на вас?</string>
-    <string name="onboarding_stage_subtitle">Выберите самый подходящий вариант. Его можно изменить позже. Это нужно, чтобы приложение не показывало ложные «точные» даты.</string>
+    <string name="onboarding_stage_subtitle">Перед продолжением выберите один вариант. Потом его можно изменить. Это нужно, чтобы приложение не показывало ложные «точные» даты.</string>
 
     <string name="cycle_stage_not_set">Пока не выбрано</string>
     <string name="cycle_stage_not_set_desc">Выберите выше вариант, который сейчас больше похож на ваши месячные. Пока вы не выберете, приложение будет показывать широкий примерный срок и не станет угадывать день выхода яйцеклетки.</string>
@@ -23,33 +19,26 @@
     <string name="cycle_stage_long_term_uneven">Месячные идут больше 3 лет, но промежутки всё ещё сильно меняются</string>
     <string name="cycle_stage_long_term_uneven_desc">Приложение будет показывать широкий промежуток и не станет угадывать день выхода яйцеклетки. Если вы никогда не говорили с врачом о таких больших скачках, это стоит сделать.</string>
     <string name="cycle_stage_changing_with_age">С возрастом месячные стали приходить по-разному</string>
-    <string name="cycle_stage_changing_with_age_desc">Когда месячные постепенно подходят к своему окончанию, они могут приходить раньше, позже или пропускать месяцы. Приложение будет показывать широкий промежуток и не станет угадывать день выхода яйцеклетки.</string>
-    <string name="cycle_stage_periods_stopped">Месячных не было 12 месяцев или дольше</string>
-    <string name="cycle_stage_periods_stopped_desc">Приложение перестанет угадывать дату следующих месячных. Если после целого года без месячных снова появилась кровь, об этом важно сказать врачу.</string>
+    <string name="cycle_stage_changing_with_age_desc">Когда месячные постепенно подходят к окончанию, они могут приходить раньше, позже или пропускать месяцы. Приложение будет показывать широкий промежуток и не станет угадывать день выхода яйцеклетки.</string>
+    <string name="cycle_stage_periods_stopped">С возрастом месячные прекратились на целый год</string>
+    <string name="cycle_stage_periods_stopped_desc">Выбирайте это только если месячные пропали на год из-за возрастных изменений или врач сказал, что они закончились. Если месячные пропали по другой причине, выберите ближайший другой вариант и поговорите с врачом.</string>
 
     <string name="onboarding_period_title">Когда начались\nпоследние месячные?</string>
     <string name="onboarding_period_subtitle">Выберите первый день, когда кровь была похожа на ваши обычные месячные, а не просто на несколько пятен.</string>
-
     <string name="onboarding_cycle_title">Примерно сколько дней проходит\nмежду месячными?</string>
     <string name="onboarding_cycle_explain">Считайте от первого дня одних настоящих месячных до первого дня следующих. Например, от 1-го числа до 29-го — это 28 дней.</string>
     <string name="onboarding_cycle_subtitle">Ничего страшного, если вы не знаете точно. Выберите примерно. Потом приложение будет учиться на тех датах, которые вы отметите.</string>
     <string name="onboarding_cycle_days_label">дней</string>
-
     <string name="onboarding_stopped_title">Без прогноза следующих месячных</string>
-    <string name="onboarding_stopped_text">Раз месячных не было 12 месяцев или дольше, «Мой Цикл» будет вести дневник, но не станет угадывать дату новых месячных. Если после целого года без месячных снова появилась кровь, нужно сказать об этом врачу.</string>
-
+    <string name="onboarding_stopped_text">Выбирайте этот вариант только если месячные прекратились на целый год из-за возрастных изменений или врач сказал, что они закончились. Приложение сохранит дневник, но не будет угадывать новые месячные. Если месячные пропали на год по другой причине, вернитесь назад, выберите ближайший другой вариант и поговорите с врачом.</string>
     <string name="onboarding_continue">Продолжить</string>
     <string name="onboarding_done">Готово</string>
     <string name="onboarding_back">Назад</string>
-
-    <!-- ==================== NAVIGATION ==================== -->
 
     <string name="nav_today">Сегодня</string>
     <string name="nav_calendar">Календарь</string>
     <string name="nav_statistics">Статистика</string>
     <string name="nav_settings">Настройки</string>
-
-    <!-- ==================== TODAY SCREEN ==================== -->
 
     <string name="today_cycle_day">день с начала последних месячных</string>
     <string name="today_cycle_day_title">С начала последних месячных</string>
@@ -62,44 +51,27 @@
     <string name="today_no_period_prediction">Дата не рассчитывается</string>
     <string name="today_prediction_passed">Предполагаемые даты уже прошли</string>
     <string name="today_no_period_prediction_help">Приложение сохраняет ваши записи, но не пытается угадывать следующие месячные.</string>
+    <string name="today_unset_prediction">Выберите в Настройках вариант, который больше похож на ваши месячные. Пока этого нет, приложение специально показывает широкий примерный срок.</string>
     <string name="today_learning_prediction">Пока это очень примерная подсказка. Добавляйте настоящие даты, и приложение будет лучше знать именно вашу историю.</string>
-    <string name="today_wide_prediction">Месячные могут приходить через разное число дней, поэтому приложение показывает широкий промежуток, а не один «точный» день.</string>
+    <string name="today_wide_prediction">Последние промежутки сильно меняются, поэтому приложение показывает широкий срок, а не один «точный» день.</string>
+    <string name="today_outside_range_prediction">Промежутки могут быть довольно ровными, но их обычная длина выходит за частый диапазон для этого периода жизни. Поэтому приложение показывает более широкий срок и не угадывает дни выхода яйцеклетки.</string>
     <string name="today_history_prediction">Этот промежуток рассчитан по вашим последним месячным. Это всё равно только предположение.</string>
 
     <string name="today_possible_pregnancy">Дни, когда беременность может быть вероятнее</string>
     <string name="today_possible_pregnancy_now">Сейчас вы внутри примерного календарного промежутка</string>
     <string name="today_calendar_guess_warning">Это только расчёт по календарю. Приложение не может точно знать день выхода яйцеклетки. Никогда не считайте эти даты «безопасными днями» для защиты от беременности.</string>
 
-    <string name="today_notice_stage_not_set">После обновления один раз выберите в Настройках вариант, который больше похож на ваши месячные. Пока вы не выберете, приложение будет показывать широкий примерный срок и не станет угадывать день выхода яйцеклетки.</string>
+    <string name="today_notice_stage_not_set">Выберите в Настройках вариант, который больше похож на ваши месячные. Пока вы не выберете, приложение будет показывать широкий примерный срок и не станет угадывать день выхода яйцеклетки.</string>
     <string name="today_notice_first_year">Месячные начались недавно. В первый год они часто приходят через разное число дней. Записывайте настоящие даты — приложение не будет подгонять их под «28 дней».</string>
     <string name="today_notice_early_years">В первые несколько лет месячные всё ещё могут приходить то раньше, то позже. Просто записывайте, как происходит на самом деле.</string>
     <string name="today_notice_long_term_uneven">Вы отметили, что промежутки между месячными обычно сильно меняются. Приложение будет записывать то, что происходит на самом деле, и показывать широкий примерный срок.</string>
-    <string name="today_notice_changing_age">Когда месячные постепенно подходят к своему окончанию, промежутки между ними часто меняются. Поэтому приложение показывает широкий промежуток дат и не угадывает день выхода яйцеклетки.</string>
-    <string name="today_notice_periods_stopped">Вы выбрали «месячных не было 12 месяцев или дольше». Приложение не будет угадывать новые месячные. Если после целого года без них снова появилась кровь, скажите об этом врачу.</string>
-    <string name="today_notice_three_month_gap">Между месячными уже около 3 месяцев или больше. В первые годы после начала месячных такой большой перерыв стоит обсудить с врачом или другим взрослым медицинским работником, которому вы доверяете.</string>
+    <string name="today_notice_changing_age">Когда месячные постепенно подходят к окончанию, промежутки между ними часто меняются. Поэтому приложение показывает широкий промежуток дат и не угадывает день выхода яйцеклетки.</string>
+    <string name="today_notice_periods_stopped">Вы выбрали, что с возрастом месячные прекратились на целый год. Приложение не будет угадывать новые месячные. Если месячные пропали на год по другой причине и врач это не объяснил, поговорите с врачом.</string>
+    <string name="today_notice_three_month_gap">Между месячными уже около 3 месяцев или больше. В первые годы после начала месячных такой большой перерыв стоит обсудить с врачом или другим медицинским работником, которому вы доверяете.</string>
+    <string name="today_notice_long_unexplained_gap">Месячных нет около 3 месяцев или дольше. Если беременность не ожидается и вы не знаете, почему месячные пропали, стоит поговорить с врачом.</string>
     <string name="today_notice_year_gap_bleeding">После перерыва примерно в год или больше снова появилась кровь. Об этом нужно рассказать врачу, даже если крови совсем немного.</string>
     <string name="today_notice_long_bleeding">Кровь идёт дольше, чем обычно. Если она всё ещё идёт, её очень много, появилась слабость или кружится голова либо вам тревожно — попросите помощи у близкого взрослого или врача.</string>
     <string name="today_notice_outside_common_range">Этот промежуток короче или длиннее обычного для этого периода жизни. Один необычный промежуток не объясняет причину. Если такое повторяется или вас тревожит — поговорите с врачом.</string>
-
-    <!-- Старые внутренние подписи оставлены простыми на случай будущих экранов. -->
-    <string name="phase_menstrual">Месячные</string>
-    <string name="phase_follicular">После месячных</string>
-    <string name="phase_ovulatory">Примерно середина цикла</string>
-    <string name="phase_luteal">Перед следующими месячными</string>
-    <string name="phase_menstrual_desc">Вы отметили кровь как месячные.</string>
-    <string name="phase_follicular_desc">Это только примерное место в календаре, а не проверка того, что происходит в организме.</string>
-    <string name="phase_ovulatory_desc">Примерно в этой части некоторых циклов может выйти яйцеклетка, но календарь не знает точный день.</string>
-    <string name="phase_luteal_desc">Это более поздняя часть календарного цикла. Точные сроки могут меняться.</string>
-
-    <!-- Старые подписи карточек оставлены для совместимости. -->
-    <string name="today_until_period">До месячных</string>
-    <string name="today_fertile_window">Беременность может быть вероятнее</string>
-    <string name="today_fertile_in">через %1$s</string>
-    <string name="today_fertile_now">примерно сейчас</string>
-    <string name="today_ovulation">Возможно, выходит яйцеклетка</string>
-    <string name="today_period_day">День месячных: %1$d</string>
-
-    <!-- ==================== CALENDAR ==================== -->
 
     <string name="calendar_today">Сегодня</string>
     <string name="calendar_legend_period">Месячные</string>
@@ -107,8 +79,6 @@
     <string name="calendar_legend_ovulation">Возможно, выходит яйцеклетка</string>
     <string name="calendar_legend_predicted">Месячные могут начаться</string>
     <string name="calendar_guess_note">Бледные цвета — только предположение по прошлым датам. Организм не обязан следовать этому календарю.</string>
-
-    <!-- ==================== DAY DETAILS ==================== -->
 
     <string name="day_details_title">Запись</string>
     <string name="day_details_period_section">Кровь сегодня</string>
@@ -119,20 +89,17 @@
     <string name="day_details_notes_hint">Напишите всё, что хотите запомнить…</string>
     <string name="day_details_save">Сохранить</string>
 
-    <!-- Flow intensity -->
     <string name="flow_none">Крови нет</string>
     <string name="flow_spotting">Несколько пятен</string>
     <string name="flow_light">Немного</string>
     <string name="flow_medium">Средне</string>
     <string name="flow_heavy">Много</string>
 
-    <!-- Mood -->
     <string name="mood_great">Отлично</string>
     <string name="mood_good">Хорошо</string>
     <string name="mood_okay">Нормально</string>
     <string name="mood_bad">Плохо</string>
 
-    <!-- Symptoms -->
     <string name="symptom_cramps">Болит низ живота</string>
     <string name="symptom_headache">Болит голова</string>
     <string name="symptom_fatigue">Усталость</string>
@@ -146,35 +113,31 @@
     <string name="symptom_cravings">Хочется определённой еды</string>
     <string name="symptom_dizziness">Кружится голова</string>
 
-    <!-- ==================== STATISTICS ==================== -->
-
     <string name="stats_title">Как идут ваши месячные</string>
     <string name="stats_avg_cycle">Обычный промежуток между месячными</string>
     <string name="stats_avg_period">Обычно дней с кровью</string>
     <string name="stats_regularity">Насколько меняются промежутки</string>
     <string name="stats_variation">Самый короткий и самый длинный отличаются примерно на %1$d дней</string>
-    <string name="stats_based_on_cycles">по %1$d законченным циклам</string>
+    <string name="stats_based_on_cycles">по %1$d последним законченным циклам</string>
     <string name="stats_regular">Обычно примерно одинаково</string>
     <string name="stats_somewhat_regular">Немного меняется</string>
     <string name="stats_irregular">Сильно меняется</string>
-    <string name="stats_not_enough_data">Пока мало законченных циклов. Продолжайте отмечать настоящие даты.</string>
+    <string name="stats_not_enough_data">Пока мало последних законченных циклов для средних чисел. Записанная история всё равно показана ниже.</string>
     <string name="stats_history_title">Последние месячные</string>
     <string name="stats_current_cycle">Сейчас идёт, ещё не закончен</string>
+    <string name="stats_period_not_recorded">неизвестно</string>
+    <string name="stats_bleeding_days">Дней с кровью: %1$s</string>
     <string name="stats_stage_not_set_note">Выберите в Настройках вариант, который больше похож на ваши месячные. Пока вы не выберете, цифры ниже показывают только записанную историю, а приложение не будет делать более узкие предположения о цикле.</string>
     <string name="stats_stage_first_year_note">В первый год после начала месячных разные промежутки — обычное дело. Цифры ниже просто показывают вашу историю и не говорят, как организм «должен» работать.</string>
     <string name="stats_stage_early_years_note">В первые несколько лет промежутки всё ещё могут меняться. Приложение показывает, что было на самом деле, и не сравнивает вас с «идеальным циклом 28 дней».</string>
     <string name="stats_stage_established_note">Эти цифры описывают только вашу недавнюю историю. Если месячные вдруг стали приходить совсем иначе или вас что-то тревожит, приложение не может сказать причину.</string>
     <string name="stats_stage_long_term_uneven_note">Вы отметили, что даже спустя несколько лет промежутки между месячными сильно меняются. Приложение просто показывает настоящие числа и не пытается сделать из них «ровный цикл».</string>
-    <string name="stats_stage_changing_age_note">Когда месячные постепенно подходят к своему окончанию, промежутки часто меняются, а некоторые месяцы могут пропускаться. Приложение просто показывает, что было на самом деле.</string>
-    <string name="stats_stage_stopped_note">Вы выбрали «месячных не было 12 месяцев или дольше». Старая история остаётся здесь, но приложение не угадывает новые месячные.</string>
-
-    <!-- ==================== SETTINGS ==================== -->
+    <string name="stats_stage_changing_age_note">Когда месячные постепенно подходят к окончанию, промежутки часто меняются, а некоторые месяцы могут пропускаться. Приложение просто показывает, что было на самом деле.</string>
+    <string name="stats_stage_stopped_note">Вы выбрали, что с возрастом месячные прекратились на целый год. Старая история остаётся здесь, но приложение не угадывает новые месячные.</string>
 
     <string name="settings_title">Настройки</string>
     <string name="settings_cycle_stage">О ваших месячных</string>
     <string name="settings_cycle_stage_desc">Выберите то, что подходит сейчас. Это можно изменить в любой момент, старые записи не удалятся.</string>
-
-    <!-- Appearance -->
     <string name="settings_appearance">Внешний вид</string>
     <string name="settings_theme">Цвет экрана</string>
     <string name="settings_theme_light">Светлый</string>
@@ -182,26 +145,11 @@
     <string name="settings_theme_system">Как в телефоне</string>
     <string name="settings_dynamic_colors">Цвета телефона</string>
     <string name="settings_dynamic_colors_desc">Брать цвета из обоев телефона</string>
-
-    <!-- Строки оставлены на будущее; в версии 1.1.0 эти функции не показываются. -->
-    <string name="settings_notifications">Уведомления</string>
-    <string name="settings_period_reminder">Напоминание о месячных</string>
-    <string name="settings_period_reminder_desc">Уведомление перед месячными</string>
-    <string name="settings_reminder_days_before">За сколько дней</string>
-    <string name="settings_daily_reminder">Ежедневное напоминание</string>
-    <string name="settings_daily_reminder_desc">Напомнить сделать запись</string>
-    <string name="settings_reminder_time">Время напоминания</string>
-
-    <!-- Data -->
     <string name="settings_data">Ваши данные</string>
     <string name="settings_export">Сохранить копию</string>
     <string name="settings_export_desc">Сохранить записи в файл CSV</string>
-    <string name="settings_import">Импорт данных</string>
-    <string name="settings_import_desc">Восстановить из копии</string>
     <string name="settings_clear_data">Удалить всё</string>
     <string name="settings_clear_data_desc">Удалить все записи о месячных и настройки приложения</string>
-
-    <!-- About -->
     <string name="settings_about">О приложении</string>
     <string name="settings_about_description">Личный дневник месячных, который учится на ваших датах. Он показывает промежутки дат, а не делает вид, что знает точный день следующих месячных или выхода яйцеклетки. Это не медицинское обследование.</string>
     <string name="settings_author">Автор</string>
@@ -214,34 +162,22 @@
     <string name="settings_privacy">Личные данные</string>
     <string name="settings_privacy_desc">Записи о месячных остаются на этом устройстве, пока вы сами не сохраните копию CSV</string>
 
-    <!-- ==================== DIALOGS ==================== -->
-
     <string name="dialog_clear_data_title">Удалить всё?</string>
     <string name="dialog_clear_data_message">Это удалит из приложения все записи о месячных и настройки. Вернуть их потом нельзя.</string>
     <string name="dialog_clear_data_confirm">Удалить</string>
     <string name="dialog_cancel">Отмена</string>
     <string name="dialog_ok">ОК</string>
-
     <string name="dialog_export_success">Копия сохранена</string>
-    <string name="dialog_import_success">Данные загружены</string>
-    <string name="dialog_import_error">Не удалось загрузить данные</string>
 
-    <!-- ==================== ACCESSIBILITY ==================== -->
-
-    <string name="a11y_selected">Выбрано</string>
     <string name="a11y_today">Сегодня</string>
     <string name="a11y_period_day">Отмеченный день месячных</string>
+    <string name="a11y_spotting_day">Отмечен день с несколькими пятнами крови</string>
     <string name="a11y_predicted_period">День, когда месячные могут начаться</string>
     <string name="a11y_fertile_window">День, когда беременность может быть вероятнее</string>
     <string name="a11y_ovulation_day">День, когда возможно выходит яйцеклетка</string>
     <string name="a11y_previous_month">Предыдущий месяц</string>
     <string name="a11y_next_month">Следующий месяц</string>
-    <string name="a11y_close">Закрыть</string>
-    <string name="a11y_navigate_back">Назад</string>
-
-    <!-- ==================== ERRORS ==================== -->
 
     <string name="error_generic">Что-то пошло не так</string>
     <string name="error_future_date">Нельзя сохранять запись на будущую дату</string>
-
 </resources>
