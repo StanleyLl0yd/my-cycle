@@ -8,6 +8,6 @@ data class Cycle(
     val endDate: LocalDate?,
     val periodEndDate: LocalDate,
     val length: Int?,
-    val periodLength: Int,
+    val periodLength: Int?,
     val isComplete: Boolean
 )

@@ -29,18 +29,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mycycle.R
+import com.example.mycycle.domain.model.CycleNotice
+import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.domain.model.DateRange
 import com.example.mycycle.domain.model.Prediction
 import com.example.mycycle.ui.theme.CycleColors
-import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun TodayScreen(
-    onLogClick: () -> Unit,
+    onLogClick: (String) -> Unit,
     viewModel: TodayViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -49,7 +51,7 @@ fun TodayScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CycleColors.backgroundGradient)
+            .background(CycleColors.backgroundGradient())
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -66,6 +68,7 @@ fun TodayScreen(
         state.prediction?.let { prediction ->
             PredictionCard(
                 prediction = prediction,
+                today = state.today,
                 locale = locale
             )
         }
@@ -76,16 +79,20 @@ fun TodayScreen(
         }
 
         state.prediction?.possiblePregnancyWindow
-            ?.takeIf { !LocalDate.now().isAfter(it.end) }
+            ?.takeIf { !state.today.isAfter(it.end) }
             ?.let { range ->
                 Spacer(modifier = Modifier.height(16.dp))
-                PregnancyCard(range = range, locale = locale)
+                PregnancyCard(
+                    range = range,
+                    today = state.today,
+                    locale = locale
+                )
             }
 
         Spacer(modifier = Modifier.height(32.dp))
 
         ExtendedFloatingActionButton(
-            onClick = onLogClick,
+            onClick = { onLogClick(state.today.toString()) },
             icon = {
                 Icon(
                     imageVector = if (state.isPeriodToday) Icons.Rounded.Check else Icons.Rounded.Add,
@@ -164,9 +171,9 @@ private fun CycleDayCard(
 @Composable
 private fun PredictionCard(
     prediction: Prediction,
+    today: LocalDate,
     locale: Locale
 ) {
-    val today = LocalDate.now()
     val window = prediction.nextPeriodStartWindow
 
     Card(
@@ -198,10 +205,14 @@ private fun PredictionCard(
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = when {
-                    prediction.nextPeriodStartWindow == null ->
+                    window == null ->
                         stringResource(R.string.today_no_period_prediction_help)
+                    prediction.stage == CycleStage.NOT_SET ->
+                        stringResource(R.string.today_unset_prediction)
                     prediction.basedOnCycles == 0 ->
                         stringResource(R.string.today_learning_prediction)
+                    prediction.outsideCommonRange ->
+                        stringResource(R.string.today_outside_range_prediction)
                     prediction.highlyVariable ->
                         stringResource(R.string.today_wide_prediction)
                     else ->
@@ -217,10 +228,9 @@ private fun PredictionCard(
 @Composable
 private fun PregnancyCard(
     range: DateRange,
+    today: LocalDate,
     locale: Locale
 ) {
-    val today = LocalDate.now()
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -254,11 +264,12 @@ private fun PregnancyCard(
 }
 
 @Composable
-private fun NoticeCard(notice: TodayNotice) {
+private fun NoticeCard(notice: CycleNotice) {
     val important = notice in setOf(
-        TodayNotice.THREE_MONTH_GAP,
-        TodayNotice.BLEEDING_AFTER_YEAR_GAP,
-        TodayNotice.LONG_BLEEDING
+        CycleNotice.THREE_MONTH_GAP,
+        CycleNotice.LONG_UNEXPLAINED_GAP,
+        CycleNotice.BLEEDING_AFTER_YEAR_GAP,
+        CycleNotice.LONG_BLEEDING
     )
 
     Card(
@@ -275,16 +286,17 @@ private fun NoticeCard(notice: TodayNotice) {
         Text(
             text = stringResource(
                 when (notice) {
-                    TodayNotice.CYCLE_STAGE_NOT_SET -> R.string.today_notice_stage_not_set
-                    TodayNotice.FIRST_YEAR_CHANGES_ARE_COMMON -> R.string.today_notice_first_year
-                    TodayNotice.EARLY_YEARS_CHANGES_ARE_COMMON -> R.string.today_notice_early_years
-                    TodayNotice.LONG_TERM_UNEVEN -> R.string.today_notice_long_term_uneven
-                    TodayNotice.CHANGING_WITH_AGE -> R.string.today_notice_changing_age
-                    TodayNotice.PERIODS_STOPPED -> R.string.today_notice_periods_stopped
-                    TodayNotice.THREE_MONTH_GAP -> R.string.today_notice_three_month_gap
-                    TodayNotice.BLEEDING_AFTER_YEAR_GAP -> R.string.today_notice_year_gap_bleeding
-                    TodayNotice.LONG_BLEEDING -> R.string.today_notice_long_bleeding
-                    TodayNotice.OUTSIDE_COMMON_RANGE -> R.string.today_notice_outside_common_range
+                    CycleNotice.CYCLE_STAGE_NOT_SET -> R.string.today_notice_stage_not_set
+                    CycleNotice.FIRST_YEAR_CHANGES_ARE_COMMON -> R.string.today_notice_first_year
+                    CycleNotice.EARLY_YEARS_CHANGES_ARE_COMMON -> R.string.today_notice_early_years
+                    CycleNotice.LONG_TERM_UNEVEN -> R.string.today_notice_long_term_uneven
+                    CycleNotice.CHANGING_WITH_AGE -> R.string.today_notice_changing_age
+                    CycleNotice.PERIODS_STOPPED -> R.string.today_notice_periods_stopped
+                    CycleNotice.THREE_MONTH_GAP -> R.string.today_notice_three_month_gap
+                    CycleNotice.LONG_UNEXPLAINED_GAP -> R.string.today_notice_long_unexplained_gap
+                    CycleNotice.BLEEDING_AFTER_YEAR_GAP -> R.string.today_notice_year_gap_bleeding
+                    CycleNotice.LONG_BLEEDING -> R.string.today_notice_long_bleeding
+                    CycleNotice.OUTSIDE_COMMON_RANGE -> R.string.today_notice_outside_common_range
                 }
             ),
             style = MaterialTheme.typography.bodyMedium,

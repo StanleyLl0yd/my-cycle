@@ -48,9 +48,12 @@ import com.example.mycycle.R
 import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.domain.model.ThemeMode
 import com.example.mycycle.ui.theme.CycleColors
-import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
+import java.io.OutputStreamWriter
 import java.time.LocalDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.koin.androidx.compose.koinViewModel
 
 private const val GITHUB_URL = "https://github.com/StanleyLl0yd/my-cycle"
 private const val LICENSE_URL = "https://polyformproject.org/licenses/noncommercial/1.0.0"
@@ -73,11 +76,15 @@ fun SettingsScreen(
         if (uri != null) {
             scope.launch {
                 try {
-                    val csv = viewModel.buildCsvExport()
-                    val output = context.contentResolver.openOutputStream(uri)
-                        ?: error("Could not open export destination")
-                    output.bufferedWriter().use { writer ->
-                        writer.write(csv)
+                    withContext(Dispatchers.IO) {
+                        val csv = viewModel.buildCsvExport()
+                        val output = context.contentResolver.openOutputStream(uri)
+                            ?: error("Could not open export destination")
+                        output.use { stream ->
+                            OutputStreamWriter(stream, Charsets.UTF_8)
+                                .buffered()
+                                .use { writer -> writer.write(csv) }
+                        }
                     }
                     Toast.makeText(
                         context,
@@ -98,7 +105,7 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CycleColors.backgroundGradient)
+            .background(CycleColors.backgroundGradient())
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -311,7 +318,9 @@ private fun SettingsItem(
             .then(
                 if (onClick != null) {
                     Modifier.clickable(onClick = onClick)
-                } else Modifier
+                } else {
+                    Modifier
+                }
             )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically

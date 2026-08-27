@@ -20,9 +20,6 @@ sealed class Screen(val route: String) {
     data object Calendar : Screen("calendar")
     data object Statistics : Screen("statistics")
     data object Settings : Screen("settings")
-    data object DayDetails : Screen("day/{date}") {
-        fun createRoute(date: String) = "day/$date"
-    }
 }
 
 enum class BottomNavItem(

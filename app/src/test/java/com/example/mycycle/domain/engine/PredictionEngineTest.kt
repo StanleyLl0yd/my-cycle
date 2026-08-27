@@ -14,13 +14,12 @@ import java.time.LocalDate
 class PredictionEngineTest {
 
     private val engine = PredictionEngine()
+    private val referenceDate = LocalDate.of(2026, 4, 10)
 
     @Test
     fun onboardingUsesDateRangeInsteadOfExactDay() {
-        val start = LocalDate.of(2026, 8, 1)
-
         val prediction = engine.predictFromOnboarding(
-            lastPeriodStart = start,
+            lastPeriodStart = LocalDate.of(2026, 8, 1),
             cycleLength = 28,
             periodLength = 5,
             stage = CycleStage.ESTABLISHED
@@ -36,25 +35,11 @@ class PredictionEngineTest {
 
     @Test
     fun unsetStageStaysWideEvenWithStableHistory() {
-        val cycles = listOf(
-            completeCycle(1, LocalDate.of(2026, 1, 1), 28, 5),
-            completeCycle(2, LocalDate.of(2026, 1, 29), 29, 5),
-            completeCycle(3, LocalDate.of(2026, 2, 27), 30, 5),
-            Cycle(
-                id = 4,
-                startDate = LocalDate.of(2026, 3, 29),
-                endDate = null,
-                periodEndDate = LocalDate.of(2026, 4, 2),
-                length = null,
-                periodLength = 5,
-                isComplete = false
-            )
-        )
-
         val prediction = engine.predictFromHistory(
-            cycles = cycles,
+            cycles = stableHistory(),
             fallbackCycleLength = 28,
             fallbackPeriodLength = 5,
+            referenceDate = referenceDate,
             stage = CycleStage.NOT_SET
         )
 
@@ -84,22 +69,23 @@ class PredictionEngineTest {
     }
 
     @Test
-    fun incompleteFirstCycleDoesNotCollapsePeriodToOneDay() {
+    fun incompleteOnboardingCycleUsesFallbackPeriodLength() {
         val start = LocalDate.of(2026, 8, 1)
-        val currentCycle = Cycle(
-            id = 1,
-            startDate = start,
-            endDate = null,
-            periodEndDate = start,
-            length = null,
-            periodLength = 1,
-            isComplete = false
-        )
-
         val prediction = engine.predictFromHistory(
-            cycles = listOf(currentCycle),
+            cycles = listOf(
+                Cycle(
+                    id = 1,
+                    startDate = start,
+                    endDate = null,
+                    periodEndDate = start,
+                    length = null,
+                    periodLength = null,
+                    isComplete = false
+                )
+            ),
             fallbackCycleLength = 28,
             fallbackPeriodLength = 5,
+            referenceDate = LocalDate.of(2026, 8, 10),
             stage = CycleStage.ESTABLISHED
         )
 
@@ -110,26 +96,31 @@ class PredictionEngineTest {
     }
 
     @Test
-    fun stableAdultHistoryCanShowBroadPregnancyEstimate() {
+    fun oneKnownCompletedPeriodLengthDoesNotReplaceFallback() {
         val cycles = listOf(
-            completeCycle(1, LocalDate.of(2026, 1, 1), 28, 5),
-            completeCycle(2, LocalDate.of(2026, 1, 29), 29, 5),
-            completeCycle(3, LocalDate.of(2026, 2, 27), 30, 6),
-            Cycle(
-                id = 4,
-                startDate = LocalDate.of(2026, 3, 29),
-                endDate = null,
-                periodEndDate = LocalDate.of(2026, 4, 2),
-                length = null,
-                periodLength = 5,
-                isComplete = false
-            )
+            completeCycle(1, LocalDate.of(2026, 1, 1), 28, null),
+            completeCycle(2, LocalDate.of(2026, 1, 29), 28, 5),
+            currentCycle(3, LocalDate.of(2026, 2, 26), 5)
         )
 
         val prediction = engine.predictFromHistory(
             cycles = cycles,
             fallbackCycleLength = 28,
+            fallbackPeriodLength = 6,
+            referenceDate = referenceDate,
+            stage = CycleStage.ESTABLISHED
+        )
+
+        assertEquals(6, prediction.expectedPeriodLength)
+    }
+
+    @Test
+    fun stableAdultHistoryCanShowBroadPregnancyEstimate() {
+        val prediction = engine.predictFromHistory(
+            cycles = stableHistory(),
+            fallbackCycleLength = 28,
             fallbackPeriodLength = 5,
+            referenceDate = referenceDate,
             stage = CycleStage.ESTABLISHED
         )
 
@@ -138,9 +129,40 @@ class PredictionEngineTest {
         assertEquals(6, prediction.expectedPeriodLength)
         assertEquals(3, prediction.basedOnCycles)
         assertFalse(prediction.highlyVariable)
+        assertFalse(prediction.outsideCommonRange)
         assertNotNull(prediction.possibleOvulationWindow)
         assertNotNull(prediction.possiblePregnancyWindow)
-        assertTrue(prediction.confidence > 0.20f)
+        assertEquals(
+            prediction.possibleOvulationWindow?.start?.minusDays(5),
+            prediction.possiblePregnancyWindow?.start
+        )
+        assertEquals(
+            prediction.possibleOvulationWindow?.end,
+            prediction.possiblePregnancyWindow?.end
+        )
+    }
+
+    @Test
+    fun steadyThirtySixDayCyclesAreNotCalledHighlyVariable() {
+        val cycles = listOf(
+            completeCycle(1, LocalDate.of(2026, 1, 1), 36, 5),
+            completeCycle(2, LocalDate.of(2026, 2, 6), 36, 5),
+            completeCycle(3, LocalDate.of(2026, 3, 14), 36, 5),
+            currentCycle(4, LocalDate.of(2026, 4, 19), 5)
+        )
+
+        val prediction = engine.predictFromHistory(
+            cycles = cycles,
+            fallbackCycleLength = 28,
+            fallbackPeriodLength = 5,
+            referenceDate = LocalDate.of(2026, 4, 20),
+            stage = CycleStage.ESTABLISHED
+        )
+
+        assertFalse(prediction.highlyVariable)
+        assertTrue(prediction.outsideCommonRange)
+        assertNull(prediction.possibleOvulationWindow)
+        assertNull(prediction.possiblePregnancyWindow)
     }
 
     @Test
@@ -149,21 +171,14 @@ class PredictionEngineTest {
             completeCycle(1, LocalDate.of(2026, 1, 1), 24, 5),
             completeCycle(2, LocalDate.of(2026, 1, 25), 38, 5),
             completeCycle(3, LocalDate.of(2026, 3, 4), 27, 5),
-            Cycle(
-                id = 4,
-                startDate = LocalDate.of(2026, 3, 31),
-                endDate = null,
-                periodEndDate = LocalDate.of(2026, 4, 4),
-                length = null,
-                periodLength = 5,
-                isComplete = false
-            )
+            currentCycle(4, LocalDate.of(2026, 3, 31), 5)
         )
 
         val prediction = engine.predictFromHistory(
             cycles = cycles,
             fallbackCycleLength = 28,
             fallbackPeriodLength = 5,
+            referenceDate = referenceDate,
             stage = CycleStage.ESTABLISHED
         )
 
@@ -174,25 +189,11 @@ class PredictionEngineTest {
 
     @Test
     fun longTermUnevenStageAlwaysUsesWideWindowAndNoOvulationGuess() {
-        val cycles = listOf(
-            completeCycle(1, LocalDate.of(2026, 1, 1), 26, 5),
-            completeCycle(2, LocalDate.of(2026, 1, 27), 42, 5),
-            completeCycle(3, LocalDate.of(2026, 3, 10), 31, 5),
-            Cycle(
-                id = 4,
-                startDate = LocalDate.of(2026, 4, 10),
-                endDate = null,
-                periodEndDate = LocalDate.of(2026, 4, 14),
-                length = null,
-                periodLength = 5,
-                isComplete = false
-            )
-        )
-
         val prediction = engine.predictFromHistory(
-            cycles = cycles,
+            cycles = stableHistory(),
             fallbackCycleLength = 28,
             fallbackPeriodLength = 5,
+            referenceDate = referenceDate,
             stage = CycleStage.LONG_TERM_UNEVEN
         )
 
@@ -200,37 +201,6 @@ class PredictionEngineTest {
         assertNotNull(window)
         assertTrue(window!!.lengthDays >= 29)
         assertTrue(prediction.highlyVariable)
-        assertNull(prediction.possibleOvulationWindow)
-        assertNull(prediction.possiblePregnancyWindow)
-    }
-
-    @Test
-    fun changingWithAgeAlwaysUsesWideWindowAndNoOvulationGuess() {
-        val cycles = listOf(
-            completeCycle(1, LocalDate.of(2026, 1, 1), 27, 5),
-            completeCycle(2, LocalDate.of(2026, 1, 28), 34, 5),
-            completeCycle(3, LocalDate.of(2026, 3, 3), 29, 5),
-            Cycle(
-                id = 4,
-                startDate = LocalDate.of(2026, 4, 1),
-                endDate = null,
-                periodEndDate = LocalDate.of(2026, 4, 5),
-                length = null,
-                periodLength = 5,
-                isComplete = false
-            )
-        )
-
-        val prediction = engine.predictFromHistory(
-            cycles = cycles,
-            fallbackCycleLength = 28,
-            fallbackPeriodLength = 5,
-            stage = CycleStage.CHANGING_WITH_AGE
-        )
-
-        val window = prediction.nextPeriodStartWindow
-        assertNotNull(window)
-        assertTrue(window!!.lengthDays >= 29)
         assertNull(prediction.possibleOvulationWindow)
         assertNull(prediction.possiblePregnancyWindow)
     }
@@ -250,18 +220,39 @@ class PredictionEngineTest {
         assertEquals(0f, prediction.confidence)
     }
 
+    private fun stableHistory(): List<Cycle> = listOf(
+        completeCycle(1, LocalDate.of(2026, 1, 1), 28, 5),
+        completeCycle(2, LocalDate.of(2026, 1, 29), 29, 5),
+        completeCycle(3, LocalDate.of(2026, 2, 27), 30, 6),
+        currentCycle(4, LocalDate.of(2026, 3, 29), 5)
+    )
+
     private fun completeCycle(
         id: Int,
         start: LocalDate,
         length: Int,
-        periodLength: Int
+        periodLength: Int?
     ): Cycle = Cycle(
         id = id,
         startDate = start,
         endDate = start.plusDays(length.toLong() - 1),
-        periodEndDate = start.plusDays(periodLength.toLong() - 1),
+        periodEndDate = start.plusDays(((periodLength ?: 1) - 1).toLong()),
         length = length,
         periodLength = periodLength,
         isComplete = true
+    )
+
+    private fun currentCycle(
+        id: Int,
+        start: LocalDate,
+        periodLength: Int?
+    ): Cycle = Cycle(
+        id = id,
+        startDate = start,
+        endDate = null,
+        periodEndDate = start.plusDays(((periodLength ?: 1) - 1).toLong()),
+        length = null,
+        periodLength = periodLength,
+        isComplete = false
     )
 }

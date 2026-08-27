@@ -12,18 +12,22 @@ import com.example.mycycle.domain.model.FertilityState
 import com.example.mycycle.domain.model.FlowIntensity
 import com.example.mycycle.domain.model.PeriodState
 import com.example.mycycle.domain.model.Prediction
+import com.example.mycycle.domain.model.UserPreferences
+import com.example.mycycle.util.currentDateFlow
+import java.time.Clock
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 
 data class CalendarState(
     val currentMonth: YearMonth = YearMonth.now(),
+    val today: LocalDate = LocalDate.now(),
     val dayStates: Map<LocalDate, DayState> = emptyMap(),
     val prediction: Prediction? = null,
     val isLoading: Boolean = true
@@ -33,13 +37,20 @@ class CalendarViewModel(
     private val preferencesRepository: UserPreferencesRepository,
     private val cycleDayRepository: CycleDayRepository,
     private val cycleDetector: CycleDetector,
-    private val predictionEngine: PredictionEngine
+    private val predictionEngine: PredictionEngine,
+    private val clock: Clock
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(CalendarState())
+    private val initialToday = LocalDate.now(clock)
+    private val _state = MutableStateFlow(
+        CalendarState(
+            currentMonth = YearMonth.from(initialToday),
+            today = initialToday
+        )
+    )
     val state: StateFlow<CalendarState> = _state.asStateFlow()
 
-    private val selectedMonth = MutableStateFlow(YearMonth.now())
+    private val selectedMonth = MutableStateFlow(YearMonth.from(initialToday))
 
     init {
         loadData()
@@ -54,7 +65,7 @@ class CalendarViewModel(
     }
 
     fun goToToday() {
-        selectedMonth.value = YearMonth.now()
+        selectedMonth.value = YearMonth.from(LocalDate.now(clock))
     }
 
     private fun loadData() {
@@ -62,38 +73,50 @@ class CalendarViewModel(
             combine(
                 preferencesRepository.preferences,
                 cycleDayRepository.observeAll(),
-                selectedMonth
-            ) { preferences, allDays, month ->
-                Triple(preferences, allDays, month)
-            }.collect { (preferences, allDays, month) ->
-                val today = LocalDate.now()
-                val cycles = cycleDetector.detectCycles(allDays)
+                selectedMonth,
+                currentDateFlow(clock)
+            ) { preferences, allDays, month, today ->
+                CalendarInput(preferences, allDays, month, today)
+            }.collect { input ->
+                val previousToday = _state.value.today
+                val previousCurrentMonth = YearMonth.from(previousToday)
+                val actualCurrentMonth = YearMonth.from(input.today)
+                if (
+                    input.month == previousCurrentMonth &&
+                    input.month != actualCurrentMonth
+                ) {
+                    selectedMonth.value = actualCurrentMonth
+                    return@collect
+                }
+
+                val cycles = cycleDetector.detectCycles(input.allDays)
 
                 val prediction = if (cycles.isNotEmpty()) {
                     predictionEngine.predictFromHistory(
                         cycles = cycles,
-                        fallbackCycleLength = preferences.estimatedCycleLength,
-                        fallbackPeriodLength = preferences.estimatedPeriodLength,
-                        stage = preferences.cycleStage
+                        fallbackCycleLength = input.preferences.estimatedCycleLength,
+                        fallbackPeriodLength = input.preferences.estimatedPeriodLength,
+                        stage = input.preferences.cycleStage,
+                        referenceDate = input.today
                     )
-                } else if (preferences.initialPeriodDate != null) {
+                } else if (input.preferences.initialPeriodDate != null) {
                     predictionEngine.predictFromOnboarding(
-                        lastPeriodStart = preferences.initialPeriodDate,
-                        cycleLength = preferences.estimatedCycleLength,
-                        periodLength = preferences.estimatedPeriodLength,
-                        stage = preferences.cycleStage
+                        lastPeriodStart = input.preferences.initialPeriodDate,
+                        cycleLength = input.preferences.estimatedCycleLength,
+                        periodLength = input.preferences.estimatedPeriodLength,
+                        stage = input.preferences.cycleStage
                     )
                 } else {
                     null
                 }
 
                 val lastPeriodStart = cycles.lastOrNull()?.startDate
-                    ?: preferences.initialPeriodDate
+                    ?: input.preferences.initialPeriodDate
 
-                val daysMap = allDays.associateBy { it.date }
+                val daysMap = input.allDays.associateBy { it.date }
                 val dayStatesMap = buildDayStates(
-                    month = month,
-                    today = today,
+                    month = input.month,
+                    today = input.today,
                     daysMap = daysMap,
                     lastPeriodStart = lastPeriodStart,
                     prediction = prediction
@@ -101,7 +124,8 @@ class CalendarViewModel(
 
                 _state.update {
                     CalendarState(
-                        currentMonth = month,
+                        currentMonth = input.month,
+                        today = input.today,
                         dayStates = dayStatesMap,
                         prediction = prediction,
                         isLoading = false
@@ -130,7 +154,6 @@ class CalendarViewModel(
             result[date] = DayState(
                 date = date,
                 cycleDay = cycleDay,
-                phase = null,
                 periodState = getPeriodState(date, existingDay, prediction),
                 fertilityState = getFertilityState(date, prediction),
                 symptoms = existingDay?.symptoms ?: emptySet(),
@@ -153,7 +176,7 @@ class CalendarViewModel(
             return PeriodState.CONFIRMED_SPOTTING
         }
 
-        if (cycleDay?.hasPeriod == true) {
+        if (cycleDay?.isPeriodBleeding == true) {
             return when (cycleDay.flowIntensity) {
                 FlowIntensity.LIGHT -> PeriodState.CONFIRMED_LIGHT
                 FlowIntensity.MEDIUM -> PeriodState.CONFIRMED_MEDIUM
@@ -186,4 +209,11 @@ class CalendarViewModel(
 
         return FertilityState.NONE
     }
+
+    private data class CalendarInput(
+        val preferences: UserPreferences,
+        val allDays: List<CycleDay>,
+        val month: YearMonth,
+        val today: LocalDate
+    )
 }

@@ -47,11 +47,10 @@ import com.example.mycycle.ui.theme.PeriodHeavy
 import com.example.mycycle.ui.theme.PeriodLight
 import com.example.mycycle.ui.theme.PeriodMedium
 import com.example.mycycle.ui.theme.PeriodStrong
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -63,7 +62,6 @@ fun DayDetailsSheet(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val locale = LocalConfiguration.current.locales[0]
-    val isFutureDate = state.date.isAfter(LocalDate.now())
 
     LaunchedEffect(state.isSaved) {
         if (state.isSaved) {
@@ -198,7 +196,7 @@ fun DayDetailsSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            if (isFutureDate) {
+            if (state.isFutureDate) {
                 Text(
                     text = stringResource(R.string.error_future_date),
                     style = MaterialTheme.typography.bodyMedium,
@@ -210,7 +208,7 @@ fun DayDetailsSheet(
             Button(
                 onClick = viewModel::save,
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isLoading && !isFutureDate
+                enabled = !state.isLoading && !state.isFutureDate
             ) {
                 Text(stringResource(R.string.day_details_save))
             }
@@ -225,22 +223,30 @@ private fun FlowOption(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val color = when (intensity) {
+    val accent = when (intensity) {
         FlowIntensity.SPOTTING -> PeriodLight
         FlowIntensity.LIGHT -> PeriodMedium
         FlowIntensity.MEDIUM -> PeriodStrong
         FlowIntensity.HEAVY -> PeriodHeavy
-        null -> MaterialTheme.colorScheme.surfaceVariant
+        null -> MaterialTheme.colorScheme.outline
     }
 
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) color.copy(alpha = 0.3f) else MaterialTheme.colorScheme.surfaceVariant)
+            .background(
+                if (isSelected) {
+                    accent.copy(alpha = 0.22f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                }
+            )
             .then(
                 if (isSelected) {
-                    Modifier.border(2.dp, color, RoundedCornerShape(12.dp))
-                } else Modifier
+                    Modifier.border(2.dp, accent, RoundedCornerShape(12.dp))
+                } else {
+                    Modifier
+                }
             )
             .clickable(onClick = onClick)
             .padding(12.dp),
@@ -254,7 +260,7 @@ private fun FlowOption(
                             imageVector = Icons.Rounded.WaterDrop,
                             contentDescription = null,
                             modifier = Modifier.size(12.dp),
-                            tint = color
+                            tint = accent
                         )
                     }
                 }
@@ -263,7 +269,7 @@ private fun FlowOption(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = if (isSelected) color else MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -297,7 +303,8 @@ private fun MoodOption(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = stringResource(mood.labelRes),
-                style = MaterialTheme.typography.labelSmall
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

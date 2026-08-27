@@ -46,12 +46,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mycycle.R
 import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.ui.theme.CycleColors
-import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun OnboardingScreen(
@@ -62,6 +62,8 @@ fun OnboardingScreen(
     val periodsStopped = state.cycleStage == CycleStage.PERIODS_STOPPED
     val lastStep = if (periodsStopped) 2 else 3
     val stepCount = lastStep + 1
+    val stageSelectionRequired =
+        state.currentStep == 1 && state.cycleStage == CycleStage.NOT_SET
 
     LaunchedEffect(state.isComplete) {
         if (state.isComplete) {
@@ -72,7 +74,7 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CycleColors.backgroundGradient)
+            .background(CycleColors.backgroundGradient())
     ) {
         Column(
             modifier = Modifier
@@ -126,7 +128,7 @@ fun OnboardingScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isLoading
+                enabled = !state.isLoading && !stageSelectionRequired
             ) {
                 Text(
                     text = when {
@@ -296,7 +298,7 @@ private fun PeriodDateStep(
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = selectedDate
-                .atStartOfDay(ZoneId.systemDefault())
+                .atStartOfDay(ZoneOffset.UTC)
                 .toInstant()
                 .toEpochMilli()
         )
@@ -308,7 +310,7 @@ private fun PeriodDateStep(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             val date = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneId.systemDefault())
+                                .atZone(ZoneOffset.UTC)
                                 .toLocalDate()
                             onDateSelected(date)
                         }

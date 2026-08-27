@@ -6,17 +6,18 @@ import com.example.mycycle.data.preferences.UserPreferencesRepository
 import com.example.mycycle.data.repository.CycleDayRepository
 import com.example.mycycle.domain.model.CycleDay
 import com.example.mycycle.domain.model.CycleStage
+import java.time.Clock
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 data class OnboardingState(
     val currentStep: Int = 0,
-    val cycleStage: CycleStage = CycleStage.ESTABLISHED,
-    val lastPeriodDate: LocalDate = LocalDate.now().minusDays(14),
+    val cycleStage: CycleStage = CycleStage.NOT_SET,
+    val lastPeriodDate: LocalDate,
     val cycleLength: Int = 28,
     val isLoading: Boolean = false,
     val isComplete: Boolean = false
@@ -24,14 +25,25 @@ data class OnboardingState(
 
 class OnboardingViewModel(
     private val preferencesRepository: UserPreferencesRepository,
-    private val cycleDayRepository: CycleDayRepository
+    private val cycleDayRepository: CycleDayRepository,
+    private val clock: Clock
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(OnboardingState())
+    private val _state = MutableStateFlow(
+        OnboardingState(
+            lastPeriodDate = LocalDate.now(clock).minusDays(14)
+        )
+    )
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
 
     fun nextStep() {
-        _state.update { it.copy(currentStep = (it.currentStep + 1).coerceAtMost(3)) }
+        _state.update { current ->
+            if (current.currentStep == 1 && current.cycleStage == CycleStage.NOT_SET) {
+                current
+            } else {
+                current.copy(currentStep = (current.currentStep + 1).coerceAtMost(3))
+            }
+        }
     }
 
     fun previousStep() {
@@ -39,6 +51,7 @@ class OnboardingViewModel(
     }
 
     fun setCycleStage(stage: CycleStage) {
+        if (stage == CycleStage.NOT_SET) return
         _state.update { current ->
             current.copy(
                 cycleStage = stage,
@@ -51,7 +64,8 @@ class OnboardingViewModel(
     }
 
     fun setLastPeriodDate(date: LocalDate) {
-        val safeDate = if (date.isAfter(LocalDate.now())) LocalDate.now() else date
+        val today = LocalDate.now(clock)
+        val safeDate = if (date.isAfter(today)) today else date
         _state.update { it.copy(lastPeriodDate = safeDate) }
     }
 
@@ -61,9 +75,11 @@ class OnboardingViewModel(
 
     fun completeOnboarding() {
         viewModelScope.launch {
+            val currentState = _state.value
+            if (currentState.cycleStage == CycleStage.NOT_SET) return@launch
+
             _state.update { it.copy(isLoading = true) }
 
-            val currentState = _state.value
             val periodsStopped = currentState.cycleStage == CycleStage.PERIODS_STOPPED
             val savedLastPeriodDate = currentState.lastPeriodDate.takeUnless { periodsStopped }
 

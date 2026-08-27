@@ -30,9 +30,9 @@ import com.example.mycycle.R
 import com.example.mycycle.domain.model.Cycle
 import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.ui.theme.CycleColors
-import org.koin.androidx.compose.koinViewModel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun StatisticsScreen(
@@ -43,7 +43,7 @@ fun StatisticsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CycleColors.backgroundGradient)
+            .background(CycleColors.backgroundGradient())
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -66,40 +66,54 @@ fun StatisticsScreen(
         val averageCycleLength = state.averageCycleLength
         val averagePeriodLength = state.averagePeriodLength
 
-        if (averageCycleLength == null || averagePeriodLength == null) {
+        if (averageCycleLength == null && averagePeriodLength == null) {
             Text(
                 text = stringResource(R.string.stats_not_enough_data),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(vertical = 32.dp)
+                    .padding(vertical = 24.dp)
             )
-            return@Column
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                title = stringResource(R.string.stats_avg_cycle),
-                value = pluralStringResource(
-                    R.plurals.days,
-                    averageCycleLength,
-                    averageCycleLength
-                ),
-                modifier = Modifier.weight(1f)
-            )
-            StatCard(
-                title = stringResource(R.string.stats_avg_period),
-                value = pluralStringResource(
-                    R.plurals.days,
-                    averagePeriodLength,
-                    averagePeriodLength
-                ),
-                modifier = Modifier.weight(1f)
-            )
+        } else if (averageCycleLength != null && averagePeriodLength != null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    title = stringResource(R.string.stats_avg_cycle),
+                    value = pluralStringResource(
+                        R.plurals.days,
+                        averageCycleLength,
+                        averageCycleLength
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                StatCard(
+                    title = stringResource(R.string.stats_avg_period),
+                    value = pluralStringResource(
+                        R.plurals.days,
+                        averagePeriodLength,
+                        averagePeriodLength
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        } else {
+            averageCycleLength?.let { value ->
+                StatCard(
+                    title = stringResource(R.string.stats_avg_cycle),
+                    value = pluralStringResource(R.plurals.days, value, value),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            averagePeriodLength?.let { value ->
+                StatCard(
+                    title = stringResource(R.string.stats_avg_period),
+                    value = pluralStringResource(R.plurals.days, value, value),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         state.cycleVariationDays?.let { variation ->
@@ -121,17 +135,19 @@ fun StatisticsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        if (state.cycles.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = stringResource(R.string.stats_history_title),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+            Text(
+                text = stringResource(R.string.stats_history_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-        state.cycles.forEach { cycle ->
-            CycleHistoryCard(cycle)
-            Spacer(modifier = Modifier.height(8.dp))
+            state.cycles.forEach { cycle ->
+                CycleHistoryCard(cycle)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }
@@ -206,11 +222,14 @@ private fun CycleHistoryCard(cycle: Cycle) {
     val locale: Locale = LocalConfiguration.current.locales[0]
     val formatter = DateTimeFormatter.ofPattern("d MMM yyyy", locale)
     val cycleLength = cycle.length
-    val value = if (cycle.isComplete && cycleLength != null) {
+    val cycleValue = if (cycle.isComplete && cycleLength != null) {
         pluralStringResource(R.plurals.days, cycleLength, cycleLength)
     } else {
         stringResource(R.string.stats_current_cycle)
     }
+    val periodValue = cycle.periodLength?.let { periodLength ->
+        pluralStringResource(R.plurals.days, periodLength, periodLength)
+    } ?: stringResource(R.string.stats_period_not_recorded)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -232,18 +251,13 @@ private fun CycleHistoryCard(cycle: Cycle) {
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = stringResource(R.string.stats_avg_period) + ": " +
-                        pluralStringResource(
-                            R.plurals.days,
-                            cycle.periodLength,
-                            cycle.periodLength
-                        ),
+                    text = stringResource(R.string.stats_bleeding_days, periodValue),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
-                text = value,
+                text = cycleValue,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )

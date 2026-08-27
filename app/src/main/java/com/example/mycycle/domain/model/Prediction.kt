@@ -12,6 +12,7 @@ data class Prediction(
     val method: PredictionMethod,
     val estimatedCycleLength: Int?,
     val highlyVariable: Boolean,
+    val outsideCommonRange: Boolean,
     val stage: CycleStage
 )
 
@@ -28,6 +29,5 @@ data class DateRange(
 
 enum class PredictionMethod {
     ONBOARDING_ESTIMATE,
-    CALENDAR_RHYTHM,
     WEIGHTED_AVERAGE
 }
