@@ -255,6 +255,7 @@ private fun DayCell(
     onClick: () -> Unit
 ) {
     val backgroundColor = when (dayState?.periodState) {
+        PeriodState.CONFIRMED_UNSPECIFIED -> PeriodMedium.copy(alpha = 0.35f)
         PeriodState.CONFIRMED_SPOTTING -> PeriodLight.copy(alpha = 0.5f)
         PeriodState.CONFIRMED_LIGHT -> PeriodMedium.copy(alpha = 0.5f)
         PeriodState.CONFIRMED_MEDIUM -> PeriodStrong.copy(alpha = 0.5f)
@@ -272,6 +273,8 @@ private fun DayCell(
         DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)
     }
     val periodDescription = when (dayState?.periodState) {
+        PeriodState.CONFIRMED_UNSPECIFIED ->
+            stringResource(R.string.a11y_period_amount_unknown)
         PeriodState.CONFIRMED_SPOTTING -> stringResource(R.string.a11y_spotting_day)
         PeriodState.CONFIRMED_LIGHT,
         PeriodState.CONFIRMED_MEDIUM,
