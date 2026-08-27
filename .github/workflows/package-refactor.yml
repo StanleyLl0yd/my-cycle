@@ -1,0 +1,54 @@
+name: Package Refactor
+
+on:
+  push:
+    branches:
+      - codex/package-namespace-cleanup
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Refactor package and namespace
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          find app/src/main/java app/src/test/java -type f -name '*.kt' -print0 \
+            | xargs -0 sed -i 's/com\.example\.mycycle/com.silverlightning.mycycle/g'
+
+          mkdir -p app/src/main/java/com/silverlightning
+          mv app/src/main/java/com/example/mycycle app/src/main/java/com/silverlightning/mycycle
+          rmdir app/src/main/java/com/example
+
+          mkdir -p app/src/test/java/com/silverlightning
+          mv app/src/test/java/com/example/mycycle app/src/test/java/com/silverlightning/mycycle
+          rmdir app/src/test/java/com/example
+
+          sed -i 's/namespace = "com\.example\.mycycle"/namespace = "com.silverlightning.mycycle"/' app/build.gradle.kts
+
+          mv app/schemas/com.example.mycycle.data.local.AppDatabase \
+            app/schemas/com.silverlightning.mycycle.data.local.AppDatabase
+
+          if grep -R --line-number --fixed-strings 'com.example.mycycle' app; then
+            echo 'Old package reference still exists.' >&2
+            exit 1
+          fi
+
+      - name: Commit refactor
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Refactor internal package namespace'
+          git push
