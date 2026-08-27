@@ -1,0 +1,64 @@
+name: Publish My Cycle 1.1.1
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/publish-v1.1.1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view v1.1.1 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release v1.1.1 already exists"
+            exit 0
+          fi
+
+          cat > release-notes.md <<'EOF'
+          # My Cycle 1.1.1
+
+          A maintenance and correctness release following a full review of cycle detection, estimates, health-related wording, accessibility, UI consistency and build configuration.
+
+          ## Highlights
+          - Keeps spotting separate from period bleeding, including legacy entries from older versions.
+          - Does not invent a one-day period from the single start date entered during setup.
+          - Preserves explicit no-blood/spotting breaks between bleeding episodes.
+          - Separates highly variable cycles from fairly steady cycles that are outside the common range used by the app.
+          - Uses broader, more cautious calendar estimates and removes the old fixed `cycle length - 14` phase logic.
+          - Adds clearer attention notes for unusually long gaps, long bleeding and bleeding after a year-long age-related stop.
+          - Improves recent-cycle statistics, midnight date rollover, dark mode, contrast, locale-aware calendar layout and TalkBack descriptions.
+          - Keeps CSV export UTF-8 and moves file writing off the UI thread.
+          - Removes unused Kotlin Serialization, stale resources and unnecessary R8 rules.
+          - Adds regression tests for the review findings and cleans up CI.
+
+          ## Signed APK
+          [Download My-Cycle-v1.1.1.apk from Google Drive](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)
+
+          SHA-256: `350ffa182220785bc3a53c11fd85f35d1135d0b932b80b06d35b57d0fab589b4`
+
+          APK Signature Scheme v2: verified  
+          APK Signature Scheme v3: verified  
+          Signer certificate SHA-256: `f02571c40741e2cb071564f5b63fd3dc38a875d0eda11a8c42269ed635bc2a58`
+
+          ## Privacy and scope
+          My Cycle remains offline for cycle records: no account, analytics, ads or Android `INTERNET` permission. It is a diary and calendar estimator, not a medical device, diagnostic tool or contraceptive method.
+
+          **Author:** Stanley Lloyd  
+          **Application ID:** `com.silverlightning.mycycle`  
+          **License:** PolyForm Noncommercial License 1.0.0
+          EOF
+
+          gh release create v1.1.1 \
+            --repo "$GITHUB_REPOSITORY" \
+            --target ac37d1d0fb445ffe36ef315a592815c52516dc03 \
+            --title "My Cycle 1.1.1" \
+            --notes-file release-notes.md
