@@ -13,11 +13,11 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.example.mycycle.domain.model.CycleStage
 import com.example.mycycle.domain.model.ThemeMode
 import com.example.mycycle.domain.model.UserPreferences
+import java.io.IOException
+import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import java.io.IOException
-import java.time.LocalDate
 
 val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "user_preferences"
@@ -84,12 +84,6 @@ class UserPreferencesRepository(
         dataStore.edit { prefs ->
             prefs[Keys.THEME_MODE] = mode.name
             prefs[Keys.USE_DYNAMIC_COLORS] = dynamicColors
-        }
-    }
-
-    suspend fun updateCycleLength(length: Int) {
-        dataStore.edit { prefs ->
-            prefs[Keys.ESTIMATED_CYCLE_LENGTH] = length
         }
     }
 
