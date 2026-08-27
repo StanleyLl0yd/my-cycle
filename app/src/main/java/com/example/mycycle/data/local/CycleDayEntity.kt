@@ -21,19 +21,30 @@ data class CycleDayEntity(
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant = Instant.now()
 ) {
-    fun toDomain(): CycleDay = CycleDay(
-        date = date,
-        hasPeriod = hasPeriod,
-        flowIntensity = flowIntensityLevel?.let { FlowIntensity.fromLevel(it) },
-        mood = moodLevel?.let { Mood.fromLevel(it) },
-        symptoms = Symptom.fromMask(symptomsMask),
-        notes = notes
-    )
+    fun toDomain(): CycleDay {
+        val flow = flowIntensityLevel?.let { FlowIntensity.fromLevel(it) }
+        val normalizedHasPeriod = when (flow) {
+            FlowIntensity.SPOTTING -> false
+            FlowIntensity.LIGHT,
+            FlowIntensity.MEDIUM,
+            FlowIntensity.HEAVY -> true
+            null -> hasPeriod
+        }
+
+        return CycleDay(
+            date = date,
+            hasPeriod = normalizedHasPeriod,
+            flowIntensity = flow,
+            mood = moodLevel?.let { Mood.fromLevel(it) },
+            symptoms = Symptom.fromMask(symptomsMask),
+            notes = notes
+        )
+    }
 
     companion object {
         fun fromDomain(domain: CycleDay): CycleDayEntity = CycleDayEntity(
             date = domain.date,
-            hasPeriod = domain.hasPeriod,
+            hasPeriod = domain.isPeriodBleeding,
             flowIntensityLevel = domain.flowIntensity?.level,
             moodLevel = domain.mood?.level,
             symptomsMask = Symptom.toMask(domain.symptoms),

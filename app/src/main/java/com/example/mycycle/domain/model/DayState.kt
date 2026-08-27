@@ -5,7 +5,6 @@ import java.time.LocalDate
 data class DayState(
     val date: LocalDate,
     val cycleDay: Int?,
-    val phase: CyclePhase?,
     val periodState: PeriodState,
     val fertilityState: FertilityState,
     val symptoms: Set<Symptom>,

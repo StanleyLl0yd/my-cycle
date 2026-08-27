@@ -49,6 +49,7 @@ class PredictionEngine {
         cycles: List<Cycle>,
         fallbackCycleLength: Int,
         fallbackPeriodLength: Int,
+        referenceDate: LocalDate,
         stage: CycleStage = CycleStage.NOT_SET
     ): Prediction {
         if (stage == CycleStage.PERIODS_STOPPED) {
@@ -60,7 +61,7 @@ class PredictionEngine {
         if (completeCycles.isEmpty()) {
             val lastCycle = cycles.lastOrNull()
             return predictFromOnboarding(
-                lastPeriodStart = lastCycle?.startDate ?: LocalDate.now(),
+                lastPeriodStart = lastCycle?.startDate ?: referenceDate,
                 cycleLength = fallbackCycleLength,
                 periodLength = fallbackPeriodLength,
                 stage = stage
@@ -69,10 +70,10 @@ class PredictionEngine {
 
         val recentCycles = completeCycles.takeLast(MAX_CYCLES_FOR_AVERAGE)
         val lengths = recentCycles.mapNotNull { it.length }
-        val periodLengths = recentCycles.map { it.periodLength }
+        val periodLengths = recentCycles.mapNotNull { it.periodLength }
 
         val avgCycleLength = weightedAverage(lengths)
-        val avgPeriodLength = if (recentCycles.size < 2) {
+        val avgPeriodLength = if (periodLengths.size < 2) {
             fallbackPeriodLength
         } else {
             weightedAverage(periodLengths)
@@ -102,26 +103,28 @@ class PredictionEngine {
         stage: CycleStage,
         method: PredictionMethod
     ): Prediction {
-        val centerDate = lastPeriodStart.plusDays(avgCycleLength.toLong())
+        val highlyVariable = isHighlyVariable(stage, spread)
+        val outsideCommonRange = isOutsideCommonRange(stage, avgCycleLength)
         val historyRadius = maxOf(
             ceil(spread / 2.0).toInt(),
             ceil(stdDev * 1.5f).toInt()
         )
-        val radius = maxOf(minimumWindowRadius(stage), historyRadius)
+        val radius = maxOf(
+            minimumWindowRadius(stage),
+            historyRadius,
+            if (outsideCommonRange) 7 else 0
+        )
+        val centerDate = lastPeriodStart.plusDays(avgCycleLength.toLong())
         val nextPeriodStartWindow = DateRange(
             start = centerDate.minusDays(radius.toLong()),
             end = centerDate.plusDays(radius.toLong())
         )
 
-        val highlyVariable = isHighlyVariable(
-            stage = stage,
-            averageLength = avgCycleLength,
-            spread = spread
-        )
-
-        val canEstimateOvulation = stage == CycleStage.ESTABLISHED &&
-            cycleCount >= 3 &&
-            !highlyVariable
+        val canEstimateOvulation =
+            stage == CycleStage.ESTABLISHED &&
+                cycleCount >= 3 &&
+                !highlyVariable &&
+                !outsideCommonRange
 
         val possibleOvulationWindow = if (canEstimateOvulation) {
             DateRange(
@@ -149,11 +152,15 @@ class PredictionEngine {
             method = method,
             estimatedCycleLength = avgCycleLength,
             highlyVariable = highlyVariable,
+            outsideCommonRange = outsideCommonRange,
             stage = stage
         )
     }
 
-    private fun stoppedPrediction(periodLength: Int, stage: CycleStage): Prediction = Prediction(
+    private fun stoppedPrediction(
+        periodLength: Int,
+        stage: CycleStage
+    ): Prediction = Prediction(
         nextPeriodStartWindow = null,
         expectedPeriodLength = periodLength.coerceAtLeast(1),
         possiblePregnancyWindow = null,
@@ -163,6 +170,7 @@ class PredictionEngine {
         method = PredictionMethod.ONBOARDING_ESTIMATE,
         estimatedCycleLength = null,
         highlyVariable = true,
+        outsideCommonRange = false,
         stage = stage
     )
 
@@ -178,16 +186,24 @@ class PredictionEngine {
 
     private fun isHighlyVariable(
         stage: CycleStage,
-        averageLength: Int,
         spread: Int
     ): Boolean = when (stage) {
         CycleStage.NOT_SET -> true
         CycleStage.FIRST_YEAR -> true
-        CycleStage.YEARS_ONE_TO_THREE -> spread > 14 || averageLength !in 21..45
-        CycleStage.ESTABLISHED -> spread > 9 || averageLength !in 21..35
+        CycleStage.YEARS_ONE_TO_THREE -> spread > 14
+        CycleStage.ESTABLISHED -> spread > 9
         CycleStage.LONG_TERM_UNEVEN -> true
         CycleStage.CHANGING_WITH_AGE -> true
         CycleStage.PERIODS_STOPPED -> true
+    }
+
+    private fun isOutsideCommonRange(
+        stage: CycleStage,
+        averageLength: Int
+    ): Boolean = when (stage) {
+        CycleStage.YEARS_ONE_TO_THREE -> averageLength !in 21..45
+        CycleStage.ESTABLISHED -> averageLength !in 21..35
+        else -> false
     }
 
     private fun calculateConfidence(

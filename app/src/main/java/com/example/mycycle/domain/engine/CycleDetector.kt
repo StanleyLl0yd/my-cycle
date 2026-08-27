@@ -2,7 +2,7 @@ package com.example.mycycle.domain.engine
 
 import com.example.mycycle.domain.model.Cycle
 import com.example.mycycle.domain.model.CycleDay
-import com.example.mycycle.domain.model.FlowIntensity
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 class CycleDetector {
@@ -12,71 +12,95 @@ class CycleDetector {
     }
 
     fun detectCycles(days: List<CycleDay>): List<Cycle> {
-        val sortedDays = days
-            .filter { it.hasPeriod && it.flowIntensity != FlowIntensity.SPOTTING }
+        val daysByDate = days.associateBy { it.date }
+        val periodDays = days
+            .filter { it.isPeriodBleeding }
             .sortedBy { it.date }
 
-        if (sortedDays.isEmpty()) return emptyList()
+        if (periodDays.isEmpty()) return emptyList()
 
         val cycles = mutableListOf<Cycle>()
         var cycleId = 1
-        var currentPeriodStart = sortedDays.first().date
+        var currentPeriodStart = periodDays.first().date
         var currentPeriodEnd = currentPeriodStart
+        var currentPeriodLengthKnown = periodDays.first().flowIntensity != null
         var previousPeriodDate = currentPeriodStart
 
-        for (i in 1 until sortedDays.size) {
-            val day = sortedDays[i]
-            val gapFromPreviousPeriodDay = ChronoUnit.DAYS.between(
-                previousPeriodDate,
-                day.date
-            )
+        for (index in 1 until periodDays.size) {
+            val day = periodDays[index]
+            val gap = ChronoUnit.DAYS.between(previousPeriodDate, day.date)
+            val canBridgeMissingDay =
+                gap <= MAX_PERIOD_GAP_DAYS &&
+                    !hasExplicitBreak(daysByDate, previousPeriodDate, day.date)
 
-            if (gapFromPreviousPeriodDay <= MAX_PERIOD_GAP_DAYS) {
+            if (canBridgeMissingDay) {
                 currentPeriodEnd = day.date
+                currentPeriodLengthKnown =
+                    currentPeriodLengthKnown || day.flowIntensity != null
                 previousPeriodDate = day.date
                 continue
             }
 
-            val cycleLength = ChronoUnit.DAYS.between(
-                currentPeriodStart,
-                day.date
-            ).toInt()
-
-            cycles.add(
-                Cycle(
-                    id = cycleId++,
-                    startDate = currentPeriodStart,
-                    endDate = day.date.minusDays(1),
-                    periodEndDate = currentPeriodEnd,
-                    length = cycleLength,
-                    periodLength = ChronoUnit.DAYS.between(
-                        currentPeriodStart,
-                        currentPeriodEnd
-                    ).toInt() + 1,
-                    isComplete = true
-                )
+            cycles += Cycle(
+                id = cycleId++,
+                startDate = currentPeriodStart,
+                endDate = day.date.minusDays(1),
+                periodEndDate = currentPeriodEnd,
+                length = ChronoUnit.DAYS.between(currentPeriodStart, day.date).toInt(),
+                periodLength = periodLength(
+                    start = currentPeriodStart,
+                    end = currentPeriodEnd,
+                    isKnown = currentPeriodLengthKnown
+                ),
+                isComplete = true
             )
 
             currentPeriodStart = day.date
             currentPeriodEnd = day.date
+            currentPeriodLengthKnown = day.flowIntensity != null
             previousPeriodDate = day.date
         }
 
-        cycles.add(
-            Cycle(
-                id = cycleId,
-                startDate = currentPeriodStart,
-                endDate = null,
-                periodEndDate = currentPeriodEnd,
-                length = null,
-                periodLength = ChronoUnit.DAYS.between(
-                    currentPeriodStart,
-                    currentPeriodEnd
-                ).toInt() + 1,
-                isComplete = false
-            )
+        cycles += Cycle(
+            id = cycleId,
+            startDate = currentPeriodStart,
+            endDate = null,
+            periodEndDate = currentPeriodEnd,
+            length = null,
+            periodLength = periodLength(
+                start = currentPeriodStart,
+                end = currentPeriodEnd,
+                isKnown = currentPeriodLengthKnown
+            ),
+            isComplete = false
         )
 
         return cycles
+    }
+
+    private fun hasExplicitBreak(
+        daysByDate: Map<LocalDate, CycleDay>,
+        previousPeriodDate: LocalDate,
+        nextPeriodDate: LocalDate
+    ): Boolean {
+        var date = previousPeriodDate.plusDays(1)
+        while (date.isBefore(nextPeriodDate)) {
+            val entry = daysByDate[date]
+            if (entry != null && !entry.isPeriodBleeding) {
+                return true
+            }
+            date = date.plusDays(1)
+        }
+        return false
+    }
+
+    private fun periodLength(
+        start: LocalDate,
+        end: LocalDate,
+        isKnown: Boolean
+    ): Int? = if (isKnown) {
+        ChronoUnit.DAYS.between(start, end).toInt() + 1
+    } else {
+        null
     }
 }
