@@ -63,7 +63,8 @@ jobs:
           done
 
           if grep -R --line-number -E 'AGP 8\.13\.2|Gradle 8\.13|Kotlin 2\.3\.0|Koin 4\.1\.1|DataStore 1\.1\.4|compileSdk = 36|targetSdk = 36|org\.jetbrains\.kotlin\.android' \
-            app build.gradle.kts gradle .github README.md README.ru.md CONTRIBUTING.md CONTRIBUTING.ru.md; then
+            app build.gradle.kts gradle README.md README.ru.md CONTRIBUTING.md CONTRIBUTING.ru.md \
+            .github/workflows/ci.yml .github/workflows/release.yml; then
             echo 'Old Android toolchain reference still exists.' >&2
             exit 1
           fi
