@@ -3,6 +3,7 @@ package com.silverlightning.mycycle.ui.settings
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -67,6 +68,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val exportSuccessMessage = stringResource(R.string.dialog_export_success)
     val genericErrorMessage = stringResource(R.string.error_generic)
+    val dynamicColorsAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val scope = rememberCoroutineScope()
     var showClearDialog by remember { mutableStateOf(false) }
 
@@ -179,8 +181,15 @@ fun SettingsScreen(
             HorizontalDivider()
             SettingsItemWithSwitch(
                 title = stringResource(R.string.settings_dynamic_colors),
-                subtitle = stringResource(R.string.settings_dynamic_colors_desc),
+                subtitle = stringResource(
+                    if (dynamicColorsAvailable) {
+                        R.string.settings_dynamic_colors_desc
+                    } else {
+                        R.string.settings_dynamic_colors_unavailable
+                    }
+                ),
                 checked = state.useDynamicColors,
+                enabled = dynamicColorsAvailable,
                 onCheckedChange = viewModel::setDynamicColors
             )
         }
@@ -353,12 +362,13 @@ private fun SettingsItemWithSwitch(
     title: String,
     subtitle: String,
     checked: Boolean,
+    enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
+            .clickable(enabled = enabled) { onCheckedChange(!checked) }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -378,7 +388,8 @@ private fun SettingsItemWithSwitch(
 
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
+            enabled = enabled
         )
     }
 }
