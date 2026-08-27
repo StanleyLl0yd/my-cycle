@@ -16,74 +16,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Sync release README files and remove one-time workflow
+      - name: Sync README and remove one-time workflow
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          release_url = "https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.1"
-          drive_url = "https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk"
-          sha256 = "350ffa182220785bc3a53c11fd85f35d1135d0b932b80b06d35b57d0fab589b4"
-
-          en_path = Path("README.md")
-          en = en_path.read_text(encoding="utf-8")
-          en = en.replace(
-              "Latest published APK: **1.1.0**",
-              "Latest published APK: **1.1.1**",
-          )
-          en_block = f"""## 📦 Installation
-
-The latest published signed APK is **1.1.1**.
-
-[Open My Cycle 1.1.1 on GitHub]({release_url})
-
-[Download signed My-Cycle-v1.1.1.apk from Google Drive]({drive_url})
-
-SHA-256 (`My-Cycle-v1.1.1.apk`): `{sha256}`
-
-Android 8.0 or newer is required."""
-          en, en_count = re.subn(
-              r"## 📦 Installation\n\n.*?\n\nAndroid 8\.0 or newer is required\.",
-              en_block,
-              en,
-              count=1,
-              flags=re.S,
-          )
-          if en_count != 1:
-              raise SystemExit("English installation block was not updated exactly once")
-          en_path.write_text(en, encoding="utf-8")
-
-          ru_path = Path("README.ru.md")
-          ru = ru_path.read_text(encoding="utf-8")
-          ru = ru.replace(
-              "Последний опубликованный APK: **1.1.0**",
-              "Последний опубликованный APK: **1.1.1**",
-          )
-          ru_block = f"""## 📦 Установка
-
-Последний опубликованный подписанный APK — **1.1.1**.
-
-[Открыть My Cycle 1.1.1 на GitHub]({release_url})
-
-[Скачать подписанный My-Cycle-v1.1.1.apk с Google Drive]({drive_url})
-
-SHA-256 (`My-Cycle-v1.1.1.apk`): `{sha256}`
-
-Для установки требуется Android 8.0 или новее."""
-          ru, ru_count = re.subn(
-              r"## 📦 Установка\n\n.*?\n\nДля установки требуется Android 8\.0 или новее\.",
-              ru_block,
-              ru,
-              count=1,
-              flags=re.S,
-          )
-          if ru_count != 1:
-              raise SystemExit("Russian installation block was not updated exactly once")
-          ru_path.write_text(ru, encoding="utf-8")
-          PY
-
+          python3 -c 'from pathlib import Path; import re; p=Path("README.md"); s=p.read_text(encoding="utf-8"); s=s.replace("Latest published APK: **1.1.0**", "Latest published APK: **1.1.1**"); b="## 📦 Installation\n\nThe latest published signed APK is **1.1.1**.\n\n[Open My Cycle 1.1.1 on GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.1)\n\n[Download signed My-Cycle-v1.1.1.apk from Google Drive](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)\n\nSHA-256 (`My-Cycle-v1.1.1.apk`): `350ffa182220785bc3a53c11fd85f35d1135d0b932b80b06d35b57d0fab589b4`\n\nAndroid 8.0 or newer is required."; s,n=re.subn(r"## 📦 Installation\n\n.*?\n\nAndroid 8\.0 or newer is required\.", b, s, count=1, flags=re.S); assert n==1; p.write_text(s, encoding="utf-8")'
+          python3 -c 'from pathlib import Path; import re; p=Path("README.ru.md"); s=p.read_text(encoding="utf-8"); s=s.replace("Последний опубликованный APK: **1.1.0**", "Последний опубликованный APK: **1.1.1**"); b="## 📦 Установка\n\nПоследний опубликованный подписанный APK — **1.1.1**.\n\n[Открыть My Cycle 1.1.1 на GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.1)\n\n[Скачать подписанный My-Cycle-v1.1.1.apk с Google Drive](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)\n\nSHA-256 (`My-Cycle-v1.1.1.apk`): `350ffa182220785bc3a53c11fd85f35d1135d0b932b80b06d35b57d0fab589b4`\n\nДля установки требуется Android 8.0 или новее."; s,n=re.subn(r"## 📦 Установка\n\n.*?\n\nДля установки требуется Android 8\.0 или новее\.", b, s, count=1, flags=re.S); assert n==1; p.write_text(s, encoding="utf-8")'
           git rm .github/workflows/publish-v1.1.1.yml
           git config user.name "Stanley Lloyd"
           git config user.email "131160519+StanleyLl0yd@users.noreply.github.com"
