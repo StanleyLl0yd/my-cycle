@@ -15,10 +15,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v7
@@ -34,21 +30,32 @@ jobs:
         with:
           gradle-version: '8.13'
 
-      - name: Restore release keystore when configured
+      - name: Restore release keystore on trusted main pushes
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && \
-             [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && \
-             [ -n "$ANDROID_KEY_ALIAS" ] && \
-             [ -n "$ANDROID_KEY_PASSWORD" ]; then
-            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/my-cycle-release.jks"
-            test -s "$RUNNER_TEMP/my-cycle-release.jks"
-            echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/my-cycle-release.jks" >> "$GITHUB_ENV"
-            echo "ANDROID_HAS_RELEASE_SIGNING=true" >> "$GITHUB_ENV"
-          else
-            echo "ANDROID_HAS_RELEASE_SIGNING=false" >> "$GITHUB_ENV"
-          fi
+          set -euo pipefail
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
+
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/my-cycle-release.jks"
+          test -s "$RUNNER_TEMP/my-cycle-release.jks"
+
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/my-cycle-release.jks" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_HAS_RELEASE_SIGNING=true" >> "$GITHUB_ENV"
+
+      - name: Mark release as unsigned outside trusted main pushes
+        if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+        run: echo "ANDROID_HAS_RELEASE_SIGNING=false" >> "$GITHUB_ENV"
 
       - name: Build APKs and run unit tests
         run: gradle assembleDebug assembleRelease test --stacktrace
