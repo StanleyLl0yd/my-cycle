@@ -132,6 +132,14 @@ class PredictionEngineTest {
         assertFalse(prediction.outsideCommonRange)
         assertNotNull(prediction.possibleOvulationWindow)
         assertNotNull(prediction.possiblePregnancyWindow)
+        assertEquals(
+            prediction.possibleOvulationWindow?.start?.minusDays(5),
+            prediction.possiblePregnancyWindow?.start
+        )
+        assertEquals(
+            prediction.possibleOvulationWindow?.end,
+            prediction.possiblePregnancyWindow?.end
+        )
     }
 
     @Test
