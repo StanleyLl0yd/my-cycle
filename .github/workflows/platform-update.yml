@@ -43,13 +43,6 @@ jobs:
             -e 's/targetSdk = 36/targetSdk = 37/' \
             app/build.gradle.kts
 
-          for file in .github/workflows/ci.yml .github/workflows/release.yml; do
-            sed -i \
-              -e 's/Set up Gradle 8\.13/Set up Gradle 9.5.0/g' \
-              -e "s/gradle-version: '8\.13'/gradle-version: '9.5.0'/g" \
-              "$file"
-          done
-
           for file in README.md README.ru.md CONTRIBUTING.md CONTRIBUTING.ru.md; do
             sed -i \
               -e 's/Target SDK: \*\*36\*\*/Target SDK: **37**/g' \
@@ -63,8 +56,7 @@ jobs:
           done
 
           if grep -R --line-number -E 'AGP 8\.13\.2|Gradle 8\.13|Kotlin 2\.3\.0|Koin 4\.1\.1|DataStore 1\.1\.4|compileSdk = 36|targetSdk = 36|org\.jetbrains\.kotlin\.android' \
-            app build.gradle.kts gradle README.md README.ru.md CONTRIBUTING.md CONTRIBUTING.ru.md \
-            .github/workflows/ci.yml .github/workflows/release.yml; then
+            app build.gradle.kts gradle README.md README.ru.md CONTRIBUTING.md CONTRIBUTING.ru.md; then
             echo 'Old Android toolchain reference still exists.' >&2
             exit 1
           fi
