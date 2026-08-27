@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
@@ -19,12 +18,12 @@ val hasReleaseSigning = listOf(
 
 android {
     namespace = "com.silverlightning.mycycle"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.silverlightning.mycycle"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 3
         versionName = "1.1.1"
 

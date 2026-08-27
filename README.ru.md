@@ -13,7 +13,7 @@
 
 [⬇️ Скачать последний опубликованный APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Версия исходного кода: **1.1.1** · Последний опубликованный APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **36**
+Версия исходного кода: **1.1.1** · Последний опубликованный APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Возможности
 
@@ -116,10 +116,10 @@ SHA-256 (`My-Cycle-v1.1.1.apk`): `7479ca24cfe8b560ee6258d98e31ac8d99c68419891b34
 Требования:
 
 - JDK 21
-- Android SDK 36
-- Gradle 8.13
+- Android SDK 37
+- Gradle 9.5.0
 
-В репозитории сейчас нет `gradle-wrapper.jar`, поэтому для сборки из командной строки требуется установленный Gradle 8.13.
+В репозитории сейчас нет `gradle-wrapper.jar`, поэтому для сборки из командной строки требуется установленный Gradle 9.5.0.
 
 ```bash
 git clone https://github.com/StanleyLl0yd/my-cycle.git
@@ -142,14 +142,14 @@ gradle assembleRelease
 
 | Категория | Технология |
 | --- | --- |
-| Язык | Kotlin 2.3.0 |
+| Язык | Kotlin 2.4.10 |
 | Интерфейс | Jetpack Compose + Material 3 |
 | Устройство приложения | Layered MVVM |
-| Связь частей приложения | Koin 4.1.1 |
+| Связь частей приложения | Koin 4.2.2 |
 | Фоновая работа / состояние | Kotlin Coroutines + Flow |
 | Локальная база | Room 2.8.4 |
-| Локальные настройки | DataStore 1.1.4 |
-| Сборка | Gradle 8.13, AGP 8.13.2, Kotlin DSL |
+| Локальные настройки | DataStore 1.2.1 |
+| Сборка | Gradle 9.5.0, AGP 9.3.2, Kotlin DSL |
 
 ## ✅ Проверка проекта
 
