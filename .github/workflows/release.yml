@@ -11,7 +11,6 @@ on:
       tag:
         description: Release tag matching app version
         required: true
-        default: v1.1.1
         type: string
 
 permissions:
@@ -119,7 +118,10 @@ jobs:
 
           report="$RUNNER_TEMP/apksigner-report.txt"
           "$apksigner" verify --verbose --print-certs "$source_apk" | tee "$report"
+          grep -F 'Verified using v1 scheme (JAR signing): false' "$report"
           grep -F 'Verified using v2 scheme (APK Signature Scheme v2): true' "$report"
+          grep -F 'Verified using v3 scheme (APK Signature Scheme v3): true' "$report"
+          grep -F 'Number of signers: 1' "$report"
 
           actual_fingerprint="$(
             awk -F': ' '/certificate SHA-256 digest:/ {print $NF; exit}' "$report" |
@@ -182,7 +184,7 @@ jobs:
         run: rm -f "$RUNNER_TEMP/my-cycle-release.jks"
 
       - name: Remove temporary release branch
-        if: always() && github.ref_type == 'branch' && startsWith(github.ref_name, 'release/v')
+        if: success() && github.ref_type == 'branch' && startsWith(github.ref_name, 'release/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
