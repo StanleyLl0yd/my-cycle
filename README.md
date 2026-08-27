@@ -13,27 +13,29 @@ A simple, private period diary for Android. It keeps your real dates and gives c
 
 [⬇️ Download the latest published APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.1.0** · Latest published APK: **1.1.0** · Min SDK: **26 (Android 8.0)** · Target SDK: **36**
+Source version: **1.1.1** · Latest published APK: **1.1.0** · Min SDK: **26 (Android 8.0)** · Target SDK: **36**
 
 ## ✨ Features
 
-- First setup asks which situation fits you now:
+- First setup asks which situation fits you now, and you must choose one before continuing:
   - periods started less than 1 year ago
   - periods started 1–3 years ago
   - periods have been coming for more than 3 years and the gaps are usually similar
   - periods have been coming for more than 3 years but the gaps still change a lot
   - periods are changing as you get older
-  - no period for 12 months or more
+  - periods stopped for a full year as part of getting older, or a doctor has already explained that they stopped for good
 - The choice can be changed later in Settings without deleting old records
-- When updating from 1.0.0, all old records are kept. Until one of the new options is chosen once in Settings, 1.1.0 deliberately uses a wide date range and does not show an egg-release or pregnancy-likelihood estimate
+- Existing 1.0.0/1.1.0 records stay in place. Old “A few spots” entries are treated as spots, not as a real period
 - Today shows how many days have passed since the last recorded period and a **range of dates** when the next one may start
 - Daily records for bleeding, mood, how your body feels and free notes
 - “A few spots” is kept in the diary but does **not** start a new cycle
-- A short gap between real periods is kept as entered instead of being hidden by the app
+- If you explicitly record “No blood” or “A few spots” between two bleeding days, the app does not join those days into one period. A completely unrecorded nearby day can still be treated as a missed diary entry
+- The one period-start date entered during first setup is not treated as proof that the bleeding lasted one day. The bleeding length stays unknown until enough real days are recorded
 - Calendar shows recorded bleeding and pale calendar guesses for possible future dates
 - After enough fairly similar adult cycles, the calendar may show a broad range of days when pregnancy could be more likely
-- Statistics describe your own recent pattern instead of comparing everyone with a 28-day cycle
+- Statistics use recent history: up to 6 finished cycles for summary numbers and up to 12 cycles for the history list
 - Simple attention notes for some unusually long gaps, longer-than-usual bleeding and new bleeding after about a year without periods
+- Dark mode, better contrast and spoken calendar descriptions for TalkBack
 - CSV export through Android's system file picker
 - Complete deletion of period records and app settings
 - System, Light and Dark themes with Material You colors on Android 12+
@@ -46,25 +48,28 @@ Future dates can be viewed in the calendar but cannot be saved as real events.
 
 My Cycle treats the calendar as a **guess**, not as a measurement of the body.
 
-On first use, the app asks for the situation that fits you, the first day of the most recent real period and the usual gap between periods. If you choose “no period for 12 months or more”, it does not ask for or create a made-up recent period date and does not guess another period.
+On first use, the app asks for the situation that fits you, the first day of the most recent real period and the usual gap between periods. The first question must be answered before setup continues. The option about periods stopping for a full year is meant for age-related changes or a situation already explained by a doctor; a year without periods for another unknown reason should be discussed with a doctor.
 
-When an existing 1.0.0 installation is updated, the previous diary stays untouched. Because 1.0.0 did not store the new situation choice, 1.1.0 starts conservatively: it uses a wide range and does not estimate egg release or pregnancy-likelihood days until you choose the closest option in Settings.
+When an existing installation is updated, the previous diary stays untouched. If the app does not yet know which situation fits, it uses a deliberately wide range and does not estimate egg-release or pregnancy-likelihood days until you choose the closest option in Settings.
 
-The first guess is shown as a **date range**, not one exact day. The range is deliberately wider in the first years after periods begin, when periods have stayed very uneven for years, and when they are changing with age.
+The first guess is shown as a **date range**, not one exact day. The range is deliberately wider in the first years after periods begin, when periods have stayed very uneven for years, when they are changing with age, and when recent gaps are fairly steady but their usual length is outside the common range used by the app.
 
 After real history is available, the app uses up to the **6 most recent finished cycles**. Newer cycles count more. If the recent gaps differ a lot, the date range becomes wider.
 
-The app does **not** know when an egg is released. Only after at least **3 fairly similar finished adult cycles** can it show a broad calendar range when pregnancy may be more likely. It does not show this range in the first years, for long-term very uneven cycles, when periods are changing with age, after periods have stopped for 12 months or more, or while the new situation choice is still unset after an update.
+The app does **not** know when an egg is released. Only after at least **3 fairly similar finished adult cycles** can it show a broad calendar range when pregnancy may be more likely. It does not show this range in the first years, for long-term very uneven cycles, when periods are changing with age, after age-related periods have stopped for a full year, while the situation choice is unset, or when a fairly steady adult cycle is outside the common range used by the app.
+
+The pregnancy-likelihood range starts five days before the broad possible egg-release range and ends with that possible egg-release range. It is still only a calendar guess.
 
 Never use the calendar colors or dates as “safe days” to avoid pregnancy.
 
 The app also keeps a few simple attention rules:
 
 - in the first years, a current or most recent gap of about **3 months or more** is worth discussing with a doctor or another trusted health professional
-- from 1 to 3 years after periods begin, gaps shorter than about **21 days** or longer than about **45 days** deserve attention if they happen
+- later, an unexplained gap of about **3 months or more** is also worth discussing with a doctor if pregnancy is not expected and you do not know why the periods stopped
+- from 1 to 3 years after periods begin, gaps shorter than about **21 days** or longer than about **45 days** deserve attention
 - after the first 3 years, when gaps are normally similar, gaps shorter than about **21 days** or longer than about **35 days** deserve attention, especially if this keeps happening
 - bleeding lasting more than about **7 days in the first years**, or more than about **8 days later**, can trigger a note to seek advice
-- after **12 months without a period**, new bleeding should be discussed with a doctor, even if there is only a little blood
+- after a full year without a period as part of age-related changes, new bleeding should be discussed with a doctor, even if there is only a little blood
 
 These notes do not tell you what the cause is and do not give a diagnosis.
 
@@ -94,7 +99,7 @@ If bleeding is very heavy, you feel faint or very weak, pain is severe, you may 
 
 ## 📦 Installation
 
-The latest published signed APK is **1.1.0** and is available from GitHub Releases:
+The latest published signed APK is **1.1.0** and is available from GitHub Releases. The source code in this branch is already **1.1.1**; the published APK line will be updated only after the signed 1.1.1 release exists.
 
 [Download latest release](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
@@ -156,7 +161,7 @@ GitHub Actions automatically checks pull requests and pushes to `main` with:
 
 The app follows the device language automatically.
 
-## 🚫 Not included in 1.1.0
+## 🚫 Not included in 1.1.1
 
 The current source version does **not** provide:
 
