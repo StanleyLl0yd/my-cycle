@@ -16,6 +16,7 @@ data class DayState(
 
 enum class PeriodState {
     NONE,
+    CONFIRMED_UNSPECIFIED,
     CONFIRMED_SPOTTING,
     CONFIRMED_LIGHT,
     CONFIRMED_MEDIUM,

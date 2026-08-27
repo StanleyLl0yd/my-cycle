@@ -5,12 +5,7 @@
 
 ## Supported versions
 
-Security fixes are provided for the latest public release of My Cycle.
-
-| Version | Supported |
-| --- | --- |
-| 1.0.x | ✅ |
-| < 1.0 | ❌ |
+Security fixes are provided for the latest public release of My Cycle. Older releases are not supported once a newer public release is available.
 
 ## Reporting a vulnerability
 

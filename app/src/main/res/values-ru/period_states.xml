@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="day_details_bleeding_unknown">Эта дата записана как начало месячных, но количество крови в тот день не было указано.</string>
+    <string name="a11y_period_amount_unknown">Отмечено начало месячных, количество крови не указано</string>
+</resources>
