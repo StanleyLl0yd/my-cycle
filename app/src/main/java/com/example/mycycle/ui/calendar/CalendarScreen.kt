@@ -42,6 +42,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,13 +62,15 @@ import com.example.mycycle.ui.theme.PeriodLight
 import com.example.mycycle.ui.theme.PeriodMedium
 import com.example.mycycle.ui.theme.PeriodPredicted
 import com.example.mycycle.ui.theme.PeriodStrong
-import org.koin.androidx.compose.koinViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.format.TextStyle
+import java.time.temporal.WeekFields
 import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CalendarScreen(
@@ -72,15 +79,17 @@ fun CalendarScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locale = LocalConfiguration.current.locales[0]
+    val firstDayOfWeek = remember(locale) { WeekFields.of(locale).firstDayOfWeek }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CycleColors.backgroundGradient)
+            .background(CycleColors.backgroundGradient())
             .padding(16.dp)
     ) {
         MonthHeader(
             yearMonth = state.currentMonth,
+            today = state.today,
             onPreviousMonth = viewModel::previousMonth,
             onNextMonth = viewModel::nextMonth,
             onTodayClick = viewModel::goToToday,
@@ -88,7 +97,10 @@ fun CalendarScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        WeekdayHeaders(locale = locale)
+        WeekdayHeaders(
+            locale = locale,
+            firstDayOfWeek = firstDayOfWeek
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         AnimatedContent(
@@ -107,18 +119,24 @@ fun CalendarScreen(
             MonthGrid(
                 yearMonth = month,
                 dayStates = state.dayStates,
+                firstDayOfWeek = firstDayOfWeek,
+                locale = locale,
                 onDayClick = { date -> onDayClick(date.toString()) }
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        CalendarLegend()
+        CalendarLegend(
+            showFertility = state.prediction?.possiblePregnancyWindow != null,
+            showOvulation = state.prediction?.possibleOvulationWindow != null
+        )
     }
 }
 
 @Composable
 private fun MonthHeader(
     yearMonth: YearMonth,
+    today: LocalDate,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onTodayClick: () -> Unit,
@@ -148,7 +166,7 @@ private fun MonthHeader(
                 style = MaterialTheme.typography.titleLarge
             )
 
-            if (yearMonth != YearMonth.now()) {
+            if (yearMonth != YearMonth.from(today)) {
                 TextButton(onClick = onTodayClick) {
                     Text(stringResource(R.string.calendar_today))
                 }
@@ -165,9 +183,11 @@ private fun MonthHeader(
 }
 
 @Composable
-private fun WeekdayHeaders(locale: Locale) {
-    val daysOfWeek = remember(locale) {
-        val firstDayOfWeek = DayOfWeek.MONDAY
+private fun WeekdayHeaders(
+    locale: Locale,
+    firstDayOfWeek: DayOfWeek
+) {
+    val daysOfWeek = remember(locale, firstDayOfWeek) {
         (0..6).map { firstDayOfWeek.plus(it.toLong()) }
     }
 
@@ -188,15 +208,17 @@ private fun WeekdayHeaders(locale: Locale) {
 private fun MonthGrid(
     yearMonth: YearMonth,
     dayStates: Map<LocalDate, DayState>,
+    firstDayOfWeek: DayOfWeek,
+    locale: Locale,
     onDayClick: (LocalDate) -> Unit
 ) {
-    val days = remember(yearMonth) {
+    val days = remember(yearMonth, firstDayOfWeek) {
         val firstOfMonth = yearMonth.atDay(1)
-        val dayOfWeekOfFirst = firstOfMonth.dayOfWeek.value
-        val leadingEmptyDays = dayOfWeekOfFirst - 1
+        val leadingEmptyDays =
+            (firstOfMonth.dayOfWeek.value - firstDayOfWeek.value + 7) % 7
         val daysInMonth = yearMonth.lengthOfMonth()
 
-        buildList {
+        buildList<LocalDate?> {
             repeat(leadingEmptyDays) { add(null) }
             for (day in 1..daysInMonth) {
                 add(yearMonth.atDay(day))
@@ -212,10 +234,10 @@ private fun MonthGrid(
     ) {
         items(days) { date ->
             if (date != null) {
-                val dayState = dayStates[date]
                 DayCell(
                     date = date,
-                    dayState = dayState,
+                    dayState = dayStates[date],
+                    locale = locale,
                     onClick = { onDayClick(date) }
                 )
             } else {
@@ -229,6 +251,7 @@ private fun MonthGrid(
 private fun DayCell(
     date: LocalDate,
     dayState: DayState?,
+    locale: Locale,
     onClick: () -> Unit
 ) {
     val backgroundColor = when (dayState?.periodState) {
@@ -245,6 +268,28 @@ private fun DayCell(
     }
 
     val isToday = dayState?.isToday == true
+    val dateFormatter = remember(locale) {
+        DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)
+    }
+    val periodDescription = when (dayState?.periodState) {
+        PeriodState.CONFIRMED_SPOTTING -> stringResource(R.string.a11y_spotting_day)
+        PeriodState.CONFIRMED_LIGHT,
+        PeriodState.CONFIRMED_MEDIUM,
+        PeriodState.CONFIRMED_HEAVY -> stringResource(R.string.a11y_period_day)
+        PeriodState.PREDICTED -> stringResource(R.string.a11y_predicted_period)
+        else -> null
+    }
+    val fertilityDescription = when (dayState?.fertilityState) {
+        FertilityState.FERTILE_PREDICTED -> stringResource(R.string.a11y_fertile_window)
+        FertilityState.OVULATION_PREDICTED -> stringResource(R.string.a11y_ovulation_day)
+        else -> null
+    }
+    val spokenDescription = buildList {
+        add(date.format(dateFormatter))
+        if (isToday) add(stringResource(R.string.a11y_today))
+        periodDescription?.let(::add)
+        fertilityDescription?.let(::add)
+    }.joinToString(". ")
 
     Box(
         modifier = Modifier
@@ -258,22 +303,39 @@ private fun DayCell(
                         color = MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(12.dp)
                     )
-                } else Modifier
+                } else {
+                    Modifier
+                }
             )
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .clearAndSetSemantics {
+                contentDescription = spokenDescription
+                role = Role.Button
+                onClick {
+                    onClick()
+                    true
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = date.dayOfMonth.toString(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                color = if (isToday) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
             )
 
-            if (dayState?.periodState != PeriodState.NONE && dayState?.periodState != PeriodState.PREDICTED) {
+            if (
+                dayState?.periodState != PeriodState.NONE &&
+                dayState?.periodState != PeriodState.PREDICTED
+            ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     val dots = when (dayState?.periodState) {
-                        PeriodState.CONFIRMED_SPOTTING -> 1
+                        PeriodState.CONFIRMED_SPOTTING,
                         PeriodState.CONFIRMED_LIGHT -> 1
                         PeriodState.CONFIRMED_MEDIUM -> 2
                         PeriodState.CONFIRMED_HEAVY -> 3
@@ -303,7 +365,10 @@ private fun DayCell(
 }
 
 @Composable
-private fun CalendarLegend() {
+private fun CalendarLegend(
+    showFertility: Boolean,
+    showOvulation: Boolean
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -323,21 +388,29 @@ private fun CalendarLegend() {
                 modifier = Modifier.weight(1f)
             )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            LegendItem(
-                color = Fertile,
-                label = stringResource(R.string.calendar_legend_fertile),
-                modifier = Modifier.weight(1f)
-            )
-            LegendItem(
-                color = Ovulation,
-                label = stringResource(R.string.calendar_legend_ovulation),
-                modifier = Modifier.weight(1f)
-            )
+
+        if (showFertility || showOvulation) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (showFertility) {
+                    LegendItem(
+                        color = Fertile,
+                        label = stringResource(R.string.calendar_legend_fertile),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (showOvulation) {
+                    LegendItem(
+                        color = Ovulation,
+                        label = stringResource(R.string.calendar_legend_ovulation),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
+
         Text(
             text = stringResource(R.string.calendar_guess_note),
             style = MaterialTheme.typography.bodySmall,
