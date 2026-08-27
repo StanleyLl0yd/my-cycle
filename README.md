@@ -103,9 +103,11 @@ The latest published signed APK is **1.1.1**.
 
 [Open My Cycle 1.1.1 on GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.1)
 
-[Download signed My-Cycle-v1.1.1.apk from Google Drive](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)
+[Download signed My-Cycle-v1.1.1.apk from GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/download/v1.1.1/My-Cycle-v1.1.1.apk)
 
-SHA-256 (`My-Cycle-v1.1.1.apk`): `350ffa182220785bc3a53c11fd85f35d1135d0b932b80b06d35b57d0fab589b4`
+[Google Drive mirror](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)
+
+SHA-256 (`My-Cycle-v1.1.1.apk`): `7479ca24cfe8b560ee6258d98e31ac8d99c68419891b345f3e478224fa7797b0`
 
 Android 8.0 or newer is required.
 
@@ -126,13 +128,15 @@ gradle assembleDebug test
 gradle lint
 ```
 
-To create an unsigned release APK:
+Without signing environment variables, this creates an unsigned release APK:
 
 ```bash
 gradle assembleRelease
 ```
 
-Release signing is not configured in the repository. APKs attached to official GitHub Releases are signed separately.
+Official release signing is configured through GitHub Repository Secrets. The keystore and passwords are never stored in the repository. GitHub Actions restores the key only for trusted release jobs, builds the signed APK, verifies the signer certificate and publishes the APK together with its SHA-256 checksum.
+
+The signing variables used by the build are `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`; `ANDROID_KEYSTORE_BASE64` is used by GitHub Actions to restore the keystore file.
 
 ## 🧱 Technology
 
@@ -155,6 +159,9 @@ GitHub Actions automatically checks pull requests and pushes to `main` with:
 - Android Lint
 - debug APK assembly
 - release APK assembly with R8/resource shrinking
+- signed release APK artifact on trusted `main` runs when signing Secrets are available
+
+The reusable `Android Release` workflow also checks the app version against the release tag and verifies the release certificate before publishing an official APK.
 
 ## 🌍 Languages
 
