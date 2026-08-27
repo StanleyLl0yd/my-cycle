@@ -1,6 +1,5 @@
 package com.example.mycycle.ui.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -48,15 +47,11 @@ fun MainNavHost(
             }
         ) {
             composable(Screen.Today.route) {
-                TodayScreen(
-                    onLogClick = { onDayClick(java.time.LocalDate.now().toString()) }
-                )
+                TodayScreen(onLogClick = onDayClick)
             }
 
             composable(Screen.Calendar.route) {
-                CalendarScreen(
-                    onDayClick = onDayClick
-                )
+                CalendarScreen(onDayClick = onDayClick)
             }
 
             composable(Screen.Statistics.route) {
