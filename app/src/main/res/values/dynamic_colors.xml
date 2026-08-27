@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_dynamic_colors_unavailable">Available on Android 12 and newer</string>
+</resources>
