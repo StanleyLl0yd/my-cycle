@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="day_details_bleeding_unknown">This date is recorded as the start of a period, but the amount of blood was not recorded.</string>
+    <string name="a11y_period_amount_unknown">Recorded period start, amount of blood not recorded</string>
+</resources>
