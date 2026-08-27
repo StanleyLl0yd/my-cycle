@@ -15,7 +15,6 @@ class PredictionEngine {
 
     companion object {
         private const val FERTILE_BEFORE_OVULATION = 5
-        private const val FERTILE_AFTER_OVULATION = 1
         private const val LUTEAL_PHASE_MIN_DAYS = 11
         private const val LUTEAL_PHASE_MAX_DAYS = 17
         private const val MAX_CYCLES_FOR_AVERAGE = 6
@@ -138,7 +137,7 @@ class PredictionEngine {
         val possiblePregnancyWindow = possibleOvulationWindow?.let {
             DateRange(
                 start = it.start.minusDays(FERTILE_BEFORE_OVULATION.toLong()),
-                end = it.end.plusDays(FERTILE_AFTER_OVULATION.toLong())
+                end = it.end
             )
         }
 
