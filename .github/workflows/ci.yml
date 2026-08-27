@@ -5,6 +5,9 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 concurrency:
   group: android-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -12,6 +15,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v7
 
@@ -25,6 +29,33 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.13'
+
+      - name: Restore release keystore on trusted main pushes
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
+
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/my-cycle-release.jks"
+          test -s "$RUNNER_TEMP/my-cycle-release.jks"
+
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/my-cycle-release.jks" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_HAS_RELEASE_SIGNING=true" >> "$GITHUB_ENV"
+
+      - name: Mark release as unsigned outside trusted main pushes
+        if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+        run: echo "ANDROID_HAS_RELEASE_SIGNING=false" >> "$GITHUB_ENV"
 
       - name: Build APKs and run unit tests
         run: gradle assembleDebug assembleRelease test --stacktrace
@@ -42,9 +73,24 @@ jobs:
             cat "$REPORT"
           fi
 
+      - name: Upload signed release APK
+        if: ${{ env.ANDROID_HAS_RELEASE_SIGNING == 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: my-cycle-signed-release-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Upload unsigned release APK
+        if: ${{ env.ANDROID_HAS_RELEASE_SIGNING != 'true' }}
         uses: actions/upload-artifact@v7
         with:
           name: my-cycle-release-unsigned
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/my-cycle-release.jks"
