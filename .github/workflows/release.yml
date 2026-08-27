@@ -1,0 +1,191 @@
+name: Android Release
+
+on:
+  push:
+    branches:
+      - 'release/v*'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag matching app version
+        required: true
+        default: v1.1.1
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Test, sign, and publish APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      EXPECTED_CERT_SHA256: f02571c40741e2cb071564f5b63fd3dc38a875d0eda11a8c42269ed635bc2a58
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle 8.13
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.13'
+
+      - name: Resolve release tag
+        id: release_info
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_TAG: ${{ inputs.tag }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            release_tag="$MANUAL_TAG"
+          elif [[ "$GITHUB_REF_TYPE" == "branch" ]]; then
+            release_tag="${GITHUB_REF_NAME#release/}"
+          else
+            release_tag="$GITHUB_REF_NAME"
+          fi
+          echo "RELEASE_TAG=$release_tag" >> "$GITHUB_ENV"
+          echo "tag=$release_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Check out manual release tag
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.release_info.outputs.tag }}
+          persist-credentials: false
+
+      - name: Validate release version
+        run: |
+          app_version="$(sed -n 's/^[[:space:]]*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -1)"
+          if [[ -z "$app_version" ]]; then
+            echo 'Could not read versionName from app/build.gradle.kts.' >&2
+            exit 1
+          fi
+          if [[ "$RELEASE_TAG" != "v$app_version" ]]; then
+            echo "Release tag $RELEASE_TAG must match app version v$app_version." >&2
+            exit 1
+          fi
+
+      - name: Configure release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
+
+          keystore_path="$RUNNER_TEMP/my-cycle-release.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          test -s "$keystore_path"
+          echo "ANDROID_KEYSTORE_PATH=$keystore_path" >> "$GITHUB_ENV"
+
+          keytool -list \
+            -keystore "$keystore_path" \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" > /dev/null
+
+      - name: Test, lint, and build signed release APK
+        run: gradle test lint assembleRelease --stacktrace
+
+      - name: Verify certificate and package APK
+        id: package
+        run: |
+          set -euo pipefail
+          source_apk="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | head -1)"
+          test -n "$source_apk"
+
+          apksigner="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -1)"
+          test -n "$apksigner"
+
+          report="$RUNNER_TEMP/apksigner-report.txt"
+          "$apksigner" verify --verbose --print-certs "$source_apk" | tee "$report"
+          grep -F 'Verified using v2 scheme (APK Signature Scheme v2): true' "$report"
+
+          actual_fingerprint="$(
+            awk -F': ' '/certificate SHA-256 digest:/ {print $NF; exit}' "$report" |
+              tr -d ':' |
+              tr '[:upper:]' '[:lower:]'
+          )"
+          if [[ "$actual_fingerprint" != "$EXPECTED_CERT_SHA256" ]]; then
+            echo 'APK certificate fingerprint does not match the My Cycle release key.' >&2
+            exit 1
+          fi
+
+          mkdir -p release
+          apk_path="release/My-Cycle-$RELEASE_TAG.apk"
+          cp "$source_apk" "$apk_path"
+          sha256sum "$apk_path" | tee "$apk_path.sha256"
+          echo "apk_path=$apk_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload signed workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: My-Cycle-${{ steps.release_info.outputs.tag }}-signed
+          path: |
+            ${{ steps.package.outputs.apk_path }}
+            ${{ steps.package.outputs.apk_path }}.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          apk_path="${{ steps.package.outputs.apk_path }}"
+          checksum_path="$apk_path.sha256"
+          notes_file=".github/release-notes/$RELEASE_TAG.md"
+
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" \
+              "$apk_path" "$checksum_path" \
+              --clobber \
+              --repo "$GITHUB_REPOSITORY"
+          elif [[ -f "$notes_file" ]]; then
+            gh release create "$RELEASE_TAG" \
+              "$apk_path" "$checksum_path" \
+              --target "$GITHUB_SHA" \
+              --title "My Cycle ${RELEASE_TAG#v}" \
+              --notes-file "$notes_file" \
+              --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$RELEASE_TAG" \
+              "$apk_path" "$checksum_path" \
+              --target "$GITHUB_SHA" \
+              --title "My Cycle ${RELEASE_TAG#v}" \
+              --generate-notes \
+              --repo "$GITHUB_REPOSITORY"
+          fi
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/my-cycle-release.jks"
+
+      - name: Remove temporary release branch
+        if: always() && github.ref_type == 'branch' && startsWith(github.ref_name, 'release/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api \
+            --method DELETE \
+            "/repos/$GITHUB_REPOSITORY/git/refs/heads/$GITHUB_REF_NAME"
