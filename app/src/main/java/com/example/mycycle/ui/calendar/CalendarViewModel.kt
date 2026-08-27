@@ -182,7 +182,7 @@ class CalendarViewModel(
                 FlowIntensity.MEDIUM -> PeriodState.CONFIRMED_MEDIUM
                 FlowIntensity.HEAVY -> PeriodState.CONFIRMED_HEAVY
                 FlowIntensity.SPOTTING -> PeriodState.CONFIRMED_SPOTTING
-                null -> PeriodState.CONFIRMED_MEDIUM
+                null -> PeriodState.CONFIRMED_UNSPECIFIED
             }
         }
 
