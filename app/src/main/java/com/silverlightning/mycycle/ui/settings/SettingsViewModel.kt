@@ -7,12 +7,14 @@ import com.silverlightning.mycycle.data.repository.CycleDayRepository
 import com.silverlightning.mycycle.domain.model.CycleStage
 import com.silverlightning.mycycle.domain.model.ThemeMode
 import com.silverlightning.mycycle.util.runSuspendCatching
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class SettingsState(
     val cycleStage: CycleStage = CycleStage.NOT_SET,
@@ -100,10 +102,26 @@ class SettingsViewModel(
 
         viewModelScope.launch {
             _state.update { it.copy(isClearingData = true, hasOperationError = false) }
+            val daysBeforeClear = cycleDayRepository.observeAll().first()
+            var daysDeleted = false
 
             val result = runSuspendCatching {
-                cycleDayRepository.deleteAll()
-                preferencesRepository.clearAll()
+                try {
+                    cycleDayRepository.deleteAll()
+                    daysDeleted = true
+                    preferencesRepository.clearAll()
+                } catch (error: Throwable) {
+                    if (daysDeleted && daysBeforeClear.isNotEmpty()) {
+                        withContext(NonCancellable) {
+                            try {
+                                daysBeforeClear.forEach { cycleDayRepository.save(it) }
+                            } catch (rollbackError: Exception) {
+                                error.addSuppressed(rollbackError)
+                            }
+                        }
+                    }
+                    throw error
+                }
             }
 
             _state.update {
