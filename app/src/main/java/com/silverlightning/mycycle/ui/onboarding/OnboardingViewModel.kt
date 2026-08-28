@@ -17,11 +17,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+private const val DEFAULT_CYCLE_LENGTH = 28
+private const val INITIAL_LAST_PERIOD_OFFSET_DAYS = 14L
+private const val FINAL_ONBOARDING_STEP = 3
+private const val FIRST_YEAR_DEFAULT_CYCLE_LENGTH = 32
+private const val MIN_CYCLE_LENGTH = 15
+private const val MAX_CYCLE_LENGTH = 90
+
 data class OnboardingState(
     val currentStep: Int = 0,
     val cycleStage: CycleStage = CycleStage.NOT_SET,
     val lastPeriodDate: LocalDate,
-    val cycleLength: Int = 28,
+    val cycleLength: Int = DEFAULT_CYCLE_LENGTH,
     val isLoading: Boolean = false,
     val hasSaveError: Boolean = false,
     val isComplete: Boolean = false
@@ -35,7 +42,7 @@ class OnboardingViewModel(
 
     private val _state = MutableStateFlow(
         OnboardingState(
-            lastPeriodDate = clockProvider.today().minusDays(14)
+            lastPeriodDate = clockProvider.today().minusDays(INITIAL_LAST_PERIOD_OFFSET_DAYS)
         )
     )
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
@@ -47,7 +54,7 @@ class OnboardingViewModel(
                 current
             } else {
                 current.copy(
-                    currentStep = (current.currentStep + 1).coerceAtMost(3),
+                    currentStep = (current.currentStep + 1).coerceAtMost(FINAL_ONBOARDING_STEP),
                     hasSaveError = false
                 )
             }
@@ -70,7 +77,7 @@ class OnboardingViewModel(
             current.copy(
                 cycleStage = stage,
                 cycleLength = when (stage) {
-                    CycleStage.FIRST_YEAR -> 32
+                    CycleStage.FIRST_YEAR -> FIRST_YEAR_DEFAULT_CYCLE_LENGTH
                     else -> current.cycleLength
                 },
                 hasSaveError = false
@@ -89,7 +96,7 @@ class OnboardingViewModel(
         if (_state.value.isLoading) return
         _state.update {
             it.copy(
-                cycleLength = length.coerceIn(15, 90),
+                cycleLength = length.coerceIn(MIN_CYCLE_LENGTH, MAX_CYCLE_LENGTH),
                 hasSaveError = false
             )
         }
