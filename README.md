@@ -159,9 +159,9 @@ GitHub Actions automatically checks pull requests and pushes to `main` with:
 - Android Lint
 - debug APK assembly
 - release APK assembly with R8/resource shrinking
-- signed release APK artifact on trusted `main` runs when signing Secrets are available
+- unsigned release APK artifact; regular CI does not receive release signing Secrets
 
-The reusable `Android Release` workflow also checks the app version against the release tag and verifies the release certificate before publishing an official APK.
+The manual `Android Release` workflow runs only from protected `main` after successful CI. It restores signing material only for the signed build step, removes the keystore immediately afterward, verifies the release certificate and publishes the official APK.
 
 ## 🌍 Languages
 
