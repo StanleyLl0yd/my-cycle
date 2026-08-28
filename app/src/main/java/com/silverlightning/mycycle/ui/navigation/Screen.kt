@@ -2,14 +2,14 @@ package com.silverlightning.mycycle.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ShowChart
+import androidx.compose.material.icons.automirrored.rounded.ShowChart
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.ShowChart
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.ShowChart
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.silverlightning.mycycle.R
 
@@ -43,8 +43,8 @@ enum class BottomNavItem(
     STATISTICS(
         route = Screen.Statistics.route,
         labelRes = R.string.nav_statistics,
-        iconOutlined = Icons.Outlined.ShowChart,
-        iconFilled = Icons.Rounded.ShowChart
+        iconOutlined = Icons.AutoMirrored.Outlined.ShowChart,
+        iconFilled = Icons.AutoMirrored.Rounded.ShowChart
     ),
     SETTINGS(
         route = Screen.Settings.route,
