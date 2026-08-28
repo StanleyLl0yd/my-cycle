@@ -6,6 +6,7 @@ import com.silverlightning.mycycle.data.preferences.UserPreferencesRepository
 import com.silverlightning.mycycle.data.repository.CycleDayRepository
 import com.silverlightning.mycycle.domain.model.CycleStage
 import com.silverlightning.mycycle.domain.model.ThemeMode
+import com.silverlightning.mycycle.util.runSuspendCatching
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +17,9 @@ import kotlinx.coroutines.launch
 data class SettingsState(
     val cycleStage: CycleStage = CycleStage.NOT_SET,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val useDynamicColors: Boolean = true
+    val useDynamicColors: Boolean = true,
+    val isClearingData: Boolean = false,
+    val hasOperationError: Boolean = false
 )
 
 class SettingsViewModel(
@@ -30,8 +33,8 @@ class SettingsViewModel(
     init {
         viewModelScope.launch {
             preferencesRepository.preferences.collect { prefs ->
-                _state.update {
-                    SettingsState(
+                _state.update { current ->
+                    current.copy(
                         cycleStage = prefs.cycleStage,
                         themeMode = prefs.themeMode,
                         useDynamicColors = prefs.useDynamicColors
@@ -43,19 +46,28 @@ class SettingsViewModel(
 
     fun setCycleStage(stage: CycleStage) {
         viewModelScope.launch {
-            preferencesRepository.updateCycleStage(stage)
+            val result = runSuspendCatching {
+                preferencesRepository.updateCycleStage(stage)
+            }
+            _state.update { it.copy(hasOperationError = result.isFailure) }
         }
     }
 
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch {
-            preferencesRepository.updateTheme(mode, _state.value.useDynamicColors)
+            val result = runSuspendCatching {
+                preferencesRepository.updateTheme(mode, _state.value.useDynamicColors)
+            }
+            _state.update { it.copy(hasOperationError = result.isFailure) }
         }
     }
 
     fun setDynamicColors(enabled: Boolean) {
         viewModelScope.launch {
-            preferencesRepository.updateTheme(_state.value.themeMode, enabled)
+            val result = runSuspendCatching {
+                preferencesRepository.updateTheme(_state.value.themeMode, enabled)
+            }
+            _state.update { it.copy(hasOperationError = result.isFailure) }
         }
     }
 
@@ -81,9 +93,22 @@ class SettingsViewModel(
     }
 
     fun clearAllData() {
+        if (_state.value.isClearingData) return
+
         viewModelScope.launch {
-            cycleDayRepository.deleteAll()
-            preferencesRepository.clearAll()
+            _state.update { it.copy(isClearingData = true, hasOperationError = false) }
+
+            val result = runSuspendCatching {
+                cycleDayRepository.deleteAll()
+                preferencesRepository.clearAll()
+            }
+
+            _state.update {
+                it.copy(
+                    isClearingData = false,
+                    hasOperationError = result.isFailure
+                )
+            }
         }
     }
 
