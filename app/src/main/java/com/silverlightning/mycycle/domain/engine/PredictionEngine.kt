@@ -20,6 +20,14 @@ class PredictionEngine {
         private const val MAX_CYCLES_FOR_AVERAGE = 6
         private const val MIN_CONFIDENCE = 0.20f
         private const val MAX_CONFIDENCE = 0.90f
+        private const val DEFAULT_WINDOW_RADIUS = 14
+        private const val FIRST_YEAR_WINDOW_RADIUS = 10
+        private const val EARLY_YEARS_WINDOW_RADIUS = 7
+        private const val ESTABLISHED_WINDOW_RADIUS = 3
+        private const val EARLY_YEARS_VARIABILITY_DAYS = 14
+        private const val ESTABLISHED_VARIABILITY_DAYS = 9
+        private val EARLY_YEARS_COMMON_RANGE = 21..45
+        private val ESTABLISHED_COMMON_RANGE = 21..35
     }
 
     fun predictFromOnboarding(
@@ -111,7 +119,7 @@ class PredictionEngine {
         val radius = maxOf(
             minimumWindowRadius(stage),
             historyRadius,
-            if (outsideCommonRange) 7 else 0
+            if (outsideCommonRange) EARLY_YEARS_WINDOW_RADIUS else 0
         )
         val centerDate = lastPeriodStart.plusDays(avgCycleLength.toLong())
         val nextPeriodStartWindow = DateRange(
@@ -121,7 +129,7 @@ class PredictionEngine {
 
         val canEstimateOvulation =
             stage == CycleStage.ESTABLISHED &&
-                cycleCount >= 3 &&
+                cycleCount >= ESTABLISHED_WINDOW_RADIUS &&
                 !highlyVariable &&
                 !outsideCommonRange
 
@@ -174,12 +182,12 @@ class PredictionEngine {
     )
 
     private fun minimumWindowRadius(stage: CycleStage): Int = when (stage) {
-        CycleStage.NOT_SET -> 14
-        CycleStage.FIRST_YEAR -> 10
-        CycleStage.YEARS_ONE_TO_THREE -> 7
-        CycleStage.ESTABLISHED -> 3
-        CycleStage.LONG_TERM_UNEVEN -> 14
-        CycleStage.CHANGING_WITH_AGE -> 14
+        CycleStage.NOT_SET -> DEFAULT_WINDOW_RADIUS
+        CycleStage.FIRST_YEAR -> FIRST_YEAR_WINDOW_RADIUS
+        CycleStage.YEARS_ONE_TO_THREE -> EARLY_YEARS_WINDOW_RADIUS
+        CycleStage.ESTABLISHED -> ESTABLISHED_WINDOW_RADIUS
+        CycleStage.LONG_TERM_UNEVEN -> DEFAULT_WINDOW_RADIUS
+        CycleStage.CHANGING_WITH_AGE -> DEFAULT_WINDOW_RADIUS
         CycleStage.PERIODS_STOPPED -> 0
     }
 
@@ -189,8 +197,8 @@ class PredictionEngine {
     ): Boolean = when (stage) {
         CycleStage.NOT_SET -> true
         CycleStage.FIRST_YEAR -> true
-        CycleStage.YEARS_ONE_TO_THREE -> spread > 14
-        CycleStage.ESTABLISHED -> spread > 9
+        CycleStage.YEARS_ONE_TO_THREE -> spread > EARLY_YEARS_VARIABILITY_DAYS
+        CycleStage.ESTABLISHED -> spread > ESTABLISHED_VARIABILITY_DAYS
         CycleStage.LONG_TERM_UNEVEN -> true
         CycleStage.CHANGING_WITH_AGE -> true
         CycleStage.PERIODS_STOPPED -> true
@@ -200,8 +208,8 @@ class PredictionEngine {
         stage: CycleStage,
         averageLength: Int
     ): Boolean = when (stage) {
-        CycleStage.YEARS_ONE_TO_THREE -> averageLength !in 21..45
-        CycleStage.ESTABLISHED -> averageLength !in 21..35
+        CycleStage.YEARS_ONE_TO_THREE -> averageLength !in EARLY_YEARS_COMMON_RANGE
+        CycleStage.ESTABLISHED -> averageLength !in ESTABLISHED_COMMON_RANGE
         else -> false
     }
 
