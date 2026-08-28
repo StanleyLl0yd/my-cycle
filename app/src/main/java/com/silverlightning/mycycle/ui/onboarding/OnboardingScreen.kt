@@ -102,6 +102,7 @@ fun OnboardingScreen(
                     0 -> WelcomeStep()
                     1 -> CycleStageStep(
                         selectedStage = state.cycleStage,
+                        enabled = !state.isLoading,
                         onStageSelected = viewModel::setCycleStage
                     )
                     2 -> if (periodsStopped) {
@@ -109,11 +110,13 @@ fun OnboardingScreen(
                     } else {
                         PeriodDateStep(
                             selectedDate = state.lastPeriodDate,
+                            enabled = !state.isLoading,
                             onDateSelected = viewModel::setLastPeriodDate
                         )
                     }
                     3 -> CycleLengthStep(
                         cycleLength = state.cycleLength,
+                        enabled = !state.isLoading,
                         onLengthChanged = viewModel::setCycleLength
                     )
                 }
@@ -216,6 +219,7 @@ private fun WelcomeStep() {
 @Composable
 private fun CycleStageStep(
     selectedStage: CycleStage,
+    enabled: Boolean,
     onStageSelected: (CycleStage) -> Unit
 ) {
     Column(
@@ -248,6 +252,7 @@ private fun CycleStageStep(
                 FilterChip(
                     selected = selectedStage == stage,
                     onClick = { onStageSelected(stage) },
+                    enabled = enabled,
                     label = { Text(stringResource(stage.labelRes)) },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -269,6 +274,7 @@ private fun CycleStageStep(
 @Composable
 private fun PeriodDateStep(
     selectedDate: LocalDate,
+    enabled: Boolean,
     onDateSelected: (LocalDate) -> Unit
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
@@ -295,7 +301,10 @@ private fun PeriodDateStep(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(onClick = { showDatePicker = true }) {
+        Button(
+            onClick = { showDatePicker = true },
+            enabled = enabled
+        ) {
             Text(
                 text = selectedDate.format(
                     DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
@@ -343,6 +352,7 @@ private fun PeriodDateStep(
 @Composable
 private fun CycleLengthStep(
     cycleLength: Int,
+    enabled: Boolean,
     onLengthChanged: (Int) -> Unit
 ) {
     Column(
@@ -384,6 +394,7 @@ private fun CycleLengthStep(
         Slider(
             value = cycleLength.toFloat(),
             onValueChange = { onLengthChanged(it.toInt()) },
+            enabled = enabled,
             valueRange = 15f..90f,
             steps = 74,
             modifier = Modifier.fillMaxWidth()
