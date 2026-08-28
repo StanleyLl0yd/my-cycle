@@ -1,24 +1,15 @@
 name: Android Release
 
 on:
-  push:
-    branches:
-      - 'release/v*'
-    tags:
-      - 'v*'
   workflow_dispatch:
-    inputs:
-      tag:
-        description: Release tag matching app version
-        required: true
-        type: string
 
 permissions:
   contents: write
+  checks: read
 
 concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-main
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -37,6 +28,14 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Validate trusted release source
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo 'Releases must be started from the protected main branch.' >&2
+            exit 1
+          fi
+
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
@@ -48,38 +47,41 @@ jobs:
         with:
           gradle-version: '9.5.0'
 
-      - name: Resolve release tag
-        id: release_info
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          MANUAL_TAG: ${{ inputs.tag }}
+      - name: Resolve release version
         run: |
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            release_tag="$MANUAL_TAG"
-          elif [[ "$GITHUB_REF_TYPE" == "branch" ]]; then
-            release_tag="${GITHUB_REF_NAME#release/}"
-          else
-            release_tag="$GITHUB_REF_NAME"
-          fi
-          echo "RELEASE_TAG=$release_tag" >> "$GITHUB_ENV"
-          echo "tag=$release_tag" >> "$GITHUB_OUTPUT"
-
-      - name: Check out manual release tag
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ steps.release_info.outputs.tag }}
-          persist-credentials: false
-
-      - name: Validate release version
-        run: |
+          set -euo pipefail
           app_version="$(sed -n 's/^[[:space:]]*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -1)"
           if [[ -z "$app_version" ]]; then
             echo 'Could not read versionName from app/build.gradle.kts.' >&2
             exit 1
           fi
-          if [[ "$RELEASE_TAG" != "v$app_version" ]]; then
-            echo "Release tag $RELEASE_TAG must match app version v$app_version." >&2
+          echo "RELEASE_TAG=v$app_version" >> "$GITHUB_ENV"
+
+      - name: Require successful main CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          conclusion="$(
+            gh api "/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs" \
+              --jq '[.check_runs[] | select(.name == "build" and .app.slug == "github-actions") | .conclusion][0] // ""'
+          )"
+          if [[ "$conclusion" != "success" ]]; then
+            echo "Required main build check is not successful for $GITHUB_SHA." >&2
+            exit 1
+          fi
+
+      - name: Protect release identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh api "/repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" > /dev/null 2>&1; then
+            echo "Tag $RELEASE_TAG already exists. Bump the app version before publishing another release." >&2
+            exit 1
+          fi
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists. Existing releases are immutable." >&2
             exit 1
           fi
 
@@ -142,7 +144,7 @@ jobs:
       - name: Upload signed workflow artifact
         uses: actions/upload-artifact@v7
         with:
-          name: My-Cycle-${{ steps.release_info.outputs.tag }}-signed
+          name: My-Cycle-${{ env.RELEASE_TAG }}-signed
           path: |
             ${{ steps.package.outputs.apk_path }}
             ${{ steps.package.outputs.apk_path }}.sha256
@@ -158,12 +160,7 @@ jobs:
           checksum_path="$apk_path.sha256"
           notes_file=".github/release-notes/$RELEASE_TAG.md"
 
-          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" \
-              "$apk_path" "$checksum_path" \
-              --clobber \
-              --repo "$GITHUB_REPOSITORY"
-          elif [[ -f "$notes_file" ]]; then
+          if [[ -f "$notes_file" ]]; then
             gh release create "$RELEASE_TAG" \
               "$apk_path" "$checksum_path" \
               --target "$GITHUB_SHA" \
@@ -182,12 +179,3 @@ jobs:
       - name: Remove signing material
         if: always()
         run: rm -f "$RUNNER_TEMP/my-cycle-release.jks"
-
-      - name: Remove temporary release branch
-        if: success() && github.ref_type == 'branch' && startsWith(github.ref_name, 'release/v')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api \
-            --method DELETE \
-            "/repos/$GITHUB_REPOSITORY/git/refs/heads/$GITHUB_REF_NAME"
