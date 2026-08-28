@@ -82,6 +82,9 @@ jobs:
             exit 1
           fi
 
+      - name: Test and lint release source
+        run: gradle test lint --stacktrace
+
       - name: Configure release signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -105,12 +108,12 @@ jobs:
             -storepass "$ANDROID_KEYSTORE_PASSWORD" \
             -alias "$ANDROID_KEY_ALIAS" > /dev/null
 
-      - name: Test, lint, and build signed release APK
+      - name: Build signed release APK
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: gradle test lint assembleRelease --stacktrace
+        run: gradle assembleRelease --stacktrace
 
       - name: Remove release keystore
         if: always()
