@@ -68,6 +68,7 @@ class DayDetailsViewModel(
     }
 
     fun setFlowIntensity(intensity: FlowIntensity?) {
+        if (_state.value.isSaving) return
         _state.update {
             it.copy(
                 flowIntensity = intensity,
@@ -79,10 +80,12 @@ class DayDetailsViewModel(
     }
 
     fun setMood(mood: Mood?) {
+        if (_state.value.isSaving) return
         _state.update { it.copy(mood = mood, hasSaveError = false, isDirty = true) }
     }
 
     fun toggleSymptom(symptom: Symptom) {
+        if (_state.value.isSaving) return
         _state.update { currentState ->
             val newSymptoms = if (symptom in currentState.symptoms) {
                 currentState.symptoms - symptom
@@ -98,6 +101,7 @@ class DayDetailsViewModel(
     }
 
     fun setNotes(notes: String) {
+        if (_state.value.isSaving) return
         _state.update {
             it.copy(notes = notes, hasSaveError = false, isDirty = true)
         }
