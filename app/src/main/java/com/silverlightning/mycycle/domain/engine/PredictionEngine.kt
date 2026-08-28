@@ -18,8 +18,10 @@ class PredictionEngine {
         private const val LUTEAL_PHASE_MIN_DAYS = 11
         private const val LUTEAL_PHASE_MAX_DAYS = 17
         private const val MAX_CYCLES_FOR_AVERAGE = 6
+        private const val MIN_CYCLES_FOR_OVULATION_ESTIMATE = 3
         private const val MIN_CONFIDENCE = 0.20f
         private const val MAX_CONFIDENCE = 0.90f
+        private const val DEFAULT_CYCLE_LENGTH = 28
         private const val DEFAULT_WINDOW_RADIUS = 14
         private const val FIRST_YEAR_WINDOW_RADIUS = 10
         private const val EARLY_YEARS_WINDOW_RADIUS = 7
@@ -129,7 +131,7 @@ class PredictionEngine {
 
         val canEstimateOvulation =
             stage == CycleStage.ESTABLISHED &&
-                cycleCount >= ESTABLISHED_WINDOW_RADIUS &&
+                cycleCount >= MIN_CYCLES_FOR_OVULATION_ESTIMATE &&
                 !highlyVariable &&
                 !outsideCommonRange
 
@@ -244,7 +246,7 @@ class PredictionEngine {
     }
 
     private fun weightedAverage(values: List<Int>): Int {
-        if (values.isEmpty()) return 28
+        if (values.isEmpty()) return DEFAULT_CYCLE_LENGTH
         if (values.size == 1) return values.first()
 
         var weightedSum = 0.0
