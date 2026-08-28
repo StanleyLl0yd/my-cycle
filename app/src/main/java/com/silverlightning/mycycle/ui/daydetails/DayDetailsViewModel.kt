@@ -53,23 +53,12 @@ class DayDetailsViewModel(
                 Pair(existingDay, today)
             }.collect { (existingDay, today) ->
                 _state.update { current ->
-                    when {
-                        current.isSaved -> current
-                        current.isDirty -> current.copy(
-                            isFutureDate = date.isAfter(today),
-                            isLoading = false
-                        )
-                        else -> DayDetailsState(
-                            date = date,
-                            hasPeriod = existingDay?.isPeriodBleeding ?: false,
-                            flowIntensity = existingDay?.flowIntensity,
-                            mood = existingDay?.mood,
-                            symptoms = existingDay?.symptoms ?: emptySet(),
-                            notes = existingDay?.notes ?: "",
-                            isFutureDate = date.isAfter(today),
-                            isLoading = false
-                        )
-                    }
+                    resolveDayDetailsRefresh(
+                        current = current,
+                        existingDay = existingDay,
+                        date = date,
+                        today = today
+                    )
                 }
             }
         }
