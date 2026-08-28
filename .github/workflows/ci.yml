@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: android-ci-${{ github.workflow }}-${{ github.ref }}
@@ -34,30 +34,10 @@ jobs:
       - name: Check source comment policy
         run: python3 scripts/check-source-comments.py
 
-      - name: Generate dependency verification metadata
-        if: github.event_name == 'pull_request'
-        run: |
-          rm -f gradle/verification-metadata.xml
-          gradle --write-verification-metadata sha256 assembleDebug assembleRelease test lint detekt --stacktrace || true
-          test -s gradle/verification-metadata.xml
-
-      - name: Commit dependency verification metadata
-        if: github.event_name == 'pull_request'
-        run: |
-          git fetch --no-tags --depth=1 origin "${{ github.event.pull_request.head.sha }}"
-          git checkout "${{ github.event.pull_request.head.sha }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add gradle/verification-metadata.xml
-          if ! git diff --cached --quiet; then
-            git commit -m "Add Gradle dependency verification metadata"
-            git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
-          fi
-
       - name: Build APKs and run unit tests
         run: |
           set -o pipefail
-          gradle assembleDebug assembleRelease test --stacktrace 2>&1 | tee android-build.log
+          gradle --dependency-verification=strict assembleDebug assembleRelease test --stacktrace 2>&1 | tee android-build.log
 
       - name: Upload build log on failure
         if: failure()
@@ -69,10 +49,10 @@ jobs:
           retention-days: 1
 
       - name: Run lint
-        run: gradle lint
+        run: gradle --dependency-verification=strict lint
 
       - name: Run Detekt
-        run: gradle detekt
+        run: gradle --dependency-verification=strict detekt
 
       - name: Print lint report on failure
         if: failure()
