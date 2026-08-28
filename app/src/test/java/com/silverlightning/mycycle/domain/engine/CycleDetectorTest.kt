@@ -2,12 +2,12 @@ package com.silverlightning.mycycle.domain.engine
 
 import com.silverlightning.mycycle.domain.model.CycleDay
 import com.silverlightning.mycycle.domain.model.FlowIntensity
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalDate
 
 class CycleDetectorTest {
 
@@ -72,6 +72,7 @@ class CycleDetectorTest {
 
         assertEquals(2, cycles.size)
         assertEquals(LocalDate.of(2026, 8, 1), cycles[0].periodEndDate)
+        assertEquals(1, cycles[0].periodLength)
         assertEquals(LocalDate.of(2026, 8, 3), cycles[1].startDate)
     }
 
@@ -113,7 +114,7 @@ class CycleDetectorTest {
     }
 
     @Test
-    fun newPeriodCompletesPreviousCycle() {
+    fun newPeriodDoesNotInventPreviousPeriodEnd() {
         val days = listOf(
             period(LocalDate.of(2026, 8, 1)),
             period(LocalDate.of(2026, 8, 2)),
@@ -126,9 +127,39 @@ class CycleDetectorTest {
         assertEquals(2, cycles.size)
         assertTrue(cycles[0].isComplete)
         assertEquals(28, cycles[0].length)
-        assertEquals(2, cycles[0].periodLength)
+        assertNull(cycles[0].periodLength)
         assertEquals(LocalDate.of(2026, 8, 29), cycles[1].startDate)
         assertFalse(cycles[1].isComplete)
+    }
+
+    @Test
+    fun explicitNoBloodAfterPeriodConfirmsCompletedLength() {
+        val days = listOf(
+            period(LocalDate.of(2026, 8, 1)),
+            period(LocalDate.of(2026, 8, 2)),
+            CycleDay(LocalDate.of(2026, 8, 3), hasPeriod = false),
+            period(LocalDate.of(2026, 8, 29))
+        )
+
+        val cycles = detector.detectCycles(days)
+
+        assertEquals(2, cycles.size)
+        assertEquals(2, cycles[0].periodLength)
+    }
+
+    @Test
+    fun bridgedMissingDayKeepsCompletedLengthUnknown() {
+        val days = listOf(
+            period(LocalDate.of(2026, 8, 1)),
+            period(LocalDate.of(2026, 8, 3)),
+            CycleDay(LocalDate.of(2026, 8, 4), hasPeriod = false),
+            period(LocalDate.of(2026, 8, 29))
+        )
+
+        val cycles = detector.detectCycles(days)
+
+        assertEquals(2, cycles.size)
+        assertNull(cycles[0].periodLength)
     }
 
     @Test
