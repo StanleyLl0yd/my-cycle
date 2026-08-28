@@ -1,0 +1,12 @@
+version: "1.0"
+linter: qodana-jvm-android
+jdk:
+  version: "21"
+failThreshold: 0
+profile:
+  name: qodana.recommended
+exclude:
+  - name: All
+    paths:
+      - build
+      - app/build
