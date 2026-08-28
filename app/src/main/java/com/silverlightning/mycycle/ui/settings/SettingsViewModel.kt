@@ -45,6 +45,7 @@ class SettingsViewModel(
     }
 
     fun setCycleStage(stage: CycleStage) {
+        if (_state.value.isClearingData) return
         viewModelScope.launch {
             val result = runSuspendCatching {
                 preferencesRepository.updateCycleStage(stage)
@@ -54,6 +55,7 @@ class SettingsViewModel(
     }
 
     fun setThemeMode(mode: ThemeMode) {
+        if (_state.value.isClearingData) return
         viewModelScope.launch {
             val result = runSuspendCatching {
                 preferencesRepository.updateTheme(mode, _state.value.useDynamicColors)
@@ -63,6 +65,7 @@ class SettingsViewModel(
     }
 
     fun setDynamicColors(enabled: Boolean) {
+        if (_state.value.isClearingData) return
         viewModelScope.launch {
             val result = runSuspendCatching {
                 preferencesRepository.updateTheme(_state.value.themeMode, enabled)
