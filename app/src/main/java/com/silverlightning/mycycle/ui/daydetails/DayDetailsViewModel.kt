@@ -9,6 +9,7 @@ import com.silverlightning.mycycle.domain.model.Mood
 import com.silverlightning.mycycle.domain.model.Symptom
 import com.silverlightning.mycycle.util.ClockProvider
 import com.silverlightning.mycycle.util.currentDateFlow
+import com.silverlightning.mycycle.util.runSuspendCatching
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +27,8 @@ data class DayDetailsState(
     val notes: String = "",
     val isFutureDate: Boolean = false,
     val isLoading: Boolean = true,
+    val isSaving: Boolean = false,
+    val hasSaveError: Boolean = false,
     val isDirty: Boolean = false,
     val isSaved: Boolean = false
 )
@@ -69,13 +72,14 @@ class DayDetailsViewModel(
             it.copy(
                 flowIntensity = intensity,
                 hasPeriod = intensity != null && intensity != FlowIntensity.SPOTTING,
+                hasSaveError = false,
                 isDirty = true
             )
         }
     }
 
     fun setMood(mood: Mood?) {
-        _state.update { it.copy(mood = mood, isDirty = true) }
+        _state.update { it.copy(mood = mood, hasSaveError = false, isDirty = true) }
     }
 
     fun toggleSymptom(symptom: Symptom) {
@@ -85,30 +89,54 @@ class DayDetailsViewModel(
             } else {
                 currentState.symptoms + symptom
             }
-            currentState.copy(symptoms = newSymptoms, isDirty = true)
+            currentState.copy(
+                symptoms = newSymptoms,
+                hasSaveError = false,
+                isDirty = true
+            )
         }
     }
 
     fun setNotes(notes: String) {
-        _state.update { it.copy(notes = notes, isDirty = true) }
+        _state.update {
+            it.copy(notes = notes, hasSaveError = false, isDirty = true)
+        }
     }
 
     fun save() {
+        if (_state.value.isSaving) return
+
         viewModelScope.launch {
             val currentState = _state.value
             if (currentState.date.isAfter(clockProvider.today())) return@launch
 
-            cycleDayRepository.save(
-                CycleDay(
-                    date = currentState.date,
-                    hasPeriod = currentState.hasPeriod,
-                    flowIntensity = currentState.flowIntensity,
-                    mood = currentState.mood,
-                    symptoms = currentState.symptoms,
-                    notes = currentState.notes.takeIf { it.isNotBlank() }
+            _state.update { it.copy(isSaving = true, hasSaveError = false) }
+
+            val result = runSuspendCatching {
+                cycleDayRepository.save(
+                    CycleDay(
+                        date = currentState.date,
+                        hasPeriod = currentState.hasPeriod,
+                        flowIntensity = currentState.flowIntensity,
+                        mood = currentState.mood,
+                        symptoms = currentState.symptoms,
+                        notes = currentState.notes.takeIf { it.isNotBlank() }
+                    )
                 )
-            )
-            _state.update { it.copy(isDirty = false, isSaved = true) }
+            }
+
+            if (result.isSuccess) {
+                _state.update {
+                    it.copy(
+                        isSaving = false,
+                        hasSaveError = false,
+                        isDirty = false,
+                        isSaved = true
+                    )
+                }
+            } else {
+                _state.update { it.copy(isSaving = false, hasSaveError = true) }
+            }
         }
     }
 }
