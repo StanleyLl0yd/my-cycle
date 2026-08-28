@@ -7,8 +7,8 @@ import com.silverlightning.mycycle.domain.model.CycleDay
 import com.silverlightning.mycycle.domain.model.FlowIntensity
 import com.silverlightning.mycycle.domain.model.Mood
 import com.silverlightning.mycycle.domain.model.Symptom
+import com.silverlightning.mycycle.util.ClockProvider
 import com.silverlightning.mycycle.util.currentDateFlow
-import java.time.Clock
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,13 +26,14 @@ data class DayDetailsState(
     val notes: String = "",
     val isFutureDate: Boolean = false,
     val isLoading: Boolean = true,
+    val isDirty: Boolean = false,
     val isSaved: Boolean = false
 )
 
 class DayDetailsViewModel(
     private val dateString: String,
     private val cycleDayRepository: CycleDayRepository,
-    private val clock: Clock
+    private val clockProvider: ClockProvider
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DayDetailsState())
@@ -47,22 +48,28 @@ class DayDetailsViewModel(
             val date = LocalDate.parse(dateString)
             combine(
                 cycleDayRepository.observeByDate(date),
-                currentDateFlow(clock)
+                currentDateFlow(clockProvider)
             ) { existingDay, today ->
                 Pair(existingDay, today)
             }.collect { (existingDay, today) ->
-                if (_state.value.isSaved) return@collect
-                _state.update {
-                    DayDetailsState(
-                        date = date,
-                        hasPeriod = existingDay?.isPeriodBleeding ?: false,
-                        flowIntensity = existingDay?.flowIntensity,
-                        mood = existingDay?.mood,
-                        symptoms = existingDay?.symptoms ?: emptySet(),
-                        notes = existingDay?.notes ?: "",
-                        isFutureDate = date.isAfter(today),
-                        isLoading = false
-                    )
+                _state.update { current ->
+                    when {
+                        current.isSaved -> current
+                        current.isDirty -> current.copy(
+                            isFutureDate = date.isAfter(today),
+                            isLoading = false
+                        )
+                        else -> DayDetailsState(
+                            date = date,
+                            hasPeriod = existingDay?.isPeriodBleeding ?: false,
+                            flowIntensity = existingDay?.flowIntensity,
+                            mood = existingDay?.mood,
+                            symptoms = existingDay?.symptoms ?: emptySet(),
+                            notes = existingDay?.notes ?: "",
+                            isFutureDate = date.isAfter(today),
+                            isLoading = false
+                        )
+                    }
                 }
             }
         }
@@ -72,13 +79,14 @@ class DayDetailsViewModel(
         _state.update {
             it.copy(
                 flowIntensity = intensity,
-                hasPeriod = intensity != null && intensity != FlowIntensity.SPOTTING
+                hasPeriod = intensity != null && intensity != FlowIntensity.SPOTTING,
+                isDirty = true
             )
         }
     }
 
     fun setMood(mood: Mood?) {
-        _state.update { it.copy(mood = mood) }
+        _state.update { it.copy(mood = mood, isDirty = true) }
     }
 
     fun toggleSymptom(symptom: Symptom) {
@@ -88,18 +96,18 @@ class DayDetailsViewModel(
             } else {
                 currentState.symptoms + symptom
             }
-            currentState.copy(symptoms = newSymptoms)
+            currentState.copy(symptoms = newSymptoms, isDirty = true)
         }
     }
 
     fun setNotes(notes: String) {
-        _state.update { it.copy(notes = notes) }
+        _state.update { it.copy(notes = notes, isDirty = true) }
     }
 
     fun save() {
         viewModelScope.launch {
             val currentState = _state.value
-            if (currentState.date.isAfter(LocalDate.now(clock))) return@launch
+            if (currentState.date.isAfter(clockProvider.today())) return@launch
 
             cycleDayRepository.save(
                 CycleDay(
@@ -111,7 +119,7 @@ class DayDetailsViewModel(
                     notes = currentState.notes.takeIf { it.isNotBlank() }
                 )
             )
-            _state.update { it.copy(isSaved = true) }
+            _state.update { it.copy(isDirty = false, isSaved = true) }
         }
     }
 }
