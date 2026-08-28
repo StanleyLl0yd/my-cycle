@@ -1,6 +1,16 @@
 .gradle/
 .idea/
 local.properties
+secrets.properties
+keystore.properties
+.env
+.env.*
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
 **/build/
 .cxx/
 *.iml
