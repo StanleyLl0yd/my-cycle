@@ -105,6 +105,9 @@ fun CalendarScreen(
 
         AnimatedContent(
             targetState = state.currentMonth,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
             transitionSpec = {
                 if (targetState > initialState) {
                     (slideInHorizontally { it / 3 } + fadeIn()) togetherWith
@@ -230,7 +233,7 @@ private fun MonthGrid(
         columns = GridCells.Fixed(7),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxSize()
     ) {
         items(days) { date ->
             if (date != null) {
