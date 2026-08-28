@@ -1,5 +1,6 @@
 version: "1.0"
-linter: qodana-jvm-android
+linter: qodana-jvm-community
+withinDocker: false
 jdk:
   version: "21"
 failThreshold: 0
