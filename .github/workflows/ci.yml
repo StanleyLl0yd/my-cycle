@@ -15,6 +15,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -30,11 +31,25 @@ jobs:
         with:
           gradle-version: '9.5.0'
 
+      - name: Check source comment policy
+        run: python3 scripts/check-source-comments.py
+
+      - name: Bootstrap dependency verification metadata
+        run: |
+          rm -f gradle/verification-metadata.xml
+          gradle --write-verification-metadata sha256 help
+          echo '=== BEGIN VERIFICATION METADATA ==='
+          cat gradle/verification-metadata.xml
+          echo '=== END VERIFICATION METADATA ==='
+
       - name: Build APKs and run unit tests
         run: gradle assembleDebug assembleRelease test --stacktrace
 
       - name: Run lint
         run: gradle lint
+
+      - name: Run Detekt
+        run: gradle detekt
 
       - name: Print lint report on failure
         if: failure()
