@@ -34,16 +34,33 @@ jobs:
       - name: Check source comment policy
         run: python3 scripts/check-source-comments.py
 
-      - name: Bootstrap dependency verification metadata
+      - name: Generate dependency verification metadata
         run: |
           rm -f gradle/verification-metadata.xml
-          gradle --write-verification-metadata sha256 help
-          echo '=== BEGIN VERIFICATION METADATA ==='
-          cat gradle/verification-metadata.xml
-          echo '=== END VERIFICATION METADATA ==='
+          gradle --write-verification-metadata sha256 assembleDebug assembleRelease test lint detekt --stacktrace
+
+      - name: Upload dependency verification metadata
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: gradle-verification-metadata
+          path: gradle/verification-metadata.xml
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Build APKs and run unit tests
-        run: gradle assembleDebug assembleRelease test --stacktrace
+        run: |
+          set -o pipefail
+          gradle assembleDebug assembleRelease test --stacktrace 2>&1 | tee android-build.log
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: android-build-log
+          path: android-build.log
+          if-no-files-found: ignore
+          retention-days: 1
 
       - name: Run lint
         run: gradle lint
