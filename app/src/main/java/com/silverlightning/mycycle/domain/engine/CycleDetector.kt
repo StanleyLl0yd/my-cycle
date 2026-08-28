@@ -24,6 +24,7 @@ class CycleDetector {
         var currentPeriodStart = periodDays.first().date
         var currentPeriodEnd = currentPeriodStart
         var currentPeriodLengthKnown = periodDays.first().flowIntensity != null
+        var currentPeriodHasMissingDay = false
         var previousPeriodDate = currentPeriodStart
 
         for (index in 1 until periodDays.size) {
@@ -34,12 +35,18 @@ class CycleDetector {
                     !hasExplicitBreak(daysByDate, previousPeriodDate, day.date)
 
             if (canBridgeMissingDay) {
+                if (gap > 1) {
+                    currentPeriodHasMissingDay = true
+                }
                 currentPeriodEnd = day.date
                 currentPeriodLengthKnown =
                     currentPeriodLengthKnown || day.flowIntensity != null
                 previousPeriodDate = day.date
                 continue
             }
+
+            val confirmedPeriodEnd =
+                daysByDate[currentPeriodEnd.plusDays(1)]?.isPeriodBleeding == false
 
             cycles += Cycle(
                 id = cycleId++,
@@ -50,7 +57,7 @@ class CycleDetector {
                 periodLength = periodLength(
                     start = currentPeriodStart,
                     end = currentPeriodEnd,
-                    isKnown = currentPeriodLengthKnown
+                    isKnown = confirmedPeriodEnd && !currentPeriodHasMissingDay
                 ),
                 isComplete = true
             )
@@ -58,6 +65,7 @@ class CycleDetector {
             currentPeriodStart = day.date
             currentPeriodEnd = day.date
             currentPeriodLengthKnown = day.flowIntensity != null
+            currentPeriodHasMissingDay = false
             previousPeriodDate = day.date
         }
 
