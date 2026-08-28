@@ -41,6 +41,7 @@ class OnboardingViewModel(
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
 
     fun nextStep() {
+        if (_state.value.isLoading) return
         _state.update { current ->
             if (current.currentStep == 1 && current.cycleStage == CycleStage.NOT_SET) {
                 current
@@ -54,6 +55,7 @@ class OnboardingViewModel(
     }
 
     fun previousStep() {
+        if (_state.value.isLoading) return
         _state.update {
             it.copy(
                 currentStep = (it.currentStep - 1).coerceAtLeast(0),
@@ -63,7 +65,7 @@ class OnboardingViewModel(
     }
 
     fun setCycleStage(stage: CycleStage) {
-        if (stage == CycleStage.NOT_SET) return
+        if (_state.value.isLoading || stage == CycleStage.NOT_SET) return
         _state.update { current ->
             current.copy(
                 cycleStage = stage,
@@ -77,12 +79,14 @@ class OnboardingViewModel(
     }
 
     fun setLastPeriodDate(date: LocalDate) {
+        if (_state.value.isLoading) return
         val today = clockProvider.today()
         val safeDate = if (date.isAfter(today)) today else date
         _state.update { it.copy(lastPeriodDate = safeDate, hasSaveError = false) }
     }
 
     fun setCycleLength(length: Int) {
+        if (_state.value.isLoading) return
         _state.update {
             it.copy(
                 cycleLength = length.coerceIn(15, 90),
