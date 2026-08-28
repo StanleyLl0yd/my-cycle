@@ -2,7 +2,6 @@ package com.silverlightning.mycycle.ui.daydetails
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.silverlightning.mycycle.R
@@ -70,8 +72,11 @@ fun DayDetailsSheet(
     }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState
+        onDismissRequest = {
+            if (!state.isSaving) onDismiss()
+        },
+        sheetState = sheetState,
+        sheetGesturesEnabled = !state.isSaving
     ) {
         Column(
             modifier = Modifier
@@ -103,12 +108,14 @@ fun DayDetailsSheet(
             Spacer(modifier = Modifier.height(12.dp))
 
             FlowRow(
+                modifier = Modifier.selectableGroup(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 FlowOption(
                     label = stringResource(R.string.flow_none),
                     isSelected = state.flowIntensity == null && !state.hasPeriod,
+                    enabled = !state.isSaving,
                     onClick = { viewModel.setFlowIntensity(null) }
                 )
 
@@ -117,6 +124,7 @@ fun DayDetailsSheet(
                         label = stringResource(intensity.labelRes),
                         intensity = intensity,
                         isSelected = state.flowIntensity == intensity,
+                        enabled = !state.isSaving,
                         onClick = { viewModel.setFlowIntensity(intensity) }
                     )
                 }
@@ -141,6 +149,7 @@ fun DayDetailsSheet(
             Spacer(modifier = Modifier.height(12.dp))
 
             FlowRow(
+                modifier = Modifier.selectableGroup(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -148,6 +157,7 @@ fun DayDetailsSheet(
                     MoodOption(
                         mood = mood,
                         isSelected = state.mood == mood,
+                        enabled = !state.isSaving,
                         onClick = {
                             viewModel.setMood(if (state.mood == mood) null else mood)
                         }
@@ -172,6 +182,7 @@ fun DayDetailsSheet(
                     FilterChip(
                         selected = symptom in state.symptoms,
                         onClick = { viewModel.toggleSymptom(symptom) },
+                        enabled = !state.isSaving,
                         label = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(symptom.emoji)
@@ -195,6 +206,7 @@ fun DayDetailsSheet(
             OutlinedTextField(
                 value = state.notes,
                 onValueChange = viewModel::setNotes,
+                enabled = !state.isSaving,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp),
@@ -239,6 +251,7 @@ private fun FlowOption(
     label: String,
     intensity: FlowIntensity? = null,
     isSelected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     val accent = when (intensity) {
@@ -266,7 +279,12 @@ private fun FlowOption(
                     Modifier
                 }
             )
-            .clickable(onClick = onClick)
+            .selectable(
+                selected = isSelected,
+                enabled = enabled,
+                role = Role.RadioButton,
+                onClick = onClick
+            )
             .padding(12.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -297,6 +315,7 @@ private fun FlowOption(
 private fun MoodOption(
     mood: Mood,
     isSelected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     Box(
@@ -309,7 +328,12 @@ private fun MoodOption(
                     MaterialTheme.colorScheme.surfaceVariant
                 }
             )
-            .clickable(onClick = onClick)
+            .selectable(
+                selected = isSelected,
+                enabled = enabled,
+                role = Role.RadioButton,
+                onClick = onClick
+            )
             .padding(12.dp),
         contentAlignment = Alignment.Center
     ) {
