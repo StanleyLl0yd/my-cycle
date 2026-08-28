@@ -214,10 +214,19 @@ fun DayDetailsSheet(
                 )
             }
 
+            if (state.hasSaveError) {
+                Text(
+                    text = stringResource(R.string.error_generic),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             Button(
                 onClick = viewModel::save,
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isLoading && !state.isFutureDate
+                enabled = !state.isLoading && !state.isFutureDate && !state.isSaving
             ) {
                 Text(stringResource(R.string.day_details_save))
             }

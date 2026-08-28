@@ -49,6 +49,7 @@ import com.silverlightning.mycycle.R
 import com.silverlightning.mycycle.domain.model.CycleStage
 import com.silverlightning.mycycle.domain.model.ThemeMode
 import com.silverlightning.mycycle.ui.theme.CycleColors
+import com.silverlightning.mycycle.util.runSuspendCatching
 import java.io.OutputStreamWriter
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
@@ -69,6 +70,7 @@ fun SettingsScreen(
     val exportSuccessMessage = stringResource(R.string.dialog_export_success)
     val genericErrorMessage = stringResource(R.string.error_generic)
     val dynamicColorsAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val interactionsEnabled = !state.isClearingData
     val scope = rememberCoroutineScope()
     var showClearDialog by remember { mutableStateOf(false) }
 
@@ -77,7 +79,7 @@ fun SettingsScreen(
     ) { uri ->
         if (uri != null) {
             scope.launch {
-                try {
+                val result = runSuspendCatching {
                     withContext(Dispatchers.IO) {
                         val csv = viewModel.buildCsvExport()
                         val output = context.contentResolver.openOutputStream(uri)
@@ -88,18 +90,12 @@ fun SettingsScreen(
                                 .use { writer -> writer.write(csv) }
                         }
                     }
-                    Toast.makeText(
-                        context,
-                        exportSuccessMessage,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } catch (_: Exception) {
-                    Toast.makeText(
-                        context,
-                        genericErrorMessage,
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
+                Toast.makeText(
+                    context,
+                    if (result.isSuccess) exportSuccessMessage else genericErrorMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -116,6 +112,15 @@ fun SettingsScreen(
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(vertical = 16.dp)
         )
+
+        if (state.hasOperationError) {
+            Text(
+                text = stringResource(R.string.error_generic),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
 
         SettingsSection(title = stringResource(R.string.settings_cycle_stage)) {
             Column(
@@ -139,6 +144,7 @@ fun SettingsScreen(
                             FilterChip(
                                 selected = state.cycleStage == stage,
                                 onClick = { viewModel.setCycleStage(stage) },
+                                enabled = interactionsEnabled,
                                 label = { Text(stringResource(stage.labelRes)) }
                             )
                         }
@@ -173,6 +179,7 @@ fun SettingsScreen(
                         FilterChip(
                             selected = state.themeMode == mode,
                             onClick = { viewModel.setThemeMode(mode) },
+                            enabled = interactionsEnabled,
                             label = { Text(stringResource(mode.labelRes)) }
                         )
                     }
@@ -189,7 +196,7 @@ fun SettingsScreen(
                     }
                 ),
                 checked = state.useDynamicColors,
-                enabled = dynamicColorsAvailable,
+                enabled = dynamicColorsAvailable && interactionsEnabled,
                 onCheckedChange = viewModel::setDynamicColors
             )
         }
@@ -200,6 +207,7 @@ fun SettingsScreen(
             SettingsItem(
                 title = stringResource(R.string.settings_export),
                 subtitle = stringResource(R.string.settings_export_desc),
+                enabled = interactionsEnabled,
                 onClick = {
                     exportLauncher.launch("my-cycle-${LocalDate.now()}.csv")
                 }
@@ -208,6 +216,7 @@ fun SettingsScreen(
             SettingsItem(
                 title = stringResource(R.string.settings_clear_data),
                 subtitle = stringResource(R.string.settings_clear_data_desc),
+                enabled = interactionsEnabled,
                 onClick = { showClearDialog = true }
             )
         }
@@ -247,12 +256,14 @@ fun SettingsScreen(
             SettingsItem(
                 title = stringResource(R.string.settings_license),
                 subtitle = stringResource(R.string.settings_license_value),
+                enabled = interactionsEnabled,
                 onClick = { openUrl(context, LICENSE_URL) }
             )
             HorizontalDivider()
             SettingsItem(
                 title = stringResource(R.string.settings_github),
                 subtitle = stringResource(R.string.settings_github_desc),
+                enabled = interactionsEnabled,
                 onClick = { openUrl(context, GITHUB_URL) }
             )
             HorizontalDivider()
@@ -274,13 +285,17 @@ fun SettingsScreen(
                     onClick = {
                         showClearDialog = false
                         viewModel.clearAllData()
-                    }
+                    },
+                    enabled = interactionsEnabled
                 ) {
                     Text(stringResource(R.string.dialog_clear_data_confirm))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showClearDialog = false }) {
+                TextButton(
+                    onClick = { showClearDialog = false },
+                    enabled = interactionsEnabled
+                ) {
                     Text(stringResource(R.string.dialog_cancel))
                 }
             }
@@ -319,14 +334,15 @@ private fun SettingsSection(
 private fun SettingsItem(
     title: String,
     subtitle: String,
-    onClick: (() -> Unit)?
+    onClick: (() -> Unit)?,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .then(
                 if (onClick != null) {
-                    Modifier.clickable(onClick = onClick)
+                    Modifier.clickable(enabled = enabled, onClick = onClick)
                 } else {
                     Modifier
                 }

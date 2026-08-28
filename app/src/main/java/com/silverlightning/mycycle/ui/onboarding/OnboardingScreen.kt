@@ -139,6 +139,15 @@ fun OnboardingScreen(
                 )
             }
 
+            if (state.hasSaveError) {
+                Text(
+                    text = stringResource(R.string.error_generic),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
             if (state.currentStep > 0) {
                 TextButton(
                     onClick = viewModel::previousStep,
