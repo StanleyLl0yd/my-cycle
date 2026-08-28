@@ -14,7 +14,7 @@ import com.silverlightning.mycycle.ui.onboarding.OnboardingViewModel
 import com.silverlightning.mycycle.ui.settings.SettingsViewModel
 import com.silverlightning.mycycle.ui.statistics.StatisticsViewModel
 import com.silverlightning.mycycle.ui.today.TodayViewModel
-import java.time.Clock
+import com.silverlightning.mycycle.util.ClockProvider
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -30,7 +30,7 @@ val appModule = module {
 
     single { get<AppDatabase>().cycleDayDao() }
     single { androidContext().userPreferencesDataStore }
-    single { Clock.systemDefaultZone() }
+    single { ClockProvider() }
 
     single { UserPreferencesRepository(get()) }
     single { CycleDayRepository(get()) }
@@ -48,7 +48,7 @@ val appModule = module {
             cycleDetector = get(),
             predictionEngine = get(),
             noticeEvaluator = get(),
-            clock = get()
+            clockProvider = get()
         )
     }
 
@@ -58,7 +58,7 @@ val appModule = module {
             cycleDayRepository = get(),
             cycleDetector = get(),
             predictionEngine = get(),
-            clock = get()
+            clockProvider = get()
         )
     }
 
