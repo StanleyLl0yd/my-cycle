@@ -6,7 +6,7 @@ import com.silverlightning.mycycle.data.preferences.UserPreferencesRepository
 import com.silverlightning.mycycle.data.repository.CycleDayRepository
 import com.silverlightning.mycycle.domain.model.CycleDay
 import com.silverlightning.mycycle.domain.model.CycleStage
-import java.time.Clock
+import com.silverlightning.mycycle.util.ClockProvider
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,12 +26,12 @@ data class OnboardingState(
 class OnboardingViewModel(
     private val preferencesRepository: UserPreferencesRepository,
     private val cycleDayRepository: CycleDayRepository,
-    private val clock: Clock
+    private val clockProvider: ClockProvider
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
         OnboardingState(
-            lastPeriodDate = LocalDate.now(clock).minusDays(14)
+            lastPeriodDate = clockProvider.today().minusDays(14)
         )
     )
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
@@ -64,7 +64,7 @@ class OnboardingViewModel(
     }
 
     fun setLastPeriodDate(date: LocalDate) {
-        val today = LocalDate.now(clock)
+        val today = clockProvider.today()
         val safeDate = if (date.isAfter(today)) today else date
         _state.update { it.copy(lastPeriodDate = safeDate) }
     }

@@ -10,8 +10,8 @@ import com.silverlightning.mycycle.domain.engine.PredictionEngine
 import com.silverlightning.mycycle.domain.model.CycleNotice
 import com.silverlightning.mycycle.domain.model.CycleStage
 import com.silverlightning.mycycle.domain.model.Prediction
+import com.silverlightning.mycycle.util.ClockProvider
 import com.silverlightning.mycycle.util.currentDateFlow
-import java.time.Clock
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,11 +37,11 @@ class TodayViewModel(
     private val cycleDetector: CycleDetector,
     private val predictionEngine: PredictionEngine,
     private val noticeEvaluator: CycleNoticeEvaluator,
-    private val clock: Clock
+    private val clockProvider: ClockProvider
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        TodayState(today = LocalDate.now(clock))
+        TodayState(today = clockProvider.today())
     )
     val state: StateFlow<TodayState> = _state.asStateFlow()
 
@@ -54,7 +54,7 @@ class TodayViewModel(
             combine(
                 preferencesRepository.preferences,
                 cycleDayRepository.observeAll(),
-                currentDateFlow(clock)
+                currentDateFlow(clockProvider)
             ) { preferences, allDays, today ->
                 Triple(preferences, allDays, today)
             }.collect { (preferences, allDays, today) ->

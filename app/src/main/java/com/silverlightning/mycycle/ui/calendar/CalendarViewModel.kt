@@ -10,8 +10,8 @@ import com.silverlightning.mycycle.domain.model.CycleDay
 import com.silverlightning.mycycle.domain.model.DayState
 import com.silverlightning.mycycle.domain.model.Prediction
 import com.silverlightning.mycycle.domain.model.UserPreferences
+import com.silverlightning.mycycle.util.ClockProvider
 import com.silverlightning.mycycle.util.currentDateFlow
-import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
@@ -35,10 +35,10 @@ class CalendarViewModel(
     private val cycleDayRepository: CycleDayRepository,
     private val cycleDetector: CycleDetector,
     private val predictionEngine: PredictionEngine,
-    private val clock: Clock
+    private val clockProvider: ClockProvider
 ) : ViewModel() {
 
-    private val initialToday = LocalDate.now(clock)
+    private val initialToday = clockProvider.today()
     private val _state = MutableStateFlow(
         CalendarState(
             currentMonth = YearMonth.from(initialToday),
@@ -62,7 +62,7 @@ class CalendarViewModel(
     }
 
     fun goToToday() {
-        selectedMonth.value = YearMonth.from(LocalDate.now(clock))
+        selectedMonth.value = YearMonth.from(clockProvider.today())
     }
 
     private fun loadData() {
@@ -71,7 +71,7 @@ class CalendarViewModel(
                 preferencesRepository.preferences,
                 cycleDayRepository.observeAll(),
                 selectedMonth,
-                currentDateFlow(clock)
+                currentDateFlow(clockProvider)
             ) { preferences, allDays, month, today ->
                 CalendarInput(preferences, allDays, month, today)
             }.collect { input ->
