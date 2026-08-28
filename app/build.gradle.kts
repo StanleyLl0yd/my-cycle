@@ -94,8 +94,6 @@ android {
 
 detekt {
     buildUponDefaultConfig = true
-    parallel = true
-    source.setFrom("src/main/java", "src/test/java")
 }
 
 dependencies {
