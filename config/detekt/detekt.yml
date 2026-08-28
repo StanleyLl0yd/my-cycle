@@ -15,6 +15,7 @@ style:
     ignoreRanges: true
     ignoreNamedArgument: true
     excludes:
+      - '**/src/test/**'
       - '**/ui/**/*Screen.kt'
       - '**/ui/navigation/NavHost.kt'
       - '**/ui/daydetails/DayDetailsSheet.kt'
