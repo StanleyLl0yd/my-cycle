@@ -146,7 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added unit tests for cycle detection and prediction logic.
 - Added GitHub Actions validation for unit tests, Android Lint, debug APK assembly and release APK assembly.
 - Release builds use R8 minification and resource shrinking.
-- Application ID: `com.silverlightning.mycycle`.
+- Application ID: `com.sl.mycycle`.
 - Min SDK: 26 (Android 8.0).
 - Target SDK: 36.
 

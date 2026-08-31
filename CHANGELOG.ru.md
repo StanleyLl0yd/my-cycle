@@ -146,7 +146,7 @@
 - Добавлены unit-тесты для логики распознавания циклов и прогнозов.
 - GitHub Actions проверяет unit-тесты, Android Lint, сборку debug APK и release APK.
 - Release-сборка использует R8 и shrink resources.
-- Application ID: `com.silverlightning.mycycle`.
+- Application ID: `com.sl.mycycle`.
 - Min SDK: 26 (Android 8.0).
 - Target SDK: 36.
 

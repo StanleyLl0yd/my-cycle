@@ -6,7 +6,7 @@
             android:name=".debug.StoreDemoReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.silverlightning.mycycle.SEED_STORE_DEMO" />
+                <action android:name="com.sl.mycycle.SEED_STORE_DEMO" />
             </intent-filter>
         </receiver>
     </application>

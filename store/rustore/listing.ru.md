@@ -10,7 +10,7 @@
 - **Дополнительная категория:** не выбирать
 - **Рекомендуемая возрастная маркировка:** 0+
 - **Теги:** Календарь, Медицина
-- **Application ID:** `com.silverlightning.mycycle`
+- **Application ID:** `com.sl.mycycle`
 - **Минимальная версия Android:** 8.0 (API 26)
 - **Target SDK:** 37
 

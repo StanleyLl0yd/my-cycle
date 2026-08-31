@@ -1,0 +1,21 @@
+package com.sl.mycycle.domain.model
+
+import java.time.LocalDate
+
+data class CycleDay(
+    val date: LocalDate,
+    val hasPeriod: Boolean = false,
+    val flowIntensity: FlowIntensity? = null,
+    val mood: Mood? = null,
+    val symptoms: Set<Symptom> = emptySet(),
+    val notes: String? = null
+) {
+    val isPeriodBleeding: Boolean
+        get() = when (flowIntensity) {
+            FlowIntensity.SPOTTING -> false
+            FlowIntensity.LIGHT,
+            FlowIntensity.MEDIUM,
+            FlowIntensity.HEAVY -> true
+            null -> hasPeriod
+        }
+}
