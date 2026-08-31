@@ -10,6 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.2] - 2026-08-31
+
+### 🗓️ Historical data and simpler entry
+- Added a quick Calendar flow for entering previous periods by start and end date, with an “Add another” action for entering several earlier cycles.
+- Existing mood, symptoms and notes are preserved when a historical period range is added.
+- The day after a historical period is recorded as a non-bleeding boundary only when that day is safe to fill automatically, so finished period length can be calculated without overwriting user data.
+- Past dates are explicitly discoverable as editable in Calendar.
+- Daily entry now keeps bleeding and Save visible first, while mood, symptoms and notes live under an optional “More details” section.
+- First-run questions and choices were shortened in English and Russian.
+
+### 🛡️ Reliability, accessibility and release safety
+- Historical period writes are atomic from the user’s perspective and roll back if a multi-day save fails.
+- Onboarding, daily entry and destructive Settings operations now handle write failures and coroutine cancellation without leaving partial state across Room and DataStore.
+- Calendar layout behaves better on smaller screens and with larger text; selection controls and Settings switches expose clearer accessibility semantics.
+- Release publishing is immutable: it can only run from protected `main`, requires successful CI for the exact commit, refuses an existing tag/release and verifies the APK signer certificate and v2/v3 signatures.
+- Regular CI never receives the release signing key or passwords; signing material is restored only for the signed release build and removed immediately afterward.
+
+### ✅ Quality and supply-chain checks
+- Android CI now runs build, unit tests, Android Lint and Detekt with strict Gradle dependency verification.
+- Security workflows run Qodana, CodeQL, Semgrep and Gitleaks; Gitleaks checks full Git history.
+- Dependabot monitors Gradle, GitHub Actions and the pinned Python security tool.
+- Third-party GitHub Actions are pinned to immutable commit SHAs.
+- Source-comment policy is enforced automatically: comments must be minimal, necessary and English-only.
+- Release builds remain minified with R8 and resource shrinking.
+- Updated source version to 1.1.2 (`versionCode` 4).
+
+---
+
 ## [1.1.1] - 2026-08-27
 
 ### ✅ Safer setup and records
