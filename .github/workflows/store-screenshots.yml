@@ -1,0 +1,151 @@
+name: RuStore Screenshots
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - rustore-first-publish
+    paths:
+      - app/src/main/**
+      - app/src/debug/**
+      - app/build.gradle.kts
+      - store/rustore/**
+      - .github/workflows/store-screenshots.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rustore-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Validate application identity
+        run: |
+          set -euo pipefail
+          expected_id='com.sl.mycycle'
+          legacy_id='com.silver''lightning.mycycle'
+          legacy_path='com/silver''lightning/mycycle'
+
+          grep -F "namespace = \"$expected_id\"" app/build.gradle.kts
+          grep -F "applicationId = \"$expected_id\"" app/build.gradle.kts
+          grep -F "package $expected_id" app/src/main/java/com/sl/mycycle/MyCycleApp.kt
+          grep -F "package $expected_id" app/src/test/java/com/sl/mycycle/domain/engine/PredictionEngineTest.kt
+          grep -F "package $expected_id.debug" app/src/debug/java/com/sl/mycycle/debug/StoreDemoReceiver.kt
+
+          if git grep -Fq "$legacy_id" -- .; then
+            echo 'Legacy application identifier remains in tracked content.' >&2
+            exit 1
+          fi
+          if git ls-files | grep -Fq -e "$legacy_path" -e "$legacy_id"; then
+            echo 'Legacy package path remains in tracked files.' >&2
+            exit 1
+          fi
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle 9.5.0
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb
+        with:
+          gradle-version: '9.5.0'
+
+      - name: Generate RuStore screenshots
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -prop persist.sys.locale=ru-RU
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            adb wait-for-device
+            test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1"
+            adb shell wm size 1080x1920
+            adb shell wm density 420
+            adb shell settings put global policy_control immersive.full=*
+
+            gradle installDebug --stacktrace
+
+            adb shell am broadcast \
+              -a com.sl.mycycle.SEED_STORE_DEMO \
+              -p com.sl.mycycle.debug
+            sleep 3
+
+            mkdir -p store/rustore/screenshots/phone
+            adb shell am force-stop com.sl.mycycle.debug
+            adb shell am start -W \
+              -n com.sl.mycycle.debug/com.sl.mycycle.ui.MainActivity
+            sleep 2
+
+            adb exec-out screencap -p > store/rustore/screenshots/phone/01-today.png
+
+            adb shell input tap 405 1810
+            sleep 1
+            adb exec-out screencap -p > store/rustore/screenshots/phone/02-calendar.png
+
+            adb shell input tap 675 1810
+            sleep 1
+            adb exec-out screencap -p > store/rustore/screenshots/phone/03-statistics.png
+
+            adb shell input tap 945 1810
+            sleep 1
+            adb exec-out screencap -p > store/rustore/screenshots/phone/04-settings.png
+
+            python3 - <<'PY'
+            from pathlib import Path
+            import struct
+
+            paths = sorted(Path("store/rustore/screenshots/phone").glob("*.png"))
+            if len(paths) < 3:
+                raise SystemExit("RuStore requires at least three phone screenshots")
+
+            for path in paths:
+                data = path.read_bytes()
+                if data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+                    raise SystemExit(f"{path} is not a valid PNG")
+                width, height = struct.unpack(">II", data[16:24])
+                if (width, height) != (1080, 1920):
+                    raise SystemExit(f"{path} has unexpected dimensions {(width, height)}")
+                if len(data) > 3 * 1024 * 1024:
+                    raise SystemExit(f"{path} exceeds 3 MB")
+                print(f"{path}: 1080x1920, {len(data)} bytes")
+            PY
+
+      - name: Upload screenshot artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: My-Cycle-RuStore-screenshots
+          path: store/rustore/screenshots/phone/*.png
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit screenshots to preparation branch
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$GITHUB_REF_NAME"
+          git rebase "origin/$GITHUB_REF_NAME"
+          git add store/rustore/screenshots/phone
+          if git diff --cached --quiet; then
+            echo "Screenshots are unchanged."
+            exit 0
+          fi
+          git commit -m "Add RuStore screenshots"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

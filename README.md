@@ -11,9 +11,9 @@
 
 A simple, private period diary for Android. It keeps your real dates and gives careful calendar guesses without pretending that every body follows a 28-day clock.
 
-[⬇️ Download the latest published APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
+[📦 Latest release files — signed AAB for RuStore](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.1.2** · Latest published APK: **1.1.2** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
+Source version: **1.1.3** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Features
 
