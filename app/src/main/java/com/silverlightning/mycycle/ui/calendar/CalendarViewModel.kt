@@ -172,6 +172,7 @@ class CalendarViewModel(
             }
 
             val dates = historicalPeriodDates(current.startDate, current.endDate)
+            val boundaryDate = historicalPeriodBoundaryDate(current.endDate, today)
             val previousDays = mutableMapOf<LocalDate, CycleDay?>()
             val changedDates = mutableListOf<LocalDate>()
 
@@ -182,6 +183,14 @@ class CalendarViewModel(
                         previousDays[date] = previous
                         cycleDayRepository.save(mergeHistoricalPeriodDay(date, previous))
                         changedDates += date
+                    }
+
+                    boundaryDate?.let { date ->
+                        if (cycleDayRepository.getByDate(date) == null) {
+                            previousDays[date] = null
+                            cycleDayRepository.save(CycleDay(date = date))
+                            changedDates += date
+                        }
                     }
                 } catch (error: Throwable) {
                     withContext(NonCancellable) {
