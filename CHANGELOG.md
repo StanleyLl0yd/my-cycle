@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.3] - 2026-08-31
+
+### 📦 RuStore and application identity
+- Fixed the canonical Android application ID and namespace at `com.sl.mycycle` for the first RuStore publication.
+- Refactored Kotlin packages, source, test and debug package paths, Room schema paths, workflows and documentation to the canonical application identity.
+- Pre-1.1.3 GitHub builds use a different Android application identity and are treated by Android as a separate app; `com.sl.mycycle` is the permanent identity going forward.
+- Release publishing now produces a signed Android App Bundle (`.aab`), SHA-256 checksum and public upload certificate for RuStore.
+- Added automated real-device-style 1080×1920 RuStore screenshots using a debug-only local demo-data seeder that is excluded from release builds.
+- Added English and Russian privacy policies and a maintained RuStore listing with publication metadata and data-safety notes.
+- Updated source version to 1.1.3 (`versionCode` 5).
+
+---
+
 ## [1.1.2] - 2026-08-31
 
 ### 🗓️ Historical data and simpler entry
