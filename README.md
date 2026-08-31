@@ -13,7 +13,7 @@ A simple, private period diary for Android. It keeps your real dates and gives c
 
 [⬇️ Download the latest published APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.1.2** · Latest published APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
+Source version: **1.1.2** · Latest published APK: **1.1.2** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Features
 
@@ -101,15 +101,13 @@ If bleeding is very heavy, you feel faint or very weak, pain is severe, you may 
 
 ## 📦 Installation
 
-The latest published signed APK is **1.1.1**.
+The latest published signed APK is **1.1.2**.
 
-[Open My Cycle 1.1.1 on GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.1)
+[Open My Cycle 1.1.2 on GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.2)
 
-[Download signed My-Cycle-v1.1.1.apk from GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/download/v1.1.1/My-Cycle-v1.1.1.apk)
+[Download signed My-Cycle-v1.1.2.apk from GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/download/v1.1.2/My-Cycle-v1.1.2.apk)
 
-[Google Drive mirror](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)
-
-SHA-256 (`My-Cycle-v1.1.1.apk`): `7479ca24cfe8b560ee6258d98e31ac8d99c68419891b345f3e478224fa7797b0`
+SHA-256 (`My-Cycle-v1.1.2.apk`): `f77c768aa0fbc15cf72c5928ca8422dfb38d373c1406b8a6894b3c03c93ac6d7`
 
 Android 8.0 or newer is required.
 
@@ -134,7 +132,7 @@ python3 scripts/check-source-comments.py
 
 Without signing environment variables, `assembleRelease` creates an unsigned release APK.
 
-Official release signing is configured through GitHub Repository Secrets. The keystore and passwords are never stored in the repository. Regular CI does not receive release signing secrets. The manual release workflow restores the key only for the signed release build, removes it immediately afterward, verifies the signer certificate and publishes the APK together with its SHA-256 checksum.
+Official release signing is configured through GitHub Repository Secrets. The keystore and passwords are never stored in the repository. Regular CI does not receive release signing secrets. The release workflow restores the key only for the signed release build, removes it immediately afterward, verifies the signer certificate and publishes the APK together with its SHA-256 checksum.
 
 The signing variables used by the build are `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`; `ANDROID_KEYSTORE_BASE64` is used by GitHub Actions to restore the keystore file.
 
@@ -169,7 +167,7 @@ Pull requests and pushes to `main` are automatically checked with:
 
 Dependabot monitors Gradle, GitHub Actions and the pinned Python security tool. Third-party GitHub Actions are pinned to immutable commit SHAs.
 
-The manual `Android Release` workflow runs only from protected `main` after successful CI. It restores signing material only for the signed build step, removes the keystore immediately afterward, verifies the release certificate and APK v2/v3 signatures, refuses an existing tag/release and publishes the official APK. Release builds use R8 minification and resource shrinking.
+`Android Release` can start automatically from protected `main` for release-related changes and can also be dispatched manually as a fallback. It waits for successful CI on the exact commit, restores signing material only for the signed build step, removes the keystore immediately afterward, verifies the release certificate and APK v2/v3 signatures, refuses duplicate publication and publishes the official APK. Release builds use R8 minification and resource shrinking.
 
 ## 🌍 Languages
 
