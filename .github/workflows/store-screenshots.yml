@@ -1,0 +1,165 @@
+name: RuStore Screenshots
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - rustore-first-publish
+    paths:
+      - app/src/main/**
+      - app/src/debug/**
+      - .github/workflows/store-screenshots.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rustore-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle 9.5.0
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb
+        with:
+          gradle-version: '9.5.0'
+
+      - name: Install emulator image
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "emulator" "system-images;android-35;default;x86_64"
+          echo no | avdmanager create avd \
+            --force \
+            --name rustore-phone \
+            --package "system-images;android-35;default;x86_64"
+
+      - name: Start emulator
+        run: |
+          sudo chmod 666 /dev/kvm || true
+          "$ANDROID_HOME/emulator/emulator" \
+            -avd rustore-phone \
+            -no-window \
+            -noaudio \
+            -no-boot-anim \
+            -no-snapshot-load \
+            -no-snapshot-save \
+            -gpu swiftshader_indirect \
+            -camera-back none \
+            -camera-front none > "$RUNNER_TEMP/emulator.log" 2>&1 &
+
+          adb wait-for-device
+          for attempt in {1..120}; do
+            if [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]]; then
+              break
+            fi
+            sleep 2
+          done
+          test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1"
+
+      - name: Configure screenshot device
+        run: |
+          adb root || true
+          adb wait-for-device
+          adb shell 'setprop persist.sys.locale ru-RU; stop; sleep 5; start' || true
+          adb wait-for-device
+          for attempt in {1..120}; do
+            if [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]]; then
+              break
+            fi
+            sleep 2
+          done
+
+          adb shell wm size 1080x1920
+          adb shell wm density 420
+          adb shell settings put global window_animation_scale 0
+          adb shell settings put global transition_animation_scale 0
+          adb shell settings put global animator_duration_scale 0
+          adb shell settings put global policy_control immersive.full=*
+
+      - name: Build and install debug app
+        run: gradle installDebug --stacktrace
+
+      - name: Seed local demo data
+        run: |
+          adb shell am broadcast \
+            -a com.silverlightning.mycycle.SEED_STORE_DEMO \
+            -p com.silverlightning.mycycle.debug
+          sleep 3
+
+      - name: Capture phone screenshots
+        run: |
+          set -euo pipefail
+          mkdir -p store/rustore/screenshots/phone
+
+          adb shell am force-stop com.silverlightning.mycycle.debug
+          adb shell am start -W \
+            -n com.silverlightning.mycycle.debug/com.silverlightning.mycycle.ui.MainActivity
+          sleep 2
+
+          adb exec-out screencap -p > store/rustore/screenshots/phone/01-today.png
+
+          adb shell input tap 405 1810
+          sleep 1
+          adb exec-out screencap -p > store/rustore/screenshots/phone/02-calendar.png
+
+          adb shell input tap 675 1810
+          sleep 1
+          adb exec-out screencap -p > store/rustore/screenshots/phone/03-statistics.png
+
+          adb shell input tap 945 1810
+          sleep 1
+          adb exec-out screencap -p > store/rustore/screenshots/phone/04-settings.png
+
+      - name: Validate screenshots
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          paths = sorted(Path("store/rustore/screenshots/phone").glob("*.png"))
+          if len(paths) < 3:
+              raise SystemExit("RuStore requires at least three phone screenshots")
+
+          for path in paths:
+              with Image.open(path) as image:
+                  if image.size != (1080, 1920):
+                      raise SystemExit(f"{path} has unexpected dimensions {image.size}")
+              if path.stat().st_size > 3 * 1024 * 1024:
+                  raise SystemExit(f"{path} exceeds 3 MB")
+              print(f"{path}: 1080x1920, {path.stat().st_size} bytes")
+          PY
+
+      - name: Upload screenshot artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: My-Cycle-RuStore-screenshots
+          path: store/rustore/screenshots/phone/*.png
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit screenshots to preparation branch
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add store/rustore/screenshots/phone
+          if git diff --cached --quiet; then
+            echo "Screenshots are unchanged."
+            exit 0
+          fi
+          git commit -m "Add RuStore screenshots"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
