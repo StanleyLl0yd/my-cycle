@@ -10,6 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.3] - 2026-08-31
+
+### 📦 RuStore and AAB distribution
+- Prepared the first RuStore release as a signed Android App Bundle (AAB).
+- Protected release publishing now verifies and publishes the signed AAB, its SHA-256 checksum, and the public upload-key certificate.
+- Android CI now builds `bundleRelease` in addition to APK variants, unit tests, Android Lint, and Detekt.
+- Added helpers for preparing the encrypted PEPK signing archive after RuStore Console provides its unique encryption key.
+
+### 🏪 Store readiness
+- Added reviewed RuStore listing text, data-safety answers, submission checklist, privacy policies, and terms of use.
+- Added a 512×512 store icon and a reproducible workflow for capturing real Russian 9:16 app screenshots.
+- The app remains offline-first with no account, ads, analytics, trackers, cloud sync, or Android `INTERNET` permission.
+- Updated source version to 1.1.3 (`versionCode` 5).
+
+---
+
 ## [1.1.2] - 2026-08-31
 
 ### 🗓️ Historical data and simpler entry
