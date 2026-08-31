@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_stage_prompt">Ваши месячные</string>
+    <string name="onboarding_stage_first_year_short">Начались меньше года назад</string>
+    <string name="onboarding_stage_one_to_three_short">Начались 1–3 года назад</string>
+    <string name="onboarding_stage_established_short">Больше 3 лет, промежутки похожи</string>
+    <string name="onboarding_stage_uneven_short">Больше 3 лет, промежутки разные</string>
+    <string name="onboarding_stage_changing_short">Меняются с возрастом</string>
+    <string name="onboarding_stage_stopped_short">Не было целый год</string>
+    <string name="onboarding_cycle_hint_short">Можно указать примерно.</string>
+    <string name="onboarding_stopped_short">Прогноз следующих месячных будет выключен.</string>
+
+    <string name="calendar_edit_hint">Нажмите на любой день, чтобы добавить или изменить данные</string>
+    <string name="calendar_add_past_period">Добавить прошлые месячные</string>
+    <string name="history_period_title">Добавить прошлые месячные</string>
+    <string name="history_period_start">Начало</string>
+    <string name="history_period_end">Конец</string>
+    <string name="history_period_saved">Сохранено</string>
+    <string name="history_period_save">Сохранить</string>
+    <string name="history_add_another">Добавить ещё</string>
+    <string name="history_done">Готово</string>
+
+    <string name="day_details_more">Ещё данные</string>
+    <string name="day_details_less">Скрыть детали</string>
+    <string name="day_details_mood_short">Настроение</string>
+    <string name="day_details_symptoms_short">Симптомы</string>
+</resources>
