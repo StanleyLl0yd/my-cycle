@@ -13,7 +13,7 @@
 
 [⬇️ Скачать последний опубликованный APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Версия исходного кода: **1.1.2** · Последний опубликованный APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
+Версия исходного кода: **1.1.2** · Последний опубликованный APK: **1.1.2** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Возможности
 
@@ -101,15 +101,13 @@ My Cycle — **дневник, а не врач и не медицинское �
 
 ## 📦 Установка
 
-Последний опубликованный подписанный APK — **1.1.1**.
+Последний опубликованный подписанный APK — **1.1.2**.
 
-[Открыть My Cycle 1.1.1 на GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.1)
+[Открыть My Cycle 1.1.2 на GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.2)
 
-[Скачать подписанный My-Cycle-v1.1.1.apk с GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/download/v1.1.1/My-Cycle-v1.1.1.apk)
+[Скачать подписанный My-Cycle-v1.1.2.apk с GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/download/v1.1.2/My-Cycle-v1.1.2.apk)
 
-[Зеркало на Google Drive](https://drive.google.com/file/d/1IiLfnSOC_ETugALA6ufRzIeptsdjK0S5/view?usp=drivesdk)
-
-SHA-256 (`My-Cycle-v1.1.1.apk`): `7479ca24cfe8b560ee6258d98e31ac8d99c68419891b345f3e478224fa7797b0`
+SHA-256 (`My-Cycle-v1.1.2.apk`): `f77c768aa0fbc15cf72c5928ca8422dfb38d373c1406b8a6894b3c03c93ac6d7`
 
 Для установки требуется Android 8.0 или новее.
 
@@ -134,7 +132,7 @@ python3 scripts/check-source-comments.py
 
 Без переменных для подписи `assembleRelease` создаёт неподписанный release APK.
 
-Официальная подпись релизов настроена через GitHub Repository Secrets. Файл ключа и пароли не хранятся в репозитории. Обычный CI не получает Secrets для релизной подписи. Ручной release workflow восстанавливает ключ только на время подписанной release-сборки, сразу удаляет его, проверяет сертификат автора подписи и публикует APK вместе с контрольной суммой SHA-256.
+Официальная подпись релизов настроена через GitHub Repository Secrets. Файл ключа и пароли не хранятся в репозитории. Обычный CI не получает Secrets для релизной подписи. Release workflow восстанавливает ключ только на время подписанной release-сборки, сразу удаляет его, проверяет сертификат автора подписи и публикует APK вместе с контрольной суммой SHA-256.
 
 Сборка использует переменные `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` и `ANDROID_KEY_PASSWORD`; GitHub Actions использует `ANDROID_KEYSTORE_BASE64`, чтобы временно восстановить файл ключа.
 
@@ -169,7 +167,7 @@ Pull Request'ы и push в `main` автоматически проверяют�
 
 Dependabot контролирует Gradle, GitHub Actions и закреплённый Python security tool. Сторонние GitHub Actions закреплены на неизменяемых commit SHA.
 
-Ручной workflow `Android Release` запускается только из защищённой ветки `main` после успешного CI. Он восстанавливает данные подписи только на время подписанной сборки, сразу удаляет файл ключа, проверяет сертификат и подписи APK v2/v3, запрещает повторный tag/release и публикует официальный APK. Release-сборка использует R8 minification и shrink resources.
+`Android Release` может автоматически запускаться из защищённой ветки `main` при изменениях, относящихся к релизу; ручной запуск остаётся резервным вариантом. Workflow ждёт успешный CI для точного commit, получает данные подписи только на время подписанной сборки, сразу удаляет файл ключа, проверяет сертификат и подписи APK v2/v3, не допускает повторной публикации той же версии и публикует официальный APK. Release-сборка использует R8 minification и shrink resources.
 
 ## 🌍 Языки
 
