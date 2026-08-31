@@ -13,7 +13,7 @@ A simple, private period diary for Android. It keeps your real dates and gives c
 
 [⬇️ Download the latest published APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.1.1** · Latest published APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
+Source version: **1.1.2** · Latest published APK: **1.1.1** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Features
 
@@ -27,7 +27,9 @@ Source version: **1.1.1** · Latest published APK: **1.1.1** · Min SDK: **26 (A
 - The choice can be changed later in Settings without deleting old records
 - Existing 1.0.0/1.1.0 records stay in place. Old “A few spots” entries are treated as spots, not as a real period
 - Today shows how many days have passed since the last recorded period and a **range of dates** when the next one may start
-- Daily records for bleeding, mood, how your body feels and free notes
+- Any past calendar day can be opened and edited, and previous periods can be added quickly by start and end date
+- Several earlier cycles can be entered one after another with the historical “Add another” flow
+- Daily entry keeps bleeding and Save up front; mood, symptoms and notes are optional under “More details”
 - “A few spots” is kept in the diary but does **not** start a new cycle
 - If you explicitly record “No blood” or “A few spots” between two bleeding days, the app does not join those days into one period. A completely unrecorded nearby day can still be treated as a missed diary entry
 - The one period-start date entered during first setup is not treated as proof that the bleeding lasted one day. The bleeding length stays unknown until enough real days are recorded
@@ -124,17 +126,15 @@ The repository currently does not include `gradle-wrapper.jar`, so command-line 
 ```bash
 git clone https://github.com/StanleyLl0yd/my-cycle.git
 cd my-cycle
-gradle assembleDebug test
-gradle lint
+gradle --dependency-verification=strict assembleDebug assembleRelease test
+gradle --dependency-verification=strict lint
+gradle --dependency-verification=strict detekt
+python3 scripts/check-source-comments.py
 ```
 
-Without signing environment variables, this creates an unsigned release APK:
+Without signing environment variables, `assembleRelease` creates an unsigned release APK.
 
-```bash
-gradle assembleRelease
-```
-
-Official release signing is configured through GitHub Repository Secrets. The keystore and passwords are never stored in the repository. GitHub Actions restores the key only for trusted release jobs, builds the signed APK, verifies the signer certificate and publishes the APK together with its SHA-256 checksum.
+Official release signing is configured through GitHub Repository Secrets. The keystore and passwords are never stored in the repository. Regular CI does not receive release signing secrets. The manual release workflow restores the key only for the signed release build, removes it immediately afterward, verifies the signer certificate and publishes the APK together with its SHA-256 checksum.
 
 The signing variables used by the build are `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`; `ANDROID_KEYSTORE_BASE64` is used by GitHub Actions to restore the keystore file.
 
@@ -153,15 +153,23 @@ The signing variables used by the build are `ANDROID_KEYSTORE_PATH`, `ANDROID_KE
 
 ## ✅ Quality checks
 
-GitHub Actions automatically checks pull requests and pushes to `main` with:
+Pull requests and pushes to `main` are automatically checked with:
 
+- debug and release APK assembly
 - unit tests
 - Android Lint
-- debug APK assembly
-- release APK assembly with R8/resource shrinking
-- unsigned release APK artifact; regular CI does not receive release signing Secrets
+- Detekt
+- Qodana
+- CodeQL
+- Semgrep
+- Gitleaks, including full Git history
+- strict Gradle dependency verification
+- source-comment policy: minimum comments, only genuinely necessary comments, English only
+- unsigned release APK artifact; regular CI does not receive release signing secrets
 
-The manual `Android Release` workflow runs only from protected `main` after successful CI. It restores signing material only for the signed build step, removes the keystore immediately afterward, verifies the release certificate and publishes the official APK.
+Dependabot monitors Gradle, GitHub Actions and the pinned Python security tool. Third-party GitHub Actions are pinned to immutable commit SHAs.
+
+The manual `Android Release` workflow runs only from protected `main` after successful CI. It restores signing material only for the signed build step, removes the keystore immediately afterward, verifies the release certificate and APK v2/v3 signatures, refuses an existing tag/release and publishes the official APK. Release builds use R8 minification and resource shrinking.
 
 ## 🌍 Languages
 
@@ -170,7 +178,7 @@ The manual `Android Release` workflow runs only from protected `main` after succ
 
 The app follows the device language automatically.
 
-## 🚫 Not included in 1.1.1
+## 🚫 Not included in 1.1.2
 
 The current source version does **not** provide:
 
