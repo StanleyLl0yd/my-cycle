@@ -39,15 +39,22 @@ jobs:
 
       - name: Install emulator image
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platform-tools" "emulator" "system-images;android-35;default;x86_64"
-          echo no | avdmanager create avd \
+          set -euo pipefail
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          avdmanager="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
+          test -x "$sdkmanager"
+          test -x "$avdmanager"
+          yes | "$sdkmanager" --licenses > /dev/null || true
+          "$sdkmanager" "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
+          echo no | "$avdmanager" create avd \
             --force \
             --name rustore-phone \
-            --package "system-images;android-35;default;x86_64"
+            --package "system-images;android-35;google_apis;x86_64" \
+            --device "pixel_6"
 
       - name: Start emulator
         run: |
+          set -euo pipefail
           sudo chmod 666 /dev/kvm || true
           "$ANDROID_HOME/emulator/emulator" \
             -avd rustore-phone \
@@ -71,6 +78,7 @@ jobs:
 
       - name: Configure screenshot device
         run: |
+          set -euo pipefail
           adb root || true
           adb wait-for-device
           adb shell 'setprop persist.sys.locale ru-RU; stop; sleep 5; start' || true
@@ -94,6 +102,7 @@ jobs:
 
       - name: Seed local demo data
         run: |
+          set -euo pipefail
           adb shell am broadcast \
             -a com.silverlightning.mycycle.SEED_STORE_DEMO \
             -p com.silverlightning.mycycle.debug
@@ -127,19 +136,22 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          from PIL import Image
+          import struct
 
           paths = sorted(Path("store/rustore/screenshots/phone").glob("*.png"))
           if len(paths) < 3:
               raise SystemExit("RuStore requires at least three phone screenshots")
 
           for path in paths:
-              with Image.open(path) as image:
-                  if image.size != (1080, 1920):
-                      raise SystemExit(f"{path} has unexpected dimensions {image.size}")
-              if path.stat().st_size > 3 * 1024 * 1024:
+              data = path.read_bytes()
+              if data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+                  raise SystemExit(f"{path} is not a valid PNG")
+              width, height = struct.unpack(">II", data[16:24])
+              if (width, height) != (1080, 1920):
+                  raise SystemExit(f"{path} has unexpected dimensions {(width, height)}")
+              if len(data) > 3 * 1024 * 1024:
                   raise SystemExit(f"{path} exceeds 3 MB")
-              print(f"{path}: 1080x1920, {path.stat().st_size} bytes")
+              print(f"{path}: 1080x1920, {len(data)} bytes")
           PY
 
       - name: Upload screenshot artifact
