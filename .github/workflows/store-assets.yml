@@ -40,13 +40,15 @@ jobs:
 
       - name: Install Android emulator image
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
-          echo no | avdmanager create avd --force --name rustore --package "system-images;android-35;google_apis;x86_64" --device "pixel_5"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          AVDMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" "platform-tools" "emulator" "system-images;android-35;google_apis;x86_64"
+          echo no | "$AVDMANAGER" create avd --force --name rustore --package "system-images;android-35;google_apis;x86_64" --device "pixel_5"
 
       - name: Start portrait emulator
         run: |
-          nohup emulator -avd rustore -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu swiftshader_indirect -skin 1080x1920 -prop persist.sys.locale=ru-RU > "$RUNNER_TEMP/emulator.log" 2>&1 &
+          nohup "$ANDROID_HOME/emulator/emulator" -avd rustore -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu swiftshader_indirect -skin 1080x1920 -prop persist.sys.locale=ru-RU > "$RUNNER_TEMP/emulator.log" 2>&1 &
 
       - name: Capture screenshots
         run: bash scripts/capture-rustore-screenshots.sh "$RUNNER_TEMP/rustore-screenshots"
