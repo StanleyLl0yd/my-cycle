@@ -2,6 +2,13 @@ name: Android Release
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - app/build.gradle.kts
+      - .github/release-notes/**
+      - .github/workflows/release.yml
 
 permissions:
   contents: write
@@ -15,7 +22,7 @@ jobs:
   release:
     name: Test, sign, and publish APK
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 50
     env:
       EXPECTED_CERT_SHA256: f02571c40741e2cb071564f5b63fd3dc38a875d0eda11a8c42269ed635bc2a58
 
@@ -29,7 +36,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
-            echo 'Releases must be started from the protected main branch.' >&2
+            echo 'Releases must run from the protected main branch.' >&2
             exit 1
           fi
 
@@ -54,38 +61,67 @@ jobs:
           fi
           echo "RELEASE_TAG=v$app_version" >> "$GITHUB_ENV"
 
-      - name: Require successful main CI
+      - name: Determine release state
+        id: release_state
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          conclusion="$(
-            gh api "/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs" \
-              --jq '[.check_runs[] | select(.name == "build" and .app.slug == "github-actions") | .conclusion][0] // ""'
-          )"
-          if [[ "$conclusion" != "success" ]]; then
-            echo "Required main build check is not successful for $GITHUB_SHA." >&2
-            exit 1
-          fi
+          tag_exists=false
+          release_exists=false
 
-      - name: Protect release identity
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
           if gh api "/repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" > /dev/null 2>&1; then
-            echo "Tag $RELEASE_TAG already exists. Bump the app version before publishing another release." >&2
-            exit 1
+            tag_exists=true
           fi
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            echo "Release $RELEASE_TAG already exists. Existing releases are immutable." >&2
-            exit 1
+            release_exists=true
           fi
 
+          if [[ "$tag_exists" == true || "$release_exists" == true ]]; then
+            if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+              echo "Release $RELEASE_TAG already exists. Bump the app version before publishing another release." >&2
+              exit 1
+            fi
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Release $RELEASE_TAG already exists; automatic publication is not needed."
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Require successful main CI
+        if: steps.release_state.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in {1..80}; do
+            status="$(
+              gh api "/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs" \
+                --jq '[.check_runs[] | select(.name == "build" and .app.slug == "github-actions") | {status: .status, conclusion: (.conclusion // "")}][0] // {status: "", conclusion: ""}'
+            )"
+            check_status="$(jq -r '.status' <<< "$status")"
+            conclusion="$(jq -r '.conclusion' <<< "$status")"
+
+            if [[ "$check_status" == "completed" && "$conclusion" == "success" ]]; then
+              exit 0
+            fi
+            if [[ "$check_status" == "completed" && -n "$conclusion" ]]; then
+              echo "Required main build check finished with $conclusion for $GITHUB_SHA." >&2
+              exit 1
+            fi
+
+            sleep 15
+          done
+
+          echo "Timed out waiting for the required main build check for $GITHUB_SHA." >&2
+          exit 1
+
       - name: Test and lint release source
+        if: steps.release_state.outputs.publish == 'true'
         run: gradle test lint --stacktrace
 
       - name: Configure release signing
+        if: steps.release_state.outputs.publish == 'true'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -109,6 +145,7 @@ jobs:
             -alias "$ANDROID_KEY_ALIAS" > /dev/null
 
       - name: Build signed release APK
+        if: steps.release_state.outputs.publish == 'true'
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -116,12 +153,13 @@ jobs:
         run: gradle assembleRelease --stacktrace
 
       - name: Remove release keystore
-        if: always()
+        if: always() && steps.release_state.outputs.publish == 'true'
         run: |
           rm -f "$RUNNER_TEMP/my-cycle-release.jks"
           echo 'ANDROID_KEYSTORE_PATH=' >> "$GITHUB_ENV"
 
       - name: Verify certificate and package APK
+        if: steps.release_state.outputs.publish == 'true'
         id: package
         run: |
           set -euo pipefail
@@ -155,6 +193,7 @@ jobs:
           echo "apk_path=$apk_path" >> "$GITHUB_OUTPUT"
 
       - name: Upload signed workflow artifact
+        if: steps.release_state.outputs.publish == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: My-Cycle-${{ env.RELEASE_TAG }}-signed
@@ -165,6 +204,7 @@ jobs:
           retention-days: 30
 
       - name: Publish GitHub release
+        if: steps.release_state.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
