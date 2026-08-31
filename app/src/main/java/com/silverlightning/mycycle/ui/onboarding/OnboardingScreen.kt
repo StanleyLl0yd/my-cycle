@@ -196,22 +196,11 @@ private fun WelcomeStep() {
             text = "🌸",
             style = MaterialTheme.typography.displayLarge
         )
-
         Spacer(modifier = Modifier.height(32.dp))
-
         Text(
             text = stringResource(R.string.onboarding_welcome_title),
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = stringResource(R.string.onboarding_welcome_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -230,18 +219,9 @@ private fun CycleStageStep(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.onboarding_stage_title),
+            text = stringResource(R.string.onboarding_stage_prompt),
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(R.string.onboarding_stage_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -253,21 +233,22 @@ private fun CycleStageStep(
                     selected = selectedStage == stage,
                     onClick = { onStageSelected(stage) },
                     enabled = enabled,
-                    label = { Text(stringResource(stage.labelRes)) },
+                    label = { Text(stringResource(onboardingStageLabelRes(stage))) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = stringResource(selectedStage.descriptionRes),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
+}
+
+private fun onboardingStageLabelRes(stage: CycleStage): Int = when (stage) {
+    CycleStage.NOT_SET -> R.string.cycle_stage_not_set
+    CycleStage.FIRST_YEAR -> R.string.onboarding_stage_first_year_short
+    CycleStage.ONE_TO_THREE_YEARS -> R.string.onboarding_stage_one_to_three_short
+    CycleStage.ESTABLISHED_REGULAR -> R.string.onboarding_stage_established_short
+    CycleStage.LONG_TERM_UNEVEN -> R.string.onboarding_stage_uneven_short
+    CycleStage.CHANGING_WITH_AGE -> R.string.onboarding_stage_changing_short
+    CycleStage.PERIODS_STOPPED -> R.string.onboarding_stage_stopped_short
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -285,18 +266,9 @@ private fun PeriodDateStep(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.onboarding_period_title),
+            text = stringResource(R.string.onboarding_period_prompt_short),
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(R.string.onboarding_period_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -361,18 +333,9 @@ private fun CycleLengthStep(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.onboarding_cycle_title),
+            text = stringResource(R.string.onboarding_cycle_prompt_short),
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(R.string.onboarding_cycle_explain),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -400,10 +363,10 @@ private fun CycleLengthStep(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = stringResource(R.string.onboarding_cycle_subtitle),
+            text = stringResource(R.string.onboarding_cycle_hint_short),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -425,7 +388,7 @@ private fun PeriodsStoppedStep() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = stringResource(R.string.onboarding_stopped_text),
+            text = stringResource(R.string.onboarding_stopped_short),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
