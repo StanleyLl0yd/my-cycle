@@ -12,6 +12,10 @@ internal fun historicalPeriodDates(startDate: LocalDate, endDate: LocalDate): Li
     }.toList()
 }
 
+internal fun historicalPeriodBoundaryDate(endDate: LocalDate, today: LocalDate): LocalDate? {
+    return endDate.plusDays(1).takeUnless { it.isAfter(today) }
+}
+
 internal fun mergeHistoricalPeriodDay(date: LocalDate, existing: CycleDay?): CycleDay {
     return existing?.copy(
         date = date,
