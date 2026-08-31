@@ -30,6 +30,17 @@ class HistoricalPeriodTest {
     }
 
     @Test
+    fun `boundary is recorded only when next day is not in the future`() {
+        val end = LocalDate.of(2026, 6, 6)
+
+        assertEquals(
+            LocalDate.of(2026, 6, 7),
+            historicalPeriodBoundaryDate(end, LocalDate.of(2026, 6, 7))
+        )
+        assertNull(historicalPeriodBoundaryDate(end, end))
+    }
+
+    @Test
     fun `existing details are preserved when period is added`() {
         val date = LocalDate.of(2026, 6, 3)
         val existing = CycleDay(
