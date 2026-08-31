@@ -26,7 +26,7 @@ jobs:
           old_path='com/silverlightning/mycycle'
           new_path='com/sl/mycycle'
 
-          git grep -IlZ "$old_id" -- . ':!gradle/verification-metadata.xml' |
+          git grep -Ilz "$old_id" -- . |
             xargs -0 -r sed -i "s/${old_id//./\\.}/$new_id/g"
 
           while IFS= read -r -d '' path; do
@@ -39,7 +39,7 @@ jobs:
             fi
           done < <(git ls-files -z)
 
-          if git grep -n "$old_id" -- . ':!gradle/verification-metadata.xml'; then
+          if git grep -n "$old_id" -- .; then
             echo 'Old application/package identifier remains in tracked content.' >&2
             exit 1
           fi
