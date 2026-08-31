@@ -176,8 +176,8 @@ class CalendarViewModel(
             val previousDays = mutableMapOf<LocalDate, CycleDay?>()
             val changedDates = mutableListOf<LocalDate>()
 
-            val result = runSuspendCatching {
-                try {
+            val result = withContext(NonCancellable) {
+                val saveResult = runSuspendCatching {
                     dates.forEach { date ->
                         val previous = cycleDayRepository.getByDate(date)
                         previousDays[date] = previous
@@ -192,19 +192,22 @@ class CalendarViewModel(
                             changedDates += date
                         }
                     }
-                } catch (error: Throwable) {
-                    withContext(NonCancellable) {
-                        changedDates.asReversed().forEach { date ->
-                            try {
-                                previousDays[date]?.let { cycleDayRepository.save(it) }
-                                    ?: cycleDayRepository.delete(date)
-                            } catch (rollbackError: Exception) {
-                                error.addSuppressed(rollbackError)
-                            }
+                }
+
+                if (saveResult.isFailure) {
+                    val originalError = saveResult.exceptionOrNull()
+                    changedDates.asReversed().forEach { date ->
+                        val rollbackResult = runSuspendCatching {
+                            previousDays[date]?.let { cycleDayRepository.save(it) }
+                                ?: cycleDayRepository.delete(date)
+                        }
+                        rollbackResult.exceptionOrNull()?.let { rollbackError ->
+                            originalError?.addSuppressed(rollbackError)
                         }
                     }
-                    throw error
                 }
+
+                saveResult
             }
 
             if (result.isSuccess) {
