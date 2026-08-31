@@ -49,9 +49,13 @@ Pull Request'ы и сообщения об ошибках приветствую
 В репозитории сейчас нет `gradle-wrapper.jar`, поэтому используйте установленный Gradle 9.5.0.
 
 ```bash
-gradle assembleDebug assembleRelease test
-gradle lint
+gradle --dependency-verification=strict assembleDebug assembleRelease test
+gradle --dependency-verification=strict lint
+gradle --dependency-verification=strict detekt
+python3 scripts/check-source-comments.py
 ```
+
+Каждый Pull Request и push в `main` дополнительно проверяются Qodana, CodeQL, Semgrep и Gitleaks. Dependabot контролирует Gradle, GitHub Actions и закреплённый Python security tool.
 
 ## 🧭 Стиль кода
 
@@ -60,6 +64,7 @@ gradle lint
 - По возможности не размещайте доменную логику в Composable-функциях.
 - Предпочитайте небольшие, целевые функции и классы.
 - Сохраняйте lifecycle-aware сбор Flow и существующие подходы к управлению состоянием.
+- Оставляйте в исходниках минимум комментариев: только действительно необходимые и только на английском.
 - Не добавляйте сетевые разрешения, аналитику или рекламные зависимости без отдельного решения по проекту.
 
 ## 🌍 Переводы
