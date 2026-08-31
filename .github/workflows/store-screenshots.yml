@@ -28,6 +28,28 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
+      - name: Validate application identity
+        run: |
+          set -euo pipefail
+          expected_id='com.sl.mycycle'
+          legacy_id='com.silver''lightning.mycycle'
+          legacy_path='com/silver''lightning/mycycle'
+
+          grep -F "namespace = \"$expected_id\"" app/build.gradle.kts
+          grep -F "applicationId = \"$expected_id\"" app/build.gradle.kts
+          grep -F "package $expected_id" app/src/main/java/com/sl/mycycle/MyCycleApp.kt
+          grep -F "package $expected_id" app/src/test/java/com/sl/mycycle/domain/engine/PredictionEngineTest.kt
+          grep -F "package $expected_id.debug" app/src/debug/java/com/sl/mycycle/debug/StoreDemoReceiver.kt
+
+          if git grep -Fq "$legacy_id" -- .; then
+            echo 'Legacy application identifier remains in tracked content.' >&2
+            exit 1
+          fi
+          if git ls-files | grep -Fq -e "$legacy_path" -e "$legacy_id"; then
+            echo 'Legacy package path remains in tracked files.' >&2
+            exit 1
+          fi
+
       - name: Set up JDK 21
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
         with:
