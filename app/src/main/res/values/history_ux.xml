@@ -7,6 +7,8 @@
     <string name="onboarding_stage_uneven_short">More than 3 years, still uneven</string>
     <string name="onboarding_stage_changing_short">Changing with age</string>
     <string name="onboarding_stage_stopped_short">Stopped for a full year</string>
+    <string name="onboarding_period_prompt_short">Last period started</string>
+    <string name="onboarding_cycle_prompt_short">Usual cycle length</string>
     <string name="onboarding_cycle_hint_short">An estimate is fine.</string>
     <string name="onboarding_stopped_short">Next-period predictions will be turned off.</string>
 
