@@ -64,24 +64,45 @@ adb shell settings put global window_animation_scale 0
 adb shell settings put global transition_animation_scale 0
 adb shell settings put global animator_duration_scale 0
 adb install -r "$APK_PATH"
-adb shell cmd locale set-app-locales --user 0 "$PACKAGE" ru-RU >/dev/null 2>&1 || true
+adb shell cmd locale set-app-locales "$PACKAGE" --user 0 --locales ru-RU
+adb shell settings put global policy_control immersive.full=*
 adb shell am force-stop "$PACKAGE"
 adb shell am start -n "$PACKAGE/$ACTIVITY" >/dev/null
 sleep 3
 
-tap_any "Начать" "Get started"
-tap_any "Больше 3 лет, промежутки похожи" "More than 3 years, usually similar"
-tap_any "Продолжить" "Continue"
-tap_any "Продолжить" "Continue"
-tap_any "Готово" "Done"
+dump_ui
+if ! grep -q 'Начать' /tmp/window.xml; then
+    cat /tmp/window.xml
+    echo 'Russian app locale was not applied.' >&2
+    exit 1
+fi
+
+tap_any "Начать"
+tap_any "Больше 3 лет, промежутки похожи"
+tap_any "Продолжить"
+tap_any "Продолжить"
+tap_any "Готово"
 sleep 2
 
-capture "01-today.png"
-tap_any "Календарь" "Calendar"
+tap_any "Календарь"
+tap_any "Добавить прошлые месячные"
+tap_any "Сохранить"
+tap_any "Добавить ещё"
+tap_any "Сохранить"
+tap_any "Добавить ещё"
+tap_any "Сохранить"
+tap_any "Готово"
+sleep 1
+
 capture "02-calendar.png"
-tap_any "Добавить прошлые месячные" "Add past period"
+tap_any "Сегодня"
+capture "01-today.png"
+tap_any "Календарь"
+tap_any "Добавить прошлые месячные"
 capture "03-add-past-period.png"
 adb shell input keyevent 4
 sleep 1
-tap_any "Настройки" "Settings"
-capture "04-settings.png"
+tap_any "Статистика"
+capture "04-statistics.png"
+tap_any "Настройки"
+capture "05-settings.png"
