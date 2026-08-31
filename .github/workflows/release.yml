@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   release:
-    name: Test, sign, and publish AAB
+    name: Test, sign, and publish Android release
     runs-on: ubuntu-latest
     timeout-minutes: 50
     env:
@@ -149,13 +149,13 @@ jobs:
             -alias "$ANDROID_KEY_ALIAS" \
             -file "$RUNNER_TEMP/upload-cert.pem"
 
-      - name: Build signed release AAB
+      - name: Build signed release APK and AAB
         if: steps.release_state.outputs.publish == 'true'
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: gradle --dependency-verification=strict bundleRelease --stacktrace
+        run: gradle --dependency-verification=strict assembleRelease bundleRelease --stacktrace
 
       - name: Remove release keystore
         if: always() && steps.release_state.outputs.publish == 'true'
@@ -163,33 +163,53 @@ jobs:
           rm -f "$RUNNER_TEMP/my-cycle-release.jks"
           echo 'ANDROID_KEYSTORE_PATH=' >> "$GITHUB_ENV"
 
-      - name: Verify and package AAB
+      - name: Verify and package release
         if: steps.release_state.outputs.publish == 'true'
         id: package
         run: |
           set -euo pipefail
+          source_apk="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | head -1)"
           source_aab="$(find app/build/outputs/bundle/release -maxdepth 1 -type f -name '*.aab' | head -1)"
+          test -n "$source_apk"
           test -n "$source_aab"
 
+          apksigner="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -1)"
+          apk_report="$RUNNER_TEMP/apksigner-report.txt"
+          "$apksigner" verify --verbose --print-certs "$source_apk" | tee "$apk_report"
+          grep -F 'Verified using v1 scheme (JAR signing): false' "$apk_report"
+          grep -F 'Verified using v2 scheme (APK Signature Scheme v2): true' "$apk_report"
+          grep -F 'Verified using v3 scheme (APK Signature Scheme v3): true' "$apk_report"
+          grep -F 'Number of signers: 1' "$apk_report"
+          apk_fingerprint="$(
+            awk -F': ' '/certificate SHA-256 digest:/ {print $NF; exit}' "$apk_report" |
+              tr -d ':' |
+              tr '[:upper:]' '[:lower:]'
+          )"
+
           jarsigner -verify -strict -certs "$source_aab" > "$RUNNER_TEMP/jarsigner-report.txt"
-          fingerprint="$(
+          aab_fingerprint="$(
             keytool -printcert -jarfile "$source_aab" 2>/dev/null |
               sed -n 's/^[[:space:]]*SHA256: //p' |
               head -1 |
               tr -d ':' |
               tr '[:upper:]' '[:lower:]'
           )"
-          if [[ "$fingerprint" != "$EXPECTED_CERT_SHA256" ]]; then
-            echo 'AAB signer certificate does not match the My Cycle upload key.' >&2
+
+          if [[ "$apk_fingerprint" != "$EXPECTED_CERT_SHA256" || "$aab_fingerprint" != "$EXPECTED_CERT_SHA256" ]]; then
+            echo 'Release signer certificate does not match the expected My Cycle key.' >&2
             exit 1
           fi
 
           mkdir -p release
+          apk_path="release/My-Cycle-$RELEASE_TAG.apk"
           aab_path="release/My-Cycle-$RELEASE_TAG.aab"
           cert_path="release/My-Cycle-$RELEASE_TAG-upload-cert.pem"
+          cp "$source_apk" "$apk_path"
           cp "$source_aab" "$aab_path"
           cp "$RUNNER_TEMP/upload-cert.pem" "$cert_path"
+          sha256sum "$apk_path" | tee "$apk_path.sha256"
           sha256sum "$aab_path" | tee "$aab_path.sha256"
+          echo "apk_path=$apk_path" >> "$GITHUB_OUTPUT"
           echo "aab_path=$aab_path" >> "$GITHUB_OUTPUT"
           echo "cert_path=$cert_path" >> "$GITHUB_OUTPUT"
 
@@ -197,8 +217,10 @@ jobs:
         if: steps.release_state.outputs.publish == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: My-Cycle-${{ env.RELEASE_TAG }}-signed-aab
+          name: My-Cycle-${{ env.RELEASE_TAG }}-signed
           path: |
+            ${{ steps.package.outputs.apk_path }}
+            ${{ steps.package.outputs.apk_path }}.sha256
             ${{ steps.package.outputs.aab_path }}
             ${{ steps.package.outputs.aab_path }}.sha256
             ${{ steps.package.outputs.cert_path }}
@@ -211,15 +233,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          apk_path="${{ steps.package.outputs.apk_path }}"
           aab_path="${{ steps.package.outputs.aab_path }}"
-          checksum_path="$aab_path.sha256"
           cert_path="${{ steps.package.outputs.cert_path }}"
           notes_file=".github/release-notes/$RELEASE_TAG.md"
 
           args=(
             "$RELEASE_TAG"
+            "$apk_path"
+            "$apk_path.sha256"
             "$aab_path"
-            "$checksum_path"
+            "$aab_path.sha256"
             "$cert_path"
             --target "$GITHUB_SHA"
             --title "My Cycle ${RELEASE_TAG#v}"
