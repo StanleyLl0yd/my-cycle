@@ -244,8 +244,8 @@ private fun CycleStageStep(
 private fun onboardingStageLabelRes(stage: CycleStage): Int = when (stage) {
     CycleStage.NOT_SET -> R.string.cycle_stage_not_set
     CycleStage.FIRST_YEAR -> R.string.onboarding_stage_first_year_short
-    CycleStage.ONE_TO_THREE_YEARS -> R.string.onboarding_stage_one_to_three_short
-    CycleStage.ESTABLISHED_REGULAR -> R.string.onboarding_stage_established_short
+    CycleStage.YEARS_ONE_TO_THREE -> R.string.onboarding_stage_one_to_three_short
+    CycleStage.ESTABLISHED -> R.string.onboarding_stage_established_short
     CycleStage.LONG_TERM_UNEVEN -> R.string.onboarding_stage_uneven_short
     CycleStage.CHANGING_WITH_AGE -> R.string.onboarding_stage_changing_short
     CycleStage.PERIODS_STOPPED -> R.string.onboarding_stage_stopped_short
