@@ -49,9 +49,13 @@ Requirements:
 The repository currently does not include `gradle-wrapper.jar`, so use an installed Gradle 9.5.0.
 
 ```bash
-gradle assembleDebug assembleRelease test
-gradle lint
+gradle --dependency-verification=strict assembleDebug assembleRelease test
+gradle --dependency-verification=strict lint
+gradle --dependency-verification=strict detekt
+python3 scripts/check-source-comments.py
 ```
+
+Every Pull Request and push to `main` is also checked by Qodana, CodeQL, Semgrep and Gitleaks. Dependabot monitors Gradle, GitHub Actions and the pinned Python security tool.
 
 ## 🧭 Code style
 
@@ -60,6 +64,7 @@ gradle lint
 - Keep domain rules out of Composables when practical.
 - Prefer small, focused functions and classes.
 - Preserve lifecycle-aware Flow collection and existing state-management patterns.
+- Keep source comments to the minimum: only genuinely necessary comments, in English only.
 - Do not add network permissions, analytics or advertising dependencies without an explicit project decision.
 
 ## 🌍 Translations
