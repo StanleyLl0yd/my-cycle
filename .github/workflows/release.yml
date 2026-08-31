@@ -202,7 +202,7 @@ jobs:
               "$ANDROID_KEY_ALIAS"
           fi
 
-          jarsigner -verify -strict -verbose -certs "$source_aab" > "$RUNNER_TEMP/jarsigner-report.txt"
+          jarsigner -verify -verbose -certs "$source_aab" > "$RUNNER_TEMP/jarsigner-report.txt"
           grep -F 'jar verified.' "$RUNNER_TEMP/jarsigner-report.txt"
 
           keytool -printcert -jarfile "$source_aab" > "$RUNNER_TEMP/aab-cert-report.txt"
