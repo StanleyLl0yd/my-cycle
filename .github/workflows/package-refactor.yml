@@ -26,10 +26,13 @@ jobs:
           old_path='com/silverlightning/mycycle'
           new_path='com/sl/mycycle'
 
-          git grep -FIlz "$old_id" -- . |
+          git grep -FIlz "$old_id" -- . ':(exclude).github/workflows/**' |
             xargs -0 -r sed -i "s/${old_id//./\\.}/$new_id/g"
 
           while IFS= read -r -d '' path; do
+            if [[ "$path" == .github/workflows/* ]]; then
+              continue
+            fi
             new="$path"
             new="${new//$old_path/$new_path}"
             new="${new//$old_id/$new_id}"
@@ -39,12 +42,12 @@ jobs:
             fi
           done < <(git ls-files -z)
 
-          if git grep -Fn "$old_id" -- .; then
-            echo 'Old application/package identifier remains in tracked content.' >&2
+          if git grep -Fn "$old_id" -- . ':(exclude).github/workflows/**'; then
+            echo 'Old application/package identifier remains outside workflows.' >&2
             exit 1
           fi
 
-          if git ls-files | grep -F -e "$old_path" -e "$old_id"; then
+          if git ls-files | grep -F -e "$old_path" -e "$old_id" | grep -Fv '.github/workflows/'; then
             echo 'Old package identifier remains in tracked paths.' >&2
             exit 1
           fi
@@ -53,7 +56,6 @@ jobs:
           grep -F 'applicationId = "com.sl.mycycle"' app/build.gradle.kts
           grep -F 'package com.sl.mycycle' app/src/main/java/com/sl/mycycle/MyCycleApp.kt
           grep -F 'package com.sl.mycycle' app/src/test/java/com/sl/mycycle/domain/engine/PredictionEngineTest.kt
-          grep -F 'com.sl.mycycle.debug' .github/workflows/store-screenshots.yml
           grep -F 'com.sl.mycycle' store/rustore/listing.ru.md
 
       - name: Commit refactor
@@ -61,7 +63,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add -A ':!.github/workflows/**'
           if git diff --cached --quiet; then
             echo 'No package refactor changes were needed.'
             exit 0
