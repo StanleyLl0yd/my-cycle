@@ -2,37 +2,60 @@
 
 ## Main details
 
-- Store title: **My Cycle — дневник цикла**
+- Store title: **Мой Цикл**
 - Type: application
-- Primary category: **Health**
+- Primary category: **Здоровье и спорт** (Health & Fitness)
 - Secondary category: none
-- Age rating: **0+**
+- Recommended age rating: **12+**
 - Price: free
 - Ads: none
 - In-app purchases: none
 - Package: `com.silverlightning.mycycle`
-- Version: `1.1.2`
-- Version code: `4`
+- Version: `1.1.3`
+- Version code: `5`
 - Minimum Android version: Android 8.0 (API 26)
+- Release format: **Android App Bundle (AAB)**
 
 ## Short description
 
-Offline period diary with a calendar, history, and careful date estimates.
+Private period diary with a calendar, history, and careful date estimates
 
 ## Full description
 
-My Cycle is a private period diary that keeps records on your device and helps you understand your own history without forcing it into a 28-day pattern.
+My Cycle is a simple private period diary.
 
-You can record bleeding and spotting, edit any past day, quickly add previous periods by start and end date, enter several earlier cycles, keep optional mood/symptom notes, view recent statistics, export a CSV copy, and delete all app data.
+Record bleeding days, mood, symptoms, and notes. The calendar lets you add previous periods and correct missed entries for past dates.
 
-Future dates are shown as broad calendar estimates rather than promises of one exact day. When enough fairly consistent adult history is available, the app may also show a broad calendar range when pregnancy could be more likely. These are date-based estimates only: My Cycle cannot know the actual day an egg is released and must not be used to identify “safe days”.
+The app shows cycle history and an approximate range for the next period based on your own recorded dates. When there is little data or timing varies, the estimate stays deliberately broad instead of presenting a calendar calculation as precise medical information.
 
-My Cycle has no account, ads, analytics, trackers, or cloud synchronization. Period records stay on the device. The app does not request Android's `INTERNET` permission and does not transmit the diary to the developer or third parties.
+Features include:
 
-My Cycle is a diary, not a medical device or diagnostic tool, and does not replace professional medical advice.
+- period calendar and historical cycles;
+- editing any past date;
+- quick previous-period entry by start and end date;
+- mood, symptoms, and notes;
+- recent-history statistics;
+- careful date ranges instead of false precision;
+- CSV export;
+- light, dark, and system themes.
 
-Russian and English are supported, together with light, dark, system themes and Material You colors on Android 12+.
+Privacy:
+
+- no account required;
+- no ads or analytics;
+- no internet access required by the app;
+- records stay on the device;
+- data leaves the app only when you explicitly save a CSV copy.
+
+My Cycle is not a medical device, diagnostic test, or contraceptive method. Calendar estimates are approximate and must not be used as “safe days” to prevent pregnancy.
+
+Russian and English are supported.
 
 ## What's new
 
-First My Cycle release in RuStore. Includes historical period entry, past-day editing, a simpler daily diary, calendar, statistics, and careful estimates based on recorded history. Data stays on the device.
+First My Cycle release in RuStore.
+
+- Add several previous cycles and correct missed past days.
+- Simpler first-run setup and daily entry.
+- Calendar, statistics, symptoms, mood, and notes.
+- Records continue to stay only on the device.
