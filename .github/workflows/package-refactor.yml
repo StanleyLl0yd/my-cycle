@@ -1,0 +1,70 @@
+name: Package Identifier Refactor
+
+on:
+  push:
+    branches:
+      - rustore-first-publish
+    paths:
+      - .github/workflows/package-refactor.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Replace identifier and package paths
+        run: |
+          set -euo pipefail
+
+          old_id='com.silverlightning.mycycle'
+          new_id='com.sl.mycycle'
+          old_path='com/silverlightning/mycycle'
+          new_path='com/sl/mycycle'
+
+          git grep -IlZ "$old_id" -- . ':!gradle/verification-metadata.xml' |
+            xargs -0 -r sed -i "s/${old_id//./\\.}/$new_id/g"
+
+          while IFS= read -r -d '' path; do
+            new="$path"
+            new="${new//$old_path/$new_path}"
+            new="${new//$old_id/$new_id}"
+            if [[ "$new" != "$path" ]]; then
+              mkdir -p "$(dirname "$new")"
+              git mv "$path" "$new"
+            fi
+          done < <(git ls-files -z)
+
+          if git grep -n "$old_id" -- . ':!gradle/verification-metadata.xml'; then
+            echo 'Old application/package identifier remains in tracked content.' >&2
+            exit 1
+          fi
+
+          if git ls-files | grep -E 'com/silverlightning/mycycle|com\.silverlightning\.mycycle'; then
+            echo 'Old package identifier remains in tracked paths.' >&2
+            exit 1
+          fi
+
+          grep -F 'namespace = "com.sl.mycycle"' app/build.gradle.kts
+          grep -F 'applicationId = "com.sl.mycycle"' app/build.gradle.kts
+          grep -F 'package com.sl.mycycle' app/src/main/java/com/sl/mycycle/MyCycleApp.kt
+          grep -F 'package com.sl.mycycle' app/src/test/java/com/sl/mycycle/domain/engine/PredictionEngineTest.kt
+          grep -F 'com.sl.mycycle.debug' .github/workflows/store-screenshots.yml
+          grep -F 'com.sl.mycycle' store/rustore/listing.ru.md
+
+      - name: Commit refactor
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No package refactor changes were needed.'
+            exit 0
+          fi
+          git commit -m "Refactor package to com.sl.mycycle"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
