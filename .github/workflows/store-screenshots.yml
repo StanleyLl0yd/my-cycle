@@ -22,7 +22,7 @@ concurrency:
 jobs:
   screenshots:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 25
 
     steps:
       - name: Check out repository
@@ -69,22 +69,12 @@ jobs:
           arch: x86_64
           profile: pixel_6
           emulator-boot-timeout: 600
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -prop persist.sys.locale=ru-RU
           disable-animations: true
           script: |
             set -euo pipefail
-            adb root || true
             adb wait-for-device
-            adb shell 'setprop persist.sys.locale ru-RU; stop; sleep 5; start' || true
-            adb wait-for-device
-            for attempt in {1..120}; do
-              if [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]]; then
-                break
-              fi
-              sleep 2
-            done
             test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1"
-
             adb shell wm size 1080x1920
             adb shell wm density 420
             adb shell settings put global policy_control immersive.full=*
