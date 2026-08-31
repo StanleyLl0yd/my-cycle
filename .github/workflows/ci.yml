@@ -34,10 +34,10 @@ jobs:
       - name: Check source comment policy
         run: python3 scripts/check-source-comments.py
 
-      - name: Build APKs and run unit tests
+      - name: Build APKs, AAB, and run unit tests
         run: |
           set -o pipefail
-          gradle --dependency-verification=strict assembleDebug assembleRelease test --stacktrace 2>&1 | tee android-build.log
+          gradle --dependency-verification=strict assembleDebug assembleRelease bundleRelease test --stacktrace 2>&1 | tee android-build.log
 
       - name: Upload build log on failure
         if: failure()
@@ -64,10 +64,12 @@ jobs:
             cat "$REPORT"
           fi
 
-      - name: Upload unsigned release APK
+      - name: Upload unsigned release artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: my-cycle-release-unsigned
-          path: app/build/outputs/apk/release/*.apk
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
           retention-days: 30
