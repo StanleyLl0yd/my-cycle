@@ -1,0 +1,158 @@
+name: Release Metadata Preparation
+
+on:
+  push:
+    branches:
+      - rustore-first-publish
+    paths:
+      - .github/workflows/release-metadata-prep.yml
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Update release metadata
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          version = "1.1.3"
+          version_code = "5"
+
+          en_section = """## [1.1.3] - 2026-08-31
+
+### 📦 RuStore and application identity
+- Fixed the canonical Android application ID and namespace at `com.sl.mycycle` for the first RuStore publication.
+- Refactored Kotlin packages, source, test and debug package paths, Room schema paths, workflows and documentation to the canonical application identity.
+- Pre-1.1.3 GitHub builds use a different Android application identity and are treated by Android as a separate app; `com.sl.mycycle` is the permanent identity going forward.
+- Release publishing now produces a signed Android App Bundle (`.aab`), SHA-256 checksum and public upload certificate for RuStore.
+- Added automated real-device-style 1080×1920 RuStore screenshots using a debug-only local demo-data seeder that is excluded from release builds.
+- Added English and Russian privacy policies and a maintained RuStore listing with publication metadata and data-safety notes.
+- Updated source version to 1.1.3 (`versionCode` 5).
+
+---
+
+"""
+
+          ru_section = """## [1.1.3] - 2026-08-31
+
+### 📦 RuStore и постоянный идентификатор приложения
+- Канонические Android Application ID и namespace зафиксированы как `com.sl.mycycle` для первой публикации в RuStore.
+- Kotlin packages, пути исходников, тестов и debug-кода, Room schema, workflows и документация приведены к единому постоянному идентификатору приложения.
+- GitHub-сборки до 1.1.3 имеют другую Android-идентичность и воспринимаются Android как отдельное приложение; начиная с 1.1.3 постоянным идентификатором является `com.sl.mycycle`.
+- Релизный процесс теперь выпускает подписанный Android App Bundle (`.aab`), SHA-256 checksum и публичный сертификат upload key для RuStore.
+- Добавлена автоматическая генерация реальных скриншотов RuStore 1080×1920 через debug-only заполнение локальных демо-данных, которое не попадает в release-сборку.
+- Добавлены политики конфиденциальности на русском и английском и поддерживаемая карточка RuStore с данными публикации и описанием обработки данных.
+- Версия исходного кода обновлена до 1.1.3 (`versionCode` 5).
+
+---
+
+"""
+
+          def add_changelog(path: str, section: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding="utf-8")
+              if f"## [{version}]" in text:
+                  return
+              marker = "## [1.1.2] - 2026-08-31"
+              text = text.replace(marker, section + marker, 1)
+              file.write_text(text, encoding="utf-8")
+
+          add_changelog("CHANGELOG.md", en_section)
+          add_changelog("CHANGELOG.ru.md", ru_section)
+
+          readme = Path("README.md")
+          text = readme.read_text(encoding="utf-8")
+          text = text.replace(
+              "[⬇️ Download the latest published APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)",
+              "[📦 Latest release files — signed AAB for RuStore](https://github.com/StanleyLl0yd/my-cycle/releases/latest)",
+          )
+          text = text.replace(
+              "Source version: **1.1.2** · Latest published APK: **1.1.2** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**",
+              "Source version: **1.1.3** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**",
+          )
+          readme.write_text(text, encoding="utf-8")
+
+          readme_ru = Path("README.ru.md")
+          text = readme_ru.read_text(encoding="utf-8")
+          text = text.replace(
+              "[⬇️ Скачать последний опубликованный APK](https://github.com/StanleyLl0yd/my-cycle/releases/latest)",
+              "[📦 Файлы последнего релиза — подписанный AAB для RuStore](https://github.com/StanleyLl0yd/my-cycle/releases/latest)",
+          )
+          text = text.replace(
+              "Версия исходного кода: **1.1.2** · Последний опубликованный APK: **1.1.2** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**",
+              "Версия исходного кода: **1.1.3** · Пакет публикации: **подписанный AAB для RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**",
+          )
+          readme_ru.write_text(text, encoding="utf-8")
+
+          listing = Path("store/rustore/listing.ru.md")
+          text = listing.read_text(encoding="utf-8")
+          text = text.replace("версии **1.1.2** (`versionCode` 4)", "версии **1.1.3** (`versionCode` 5)")
+          text = text.replace("My-Cycle-v1.1.2.aab", "My-Cycle-v1.1.3.aab")
+          text = text.replace("My-Cycle-v1.1.2-upload-cert.pem", "My-Cycle-v1.1.3-upload-cert.pem")
+          identity_note = "- Постоянный Application ID зафиксирован как `com.sl.mycycle`.\n"
+          changed_anchor = "Первая публикация My Cycle в RuStore.\n\n"
+          if identity_note not in text:
+              text = text.replace(changed_anchor, changed_anchor + identity_note, 1)
+          listing.write_text(text, encoding="utf-8")
+
+          previous_notes = Path(".github/release-notes/v1.1.2.md")
+          text = previous_notes.read_text(encoding="utf-8")
+          text = text.replace(
+              "- The GitHub release includes a signed Android App Bundle (`.aab`), its SHA-256 checksum, and the public upload certificate for RuStore publication.",
+              "- The GitHub release includes the signed APK and its SHA-256 checksum.",
+          )
+          previous_notes.write_text(text, encoding="utf-8")
+
+          release_notes = Path(".github/release-notes/v1.1.3.md")
+          release_notes.write_text("""## My Cycle 1.1.3
+
+### RuStore publication
+- Fixed the permanent Android application ID and namespace at `com.sl.mycycle`.
+- Refactored source, test and debug package paths plus the Room schema package to match the canonical identity.
+- Added a signed Android App Bundle (`.aab`) release pipeline with SHA-256 verification and the public upload certificate required for store onboarding.
+- Added automated 1080×1920 RuStore screenshots generated from the real app UI with debug-only local demo data.
+- Added English and Russian privacy policies and a maintained RuStore store-listing file.
+
+### Compatibility note
+Pre-1.1.3 GitHub builds have a different Android application identity and Android treats them as a separate app. `com.sl.mycycle` is the permanent application identity from this release onward.
+
+The app remains offline-first: no account, analytics, ads or Android `INTERNET` permission.
+""", encoding="utf-8")
+
+          checks = {
+              "app/build.gradle.kts": [
+                  'namespace = "com.sl.mycycle"',
+                  'applicationId = "com.sl.mycycle"',
+                  'versionCode = 5',
+                  'versionName = "1.1.3"',
+              ],
+              "store/rustore/listing.ru.md": ["`com.sl.mycycle`", "My-Cycle-v1.1.3.aab"],
+              "CHANGELOG.md": ["## [1.1.3] - 2026-08-31"],
+              "CHANGELOG.ru.md": ["## [1.1.3] - 2026-08-31"],
+          }
+          for path, needles in checks.items():
+              content = Path(path).read_text(encoding="utf-8")
+              for needle in needles:
+                  if needle not in content:
+                      raise SystemExit(f"Missing {needle!r} in {path}")
+          PY
+
+      - name: Commit metadata
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md CHANGELOG.ru.md README.md README.ru.md store/rustore/listing.ru.md .github/release-notes/v1.1.2.md .github/release-notes/v1.1.3.md
+          if git diff --cached --quiet; then
+            echo 'Release metadata is already current.'
+            exit 0
+          fi
+          git commit -m "Prepare My Cycle 1.1.3 release metadata"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
