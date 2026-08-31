@@ -1,0 +1,45 @@
+config:
+  validation: true
+  warningsAsErrors: true
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - Composable
+
+style:
+  MagicNumber:
+    ignorePropertyDeclaration: true
+    ignoreLocalVariableDeclaration: true
+    ignoreEnums: true
+    ignoreRanges: true
+    ignoreNamedArgument: true
+    excludes:
+      - '**/src/test/**'
+      - '**/ui/**/*Screen.kt'
+      - '**/ui/navigation/NavHost.kt'
+      - '**/ui/daydetails/DayDetailsSheet.kt'
+  ReturnCount:
+    max: 5
+    excludeGuardClauses: true
+
+complexity:
+  ComplexCondition:
+    allowedConditions: 4
+  CyclomaticComplexMethod:
+    allowedComplexity: 20
+    excludes:
+      - '**/ui/**/*Screen.kt'
+      - '**/ui/daydetails/DayDetailsSheet.kt'
+  LongMethod:
+    allowedLines: 80
+    excludes:
+      - '**/ui/**/*Screen.kt'
+      - '**/ui/daydetails/DayDetailsSheet.kt'
+
+exceptions:
+  TooGenericExceptionCaught:
+    excludes:
+      - '**/util/SuspendResult.kt'
+      - '**/ui/onboarding/OnboardingViewModel.kt'
+      - '**/ui/settings/SettingsViewModel.kt'

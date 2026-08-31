@@ -1,0 +1,12 @@
+version: "1.0"
+linter: qodana-jvm-community
+withinDocker: false
+bootstrap: rm -f gradle/verification-metadata.xml
+failThreshold: 0
+profile:
+  name: qodana.recommended
+exclude:
+  - name: All
+    paths:
+      - build
+      - app/build

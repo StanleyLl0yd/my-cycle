@@ -40,6 +40,9 @@ class StatisticsViewModel(
 
     companion object {
         private const val MAX_CYCLES_FOR_SUMMARY = 6
+        private const val MAX_CYCLES_TO_DISPLAY = 12
+        private const val REGULAR_VARIATION_DAYS = 9
+        private const val SOMEWHAT_REGULAR_VARIATION_DAYS = 14
     }
 
     private val _state = MutableStateFlow(StatisticsState())
@@ -87,7 +90,7 @@ class StatisticsViewModel(
                         cycleVariationDays = variation,
                         regularity = regularity,
                         completedCycleCount = recent.size,
-                        cycles = cycles.takeLast(12).reversed(),
+                        cycles = cycles.takeLast(MAX_CYCLES_TO_DISPLAY).reversed(),
                         cycleStage = preferences.cycleStage,
                         isLoading = false
                     )
@@ -108,8 +111,8 @@ class StatisticsViewModel(
         CycleStage.PERIODS_STOPPED -> null
 
         CycleStage.ESTABLISHED -> when {
-            variationDays <= 9 -> CycleRegularity.REGULAR
-            variationDays <= 14 -> CycleRegularity.SOMEWHAT_REGULAR
+            variationDays <= REGULAR_VARIATION_DAYS -> CycleRegularity.REGULAR
+            variationDays <= SOMEWHAT_REGULAR_VARIATION_DAYS -> CycleRegularity.SOMEWHAT_REGULAR
             else -> CycleRegularity.IRREGULAR
         }
     }

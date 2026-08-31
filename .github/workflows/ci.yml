@@ -15,6 +15,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -30,11 +31,28 @@ jobs:
         with:
           gradle-version: '9.5.0'
 
+      - name: Check source comment policy
+        run: python3 scripts/check-source-comments.py
+
       - name: Build APKs and run unit tests
-        run: gradle assembleDebug assembleRelease test --stacktrace
+        run: |
+          set -o pipefail
+          gradle --dependency-verification=strict assembleDebug assembleRelease test --stacktrace 2>&1 | tee android-build.log
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: android-build-log
+          path: android-build.log
+          if-no-files-found: ignore
+          retention-days: 1
 
       - name: Run lint
-        run: gradle lint
+        run: gradle --dependency-verification=strict lint
+
+      - name: Run Detekt
+        run: gradle --dependency-verification=strict detekt
 
       - name: Print lint report on failure
         if: failure()

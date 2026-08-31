@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.detekt)
 }
 
 val releaseKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
@@ -89,6 +90,11 @@ android {
         error += "SetTextI18n"
         warning += "MissingTranslation"
     }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.files("config/detekt/detekt.yml"))
 }
 
 dependencies {
