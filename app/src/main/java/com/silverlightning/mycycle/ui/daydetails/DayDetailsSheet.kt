@@ -29,10 +29,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,10 +68,20 @@ fun DayDetailsSheet(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val locale = LocalConfiguration.current.locales[0]
+    var showMoreDetails by rememberSaveable(state.date.toString()) { mutableStateOf(false) }
 
     LaunchedEffect(state.isSaved) {
         if (state.isSaved) {
             onDismiss()
+        }
+    }
+
+    LaunchedEffect(state.isLoading, state.date) {
+        if (
+            !state.isLoading &&
+            (state.mood != null || state.symptoms.isNotEmpty() || state.notes.isNotBlank())
+        ) {
+            showMoreDetails = true
         }
     }
 
@@ -92,17 +106,11 @@ fun DayDetailsSheet(
                 style = MaterialTheme.typography.titleLarge
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = stringResource(R.string.day_details_period_section),
                 style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = stringResource(R.string.day_details_bleeding_help),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -139,83 +147,100 @@ fun DayDetailsSheet(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = stringResource(R.string.day_details_mood_section),
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            FlowRow(
-                modifier = Modifier.selectableGroup(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            TextButton(
+                onClick = { showMoreDetails = !showMoreDetails },
+                enabled = !state.isSaving
             ) {
-                Mood.entries.forEach { mood ->
-                    MoodOption(
-                        mood = mood,
-                        isSelected = state.mood == mood,
-                        enabled = !state.isSaving,
-                        onClick = {
-                            viewModel.setMood(if (state.mood == mood) null else mood)
+                Text(
+                    stringResource(
+                        if (showMoreDetails) {
+                            R.string.day_details_less
+                        } else {
+                            R.string.day_details_more
                         }
                     )
-                }
+                )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            if (showMoreDetails) {
+                Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = stringResource(R.string.day_details_symptoms_section),
-                style = MaterialTheme.typography.titleMedium
-            )
+                Text(
+                    text = stringResource(R.string.day_details_mood_short),
+                    style = MaterialTheme.typography.titleMedium
+                )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Symptom.entries.forEach { symptom ->
-                    FilterChip(
-                        selected = symptom in state.symptoms,
-                        onClick = { viewModel.toggleSymptom(symptom) },
-                        enabled = !state.isSaving,
-                        label = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(symptom.emoji)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(stringResource(symptom.labelRes))
+                FlowRow(
+                    modifier = Modifier.selectableGroup(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Mood.entries.forEach { mood ->
+                        MoodOption(
+                            mood = mood,
+                            isSelected = state.mood == mood,
+                            enabled = !state.isSaving,
+                            onClick = {
+                                viewModel.setMood(if (state.mood == mood) null else mood)
                             }
-                        }
-                    )
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = stringResource(R.string.day_details_symptoms_short),
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Symptom.entries.forEach { symptom ->
+                        FilterChip(
+                            selected = symptom in state.symptoms,
+                            onClick = { viewModel.toggleSymptom(symptom) },
+                            enabled = !state.isSaving,
+                            label = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(symptom.emoji)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(stringResource(symptom.labelRes))
+                                }
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = stringResource(R.string.day_details_notes_section),
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = state.notes,
+                    onValueChange = viewModel::setNotes,
+                    enabled = !state.isSaving,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    placeholder = {
+                        Text(stringResource(R.string.day_details_notes_hint))
+                    }
+                )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = stringResource(R.string.day_details_notes_section),
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = state.notes,
-                onValueChange = viewModel::setNotes,
-                enabled = !state.isSaving,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp),
-                placeholder = {
-                    Text(stringResource(R.string.day_details_notes_hint))
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             if (state.isFutureDate) {
                 Text(

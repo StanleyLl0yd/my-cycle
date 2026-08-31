@@ -28,14 +28,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,8 +73,10 @@ import com.silverlightning.mycycle.ui.theme.PeriodMedium
 import com.silverlightning.mycycle.ui.theme.PeriodPredicted
 import com.silverlightning.mycycle.ui.theme.PeriodStrong
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
@@ -78,8 +90,10 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val historicalPeriodState by viewModel.historicalPeriodState.collectAsStateWithLifecycle()
     val locale = LocalConfiguration.current.locales[0]
     val firstDayOfWeek = remember(locale) { WeekFields.of(locale).firstDayOfWeek }
+    var showHistoricalPeriod by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -96,7 +110,27 @@ fun CalendarScreen(
             locale = locale
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.calendar_edit_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(
+                onClick = {
+                    viewModel.resetHistoricalPeriodEntry()
+                    showHistoricalPeriod = true
+                }
+            ) {
+                Text(stringResource(R.string.calendar_add_past_period))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
         WeekdayHeaders(
             locale = locale,
             firstDayOfWeek = firstDayOfWeek
@@ -133,6 +167,201 @@ fun CalendarScreen(
             showFertility = state.prediction?.possiblePregnancyWindow != null,
             showOvulation = state.prediction?.possibleOvulationWindow != null
         )
+    }
+
+    if (showHistoricalPeriod) {
+        HistoricalPeriodSheet(
+            state = historicalPeriodState,
+            locale = locale,
+            onStartDateChanged = viewModel::setHistoricalPeriodStart,
+            onEndDateChanged = viewModel::setHistoricalPeriodEnd,
+            onSave = viewModel::saveHistoricalPeriod,
+            onAddAnother = viewModel::prepareAnotherHistoricalPeriod,
+            onDismiss = {
+                if (!historicalPeriodState.isSaving) {
+                    showHistoricalPeriod = false
+                }
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HistoricalPeriodSheet(
+    state: HistoricalPeriodState,
+    locale: Locale,
+    onStartDateChanged: (LocalDate) -> Unit,
+    onEndDateChanged: (LocalDate) -> Unit,
+    onSave: () -> Unit,
+    onAddAnother: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val formatter = remember(locale) {
+        DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
+    }
+    var editStartDate by remember { mutableStateOf(false) }
+    var editEndDate by remember { mutableStateOf(false) }
+
+    ModalBottomSheet(
+        onDismissRequest = {
+            if (!state.isSaving) onDismiss()
+        },
+        sheetState = sheetState,
+        sheetGesturesEnabled = !state.isSaving
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.history_period_title),
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { editStartDate = true },
+                    enabled = !state.isSaving,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(R.string.history_period_start),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(state.startDate.format(formatter))
+                    }
+                }
+
+                OutlinedButton(
+                    onClick = { editEndDate = true },
+                    enabled = !state.isSaving,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(R.string.history_period_end),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(state.endDate.format(formatter))
+                    }
+                }
+            }
+
+            if (state.hasSaveError) {
+                Text(
+                    text = stringResource(R.string.error_generic),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            if (state.isSaved) {
+                Text(
+                    text = stringResource(R.string.history_period_saved),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.history_done))
+                }
+                TextButton(
+                    onClick = onAddAnother,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.history_add_another))
+                }
+            } else {
+                Button(
+                    onClick = onSave,
+                    enabled = !state.isSaving,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.history_period_save))
+                }
+                TextButton(
+                    onClick = onDismiss,
+                    enabled = !state.isSaving,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.dialog_cancel))
+                }
+            }
+        }
+    }
+
+    if (editStartDate) {
+        HistoricalDatePicker(
+            selectedDate = state.startDate,
+            onDateSelected = onStartDateChanged,
+            onDismiss = { editStartDate = false }
+        )
+    }
+
+    if (editEndDate) {
+        HistoricalDatePicker(
+            selectedDate = state.endDate,
+            onDateSelected = onEndDateChanged,
+            onDismiss = { editEndDate = false }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HistoricalDatePicker(
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate
+            .atStartOfDay(ZoneOffset.UTC)
+            .toInstant()
+            .toEpochMilli()
+    )
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        onDateSelected(
+                            Instant.ofEpochMilli(millis)
+                                .atZone(ZoneOffset.UTC)
+                                .toLocalDate()
+                        )
+                    }
+                    onDismiss()
+                }
+            ) {
+                Text(stringResource(R.string.dialog_ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.dialog_cancel))
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
     }
 }
 

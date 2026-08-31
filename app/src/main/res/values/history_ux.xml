@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_stage_prompt">Your periods</string>
+    <string name="onboarding_stage_first_year_short">Started less than 1 year ago</string>
+    <string name="onboarding_stage_one_to_three_short">Started 1–3 years ago</string>
+    <string name="onboarding_stage_established_short">More than 3 years, usually similar</string>
+    <string name="onboarding_stage_uneven_short">More than 3 years, still uneven</string>
+    <string name="onboarding_stage_changing_short">Changing with age</string>
+    <string name="onboarding_stage_stopped_short">Stopped for a full year</string>
+    <string name="onboarding_period_prompt_short">Last period started</string>
+    <string name="onboarding_cycle_prompt_short">Usual cycle length</string>
+    <string name="onboarding_cycle_hint_short">An estimate is fine.</string>
+    <string name="onboarding_stopped_short">Next-period predictions will be turned off.</string>
+
+    <string name="calendar_edit_hint">Tap any day to add or edit data</string>
+    <string name="calendar_add_past_period">Add past period</string>
+    <string name="history_period_title">Add past period</string>
+    <string name="history_period_start">Start</string>
+    <string name="history_period_end">End</string>
+    <string name="history_period_saved">Saved</string>
+    <string name="history_period_save">Save</string>
+    <string name="history_add_another">Add another</string>
+    <string name="history_done">Done</string>
+
+    <string name="day_details_more">More details</string>
+    <string name="day_details_less">Fewer details</string>
+    <string name="day_details_mood_short">Mood</string>
+    <string name="day_details_symptoms_short">Symptoms</string>
+</resources>
