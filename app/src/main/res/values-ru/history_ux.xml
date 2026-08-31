@@ -7,6 +7,8 @@
     <string name="onboarding_stage_uneven_short">Больше 3 лет, промежутки разные</string>
     <string name="onboarding_stage_changing_short">Меняются с возрастом</string>
     <string name="onboarding_stage_stopped_short">Не было целый год</string>
+    <string name="onboarding_period_prompt_short">Начало последних месячных</string>
+    <string name="onboarding_cycle_prompt_short">Обычная длина цикла</string>
     <string name="onboarding_cycle_hint_short">Можно указать примерно.</string>
     <string name="onboarding_stopped_short">Прогноз следующих месячных будет выключен.</string>
 
