@@ -225,6 +225,7 @@ class CalendarViewModel(
                     predictionEngine.predictFromHistory(
                         cycles = cycles,
                         fallbackCycleLength = input.preferences.estimatedCycleLength,
+                        fallbackPeriodLength = input.preferences.estimatedPeriodLength,
                         stage = input.preferences.cycleStage,
                         referenceDate = input.today
                     )
@@ -232,6 +233,7 @@ class CalendarViewModel(
                     predictionEngine.predictFromOnboarding(
                         lastPeriodStart = input.preferences.initialPeriodDate,
                         cycleLength = input.preferences.estimatedCycleLength,
+                        periodLength = input.preferences.estimatedPeriodLength,
                         stage = input.preferences.cycleStage
                     )
                 } else {
