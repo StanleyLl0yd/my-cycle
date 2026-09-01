@@ -28,7 +28,6 @@ val appModule = module {
         ).build()
     }
 
-    single { get<AppDatabase>().cycleDayDao() }
     single { androidContext().userPreferencesDataStore }
     single { ClockProvider() }
 
