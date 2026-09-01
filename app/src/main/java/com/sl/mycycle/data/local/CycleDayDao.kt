@@ -18,9 +18,6 @@ interface CycleDayDao {
     @Query("SELECT * FROM cycle_days WHERE date = :date")
     fun observeByDate(date: LocalDate): Flow<CycleDayEntity?>
 
-    @Query("SELECT * FROM cycle_days WHERE date BETWEEN :start AND :end ORDER BY date")
-    fun observeRange(start: LocalDate, end: LocalDate): Flow<List<CycleDayEntity>>
-
     @Upsert
     suspend fun upsert(day: CycleDayEntity)
 
