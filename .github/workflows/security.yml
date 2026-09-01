@@ -58,6 +58,8 @@ jobs:
     permissions:
       contents: read
       checks: write
+    env:
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-user-home
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -76,6 +78,9 @@ jobs:
         with:
           gradle-version: '9.5.0'
           cache-read-only: true
+
+      - name: Prime Gradle Wrapper
+        run: ./gradlew --version
 
       - name: Prepare Gradle dependencies
         run: ./gradlew --dependency-verification=strict --no-daemon :app:dependencies --stacktrace
