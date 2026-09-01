@@ -91,20 +91,6 @@ jobs:
                   raise SystemExit("Gradle verification metadata configuration marker not found")
               path.write_text(text.replace(marker, marker + trusted, 1), encoding="utf-8")
 
-      - name: Allow newer AGP during Qodana IDE sync
-        shell: python
-        run: |
-          from pathlib import Path
-
-          path = Path("gradle.properties")
-          text = path.read_text(encoding="utf-8") if path.exists() else ""
-          key = "android.injected.studio.version.check"
-          if not any(line.strip().startswith(f"{key}=") for line in text.splitlines()):
-              if text and not text.endswith("\n"):
-                  text += "\n"
-              text += f"{key}=false\n"
-              path.write_text(text, encoding="utf-8")
-
       - name: Run Qodana
         uses: JetBrains/qodana-action@b588768b6e7e6da579e518bc584f79de0d243692
         with:
