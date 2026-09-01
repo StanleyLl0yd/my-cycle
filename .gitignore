@@ -15,3 +15,4 @@ keystore.properties
 .cxx/
 *.iml
 .DS_Store
+store/rustore/screenshots/
