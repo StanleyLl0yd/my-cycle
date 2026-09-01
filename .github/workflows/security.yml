@@ -85,6 +85,14 @@ jobs:
       - name: Prepare Gradle dependencies
         run: ./gradlew --dependency-verification=strict --no-daemon :app:dependencies --stacktrace
 
+      - name: Prepare Android project model for Qodana
+        run: |
+          ./gradlew --dependency-verification=strict --no-daemon \
+            :app:compileDebugKotlin \
+            :app:compileReleaseKotlin \
+            :app:testDebugUnitTest \
+            --stacktrace
+
       - name: Prepare Qodana dependency verification metadata
         run: |
           python3 - <<'PY'
