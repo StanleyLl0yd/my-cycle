@@ -1,7 +1,6 @@
 package com.sl.mycycle.data.local
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import java.time.LocalDate
@@ -25,8 +24,8 @@ interface CycleDayDao {
     @Upsert
     suspend fun upsert(day: CycleDayEntity)
 
-    @Delete
-    suspend fun delete(day: CycleDayEntity)
+    @Query("DELETE FROM cycle_days WHERE date = :date")
+    suspend fun delete(date: LocalDate)
 
     @Query("DELETE FROM cycle_days")
     suspend fun deleteAll()
