@@ -7,6 +7,7 @@ import com.sl.mycycle.domain.model.FertilityState
 import com.sl.mycycle.domain.model.FlowIntensity
 import com.sl.mycycle.domain.model.PeriodState
 import com.sl.mycycle.domain.model.Prediction
+import com.sl.mycycle.domain.model.PredictionMethod
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -116,9 +117,13 @@ class CalendarDayStateResolverTest {
         pregnancyDate: LocalDate? = null
     ) = Prediction(
         nextPeriodStartWindow = periodDate?.let { DateRange(it, it) },
+        expectedPeriodLength = 5,
         possiblePregnancyWindow = pregnancyDate?.let { DateRange(it, it) },
         possibleOvulationWindow = ovulationDate?.let { DateRange(it, it) },
+        confidence = 0.5f,
         basedOnCycles = 3,
+        method = PredictionMethod.WEIGHTED_AVERAGE,
+        estimatedCycleLength = 28,
         highlyVariable = false,
         outsideCommonRange = false,
         stage = CycleStage.ESTABLISHED
