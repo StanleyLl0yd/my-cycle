@@ -47,7 +47,7 @@ class CycleDayRepository(
     }
 
     suspend fun delete(date: LocalDate) {
-        dao.getByDate(date)?.let { dao.delete(it) }
+        dao.delete(date)
     }
 
     suspend fun deleteAll() {
