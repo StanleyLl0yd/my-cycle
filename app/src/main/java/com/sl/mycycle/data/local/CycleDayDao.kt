@@ -15,11 +15,17 @@ interface CycleDayDao {
     @Query("SELECT * FROM cycle_days WHERE date = :date")
     suspend fun getByDate(date: LocalDate): CycleDayEntity?
 
+    @Query("SELECT * FROM cycle_days WHERE date IN (:dates)")
+    suspend fun getByDates(dates: List<LocalDate>): List<CycleDayEntity>
+
     @Query("SELECT * FROM cycle_days WHERE date = :date")
     fun observeByDate(date: LocalDate): Flow<CycleDayEntity?>
 
     @Upsert
     suspend fun upsert(day: CycleDayEntity)
+
+    @Upsert
+    suspend fun upsertAll(days: List<CycleDayEntity>)
 
     @Query("DELETE FROM cycle_days WHERE date = :date")
     suspend fun delete(date: LocalDate)
