@@ -1,6 +1,7 @@
 package com.sl.mycycle.data.repository
 
-import com.sl.mycycle.data.local.CycleDayDao
+import androidx.room.withTransaction
+import com.sl.mycycle.data.local.AppDatabase
 import com.sl.mycycle.data.local.CycleDayEntity
 import com.sl.mycycle.domain.model.CycleDay
 import java.time.Instant
@@ -9,8 +10,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class CycleDayRepository(
-    private val dao: CycleDayDao
+    private val database: AppDatabase
 ) {
+    private val dao = database.cycleDayDao()
+
     fun observeAll(): Flow<List<CycleDay>> =
         dao.observeAll().map { entities ->
             entities.map { it.toDomain() }
@@ -35,6 +38,12 @@ class CycleDayRepository(
             updatedAt = now
         )
         dao.upsert(entity)
+    }
+
+    suspend fun saveAll(cycleDays: List<CycleDay>) {
+        database.withTransaction {
+            cycleDays.forEach { save(it) }
+        }
     }
 
     suspend fun delete(date: LocalDate) {
