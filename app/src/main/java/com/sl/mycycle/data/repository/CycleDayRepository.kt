@@ -19,11 +19,6 @@ class CycleDayRepository(
             entities.map { it.toDomain() }
         }
 
-    fun observeRange(start: LocalDate, end: LocalDate): Flow<List<CycleDay>> =
-        dao.observeRange(start, end).map { entities ->
-            entities.map { it.toDomain() }
-        }
-
     fun observeByDate(date: LocalDate): Flow<CycleDay?> =
         dao.observeByDate(date).map { it?.toDomain() }
 
