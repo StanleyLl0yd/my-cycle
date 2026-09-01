@@ -19,12 +19,12 @@ val hasReleaseSigning = listOf(
 
 android {
     namespace = "com.sl.mycycle"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.sl.mycycle"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 36
         versionCode = 7
         versionName = "1.1.5"
 
