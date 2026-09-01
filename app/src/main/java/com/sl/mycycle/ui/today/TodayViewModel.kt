@@ -25,7 +25,9 @@ data class TodayState(
     val cycleDay: Int? = null,
     val isPeriodToday: Boolean = false,
     val prediction: Prediction? = null,
-    val notice: CycleNotice? = null
+    val cycleStage: CycleStage = CycleStage.NOT_SET,
+    val notice: CycleNotice? = null,
+    val isLoading: Boolean = true
 )
 
 class TodayViewModel(
@@ -115,7 +117,9 @@ class TodayViewModel(
                     cycleDay = cycleDay,
                     isPeriodToday = isPeriodToday,
                     prediction = prediction,
-                    notice = notice
+                    cycleStage = preferences.cycleStage,
+                    notice = notice,
+                    isLoading = false
                 )
             }
         }
