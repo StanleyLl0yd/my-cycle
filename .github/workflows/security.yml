@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
-      contents: write
+      contents: read
       checks: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -64,44 +64,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Set up JDK 25
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
-        with:
-          distribution: temurin
-          java-version: 25
-
-      - name: Set up Gradle 9.6.0
-        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb
-        with:
-          gradle-version: '9.6.0'
-
-      - name: Generate Gradle 9.6 verification metadata
-        run: gradle --write-verification-metadata sha256 wrapper
-
-      - name: Upload generated verification metadata
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: gradle-9.6-verification-metadata
-          path: gradle/verification-metadata.xml
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Commit generated verification metadata
-        if: github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          HEAD_REF: ${{ github.head_ref }}
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- gradle/verification-metadata.xml; then
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add gradle/verification-metadata.xml
-          git commit -m 'Update Gradle 9.6 verification metadata'
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${HEAD_REF}"
 
       - name: Run Qodana
         uses: JetBrains/qodana-action@b588768b6e7e6da579e518bc584f79de0d243692
