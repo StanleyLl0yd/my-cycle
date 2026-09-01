@@ -41,7 +41,7 @@ jobs:
           gradle-version: '9.5.0'
 
       - name: Build for CodeQL
-        run: gradle assembleDebug --no-build-cache --rerun-tasks --stacktrace
+        run: ./gradlew assembleDebug --no-build-cache --rerun-tasks --stacktrace
 
       - name: Analyze
         uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938

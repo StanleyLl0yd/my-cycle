@@ -6,10 +6,10 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
-val releaseKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
-val releaseStorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
-val releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
-val releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+val releaseKeystorePath: String? = System.getenv("ANDROID_KEYSTORE_PATH")
+val releaseStorePassword: String? = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+val releaseKeyAlias: String? = System.getenv("ANDROID_KEY_ALIAS")
+val releaseKeyPassword: String? = System.getenv("ANDROID_KEY_PASSWORD")
 val hasReleaseSigning = listOf(
     releaseKeystorePath,
     releaseStorePassword,
@@ -25,8 +25,8 @@ android {
         applicationId = "com.sl.mycycle"
         minSdk = 26
         targetSdk = 37
-        versionCode = 6
-        versionName = "1.1.4"
+        versionCode = 7
+        versionName = "1.1.5"
 
         vectorDrawables {
             useSupportLibrary = true

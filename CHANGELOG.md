@@ -10,6 +10,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.5] - 2026-09-01
+
+### 🛡️ Repository and release hardening
+- Added the verified Gradle 9.5.0 Wrapper, including the official distribution SHA-256 checksum, so local and CI builds use the same pinned Gradle runtime.
+- Switched Android CI, CodeQL, Qodana preparation, release builds and RuStore screenshot builds to `./gradlew`.
+- The protected required `build` check now waits for CodeQL, Qodana, Semgrep and Gitleaks, so a security failure blocks the merge through the existing branch ruleset.
+- The release workflow still waits for the required `build` check, which now represents the full quality and security gate.
+- Updated GitHub Actions dependencies and KSP to 2.3.11 without weakening strict Gradle dependency verification.
+- Cleaned stale maintenance branches.
+- No user-facing behavior, UI/UX, persistence or application identity changes are intended.
+- Updated source version to 1.1.5 (`versionCode` 7).
+
+---
+
+## [1.1.4] - 2026-09-01
+
+### 🧹 Maintenance and code quality
+- Completed a repository-wide cleanup and deep refactoring pass while preserving application behavior, UI/UX, data formats and the permanent Android identity.
+- Removed unused Compose tooling dependencies, redundant calendar state and calculations, an unused range-observation API and unnecessary Activity lookup code.
+- Simplified Room deletion by date and reused the existing atomic batch API for debug-only RuStore screenshot seed data.
+- Stabilized Qodana Android project import without disabling strict Gradle dependency verification or lowering the quality gate.
+- Kept prediction, history, attention-note, persistence and release-signing behavior unchanged.
+- Updated source version to 1.1.4 (`versionCode` 6).
+
+---
+
 ## [1.1.3] - 2026-08-31
 
 ### 📦 RuStore and application identity
