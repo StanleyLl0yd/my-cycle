@@ -114,7 +114,7 @@ class SettingsViewModel(
                     if (daysDeleted && daysBeforeClear.isNotEmpty()) {
                         withContext(NonCancellable) {
                             try {
-                                daysBeforeClear.forEach { cycleDayRepository.save(it) }
+                                cycleDayRepository.saveAll(daysBeforeClear)
                             } catch (rollbackError: Exception) {
                                 error.addSuppressed(rollbackError)
                             }
