@@ -2,13 +2,14 @@ package com.sl.mycycle.domain.engine
 
 import com.sl.mycycle.domain.model.Cycle
 import com.sl.mycycle.domain.model.CycleStage
-import java.time.LocalDate
+import com.sl.mycycle.domain.model.PredictionMethod
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
 
 class PredictionEngineTest {
 
@@ -20,13 +21,16 @@ class PredictionEngineTest {
         val prediction = engine.predictFromOnboarding(
             lastPeriodStart = LocalDate.of(2026, 8, 1),
             cycleLength = 28,
+            periodLength = 5,
             stage = CycleStage.ESTABLISHED
         )
 
         assertEquals(LocalDate.of(2026, 8, 26), prediction.nextPeriodStartWindow?.start)
         assertEquals(LocalDate.of(2026, 9, 1), prediction.nextPeriodStartWindow?.end)
+        assertEquals(5, prediction.expectedPeriodLength)
         assertNull(prediction.possibleOvulationWindow)
         assertNull(prediction.possiblePregnancyWindow)
+        assertEquals(PredictionMethod.ONBOARDING_ESTIMATE, prediction.method)
     }
 
     @Test
@@ -34,6 +38,7 @@ class PredictionEngineTest {
         val prediction = engine.predictFromHistory(
             cycles = stableHistory(),
             fallbackCycleLength = 28,
+            fallbackPeriodLength = 5,
             referenceDate = referenceDate,
             stage = CycleStage.NOT_SET
         )
@@ -52,6 +57,7 @@ class PredictionEngineTest {
         val prediction = engine.predictFromOnboarding(
             lastPeriodStart = LocalDate.of(2026, 8, 1),
             cycleLength = 28,
+            periodLength = 5,
             stage = CycleStage.FIRST_YEAR
         )
 
@@ -63,7 +69,7 @@ class PredictionEngineTest {
     }
 
     @Test
-    fun incompleteOnboardingCycleUsesFallbackCycleLength() {
+    fun incompleteOnboardingCycleUsesFallbackPeriodLength() {
         val start = LocalDate.of(2026, 8, 1)
         val prediction = engine.predictFromHistory(
             cycles = listOf(
@@ -78,12 +84,34 @@ class PredictionEngineTest {
                 )
             ),
             fallbackCycleLength = 28,
+            fallbackPeriodLength = 5,
             referenceDate = LocalDate.of(2026, 8, 10),
             stage = CycleStage.ESTABLISHED
         )
 
+        assertEquals(5, prediction.expectedPeriodLength)
         assertEquals(LocalDate.of(2026, 8, 26), prediction.nextPeriodStartWindow?.start)
         assertEquals(0, prediction.basedOnCycles)
+        assertEquals(PredictionMethod.ONBOARDING_ESTIMATE, prediction.method)
+    }
+
+    @Test
+    fun oneKnownCompletedPeriodLengthDoesNotReplaceFallback() {
+        val cycles = listOf(
+            completeCycle(1, LocalDate.of(2026, 1, 1), 28, null),
+            completeCycle(2, LocalDate.of(2026, 1, 29), 28, 5),
+            currentCycle(3, LocalDate.of(2026, 2, 26), 5)
+        )
+
+        val prediction = engine.predictFromHistory(
+            cycles = cycles,
+            fallbackCycleLength = 28,
+            fallbackPeriodLength = 6,
+            referenceDate = referenceDate,
+            stage = CycleStage.ESTABLISHED
+        )
+
+        assertEquals(6, prediction.expectedPeriodLength)
     }
 
     @Test
@@ -91,12 +119,14 @@ class PredictionEngineTest {
         val prediction = engine.predictFromHistory(
             cycles = stableHistory(),
             fallbackCycleLength = 28,
+            fallbackPeriodLength = 5,
             referenceDate = referenceDate,
             stage = CycleStage.ESTABLISHED
         )
 
         assertEquals(LocalDate.of(2026, 4, 24), prediction.nextPeriodStartWindow?.start)
         assertEquals(LocalDate.of(2026, 4, 30), prediction.nextPeriodStartWindow?.end)
+        assertEquals(6, prediction.expectedPeriodLength)
         assertEquals(3, prediction.basedOnCycles)
         assertFalse(prediction.highlyVariable)
         assertFalse(prediction.outsideCommonRange)
@@ -124,6 +154,7 @@ class PredictionEngineTest {
         val prediction = engine.predictFromHistory(
             cycles = cycles,
             fallbackCycleLength = 28,
+            fallbackPeriodLength = 5,
             referenceDate = LocalDate.of(2026, 4, 20),
             stage = CycleStage.ESTABLISHED
         )
@@ -146,6 +177,7 @@ class PredictionEngineTest {
         val prediction = engine.predictFromHistory(
             cycles = cycles,
             fallbackCycleLength = 28,
+            fallbackPeriodLength = 5,
             referenceDate = referenceDate,
             stage = CycleStage.ESTABLISHED
         )
@@ -160,6 +192,7 @@ class PredictionEngineTest {
         val prediction = engine.predictFromHistory(
             cycles = stableHistory(),
             fallbackCycleLength = 28,
+            fallbackPeriodLength = 5,
             referenceDate = referenceDate,
             stage = CycleStage.LONG_TERM_UNEVEN
         )
@@ -177,14 +210,14 @@ class PredictionEngineTest {
         val prediction = engine.predictFromOnboarding(
             lastPeriodStart = LocalDate.of(2025, 1, 1),
             cycleLength = 28,
+            periodLength = 5,
             stage = CycleStage.PERIODS_STOPPED
         )
 
         assertNull(prediction.nextPeriodStartWindow)
         assertNull(prediction.possibleOvulationWindow)
         assertNull(prediction.possiblePregnancyWindow)
-        assertEquals(0, prediction.basedOnCycles)
-        assertTrue(prediction.highlyVariable)
+        assertEquals(0f, prediction.confidence)
     }
 
     private fun stableHistory(): List<Cycle> = listOf(
