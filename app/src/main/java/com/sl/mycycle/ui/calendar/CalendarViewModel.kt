@@ -16,14 +16,12 @@ import com.sl.mycycle.util.runSuspendCatching
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private const val DEFAULT_CYCLE_LENGTH = 28
 private const val DEFAULT_PERIOD_LENGTH = 5
@@ -171,43 +169,21 @@ class CalendarViewModel(
                 it.copy(isSaving = true, hasSaveError = false, isSaved = false)
             }
 
-            val dates = historicalPeriodDates(current.startDate, current.endDate)
-            val boundaryDate = historicalPeriodBoundaryDate(current.endDate, today)
-            val previousDays = mutableMapOf<LocalDate, CycleDay?>()
-            val changedDates = mutableListOf<LocalDate>()
-
-            val result = withContext(NonCancellable) {
-                val saveResult = runSuspendCatching {
-                    dates.forEach { date ->
+            val result = runSuspendCatching {
+                val daysToSave = historicalPeriodDates(current.startDate, current.endDate)
+                    .map { date ->
                         val previous = cycleDayRepository.getByDate(date)
-                        previousDays[date] = previous
-                        cycleDayRepository.save(mergeHistoricalPeriodDay(date, previous))
-                        changedDates += date
+                        mergeHistoricalPeriodDay(date, previous)
                     }
+                    .toMutableList()
 
-                    boundaryDate?.let { date ->
-                        if (cycleDayRepository.getByDate(date) == null) {
-                            previousDays[date] = null
-                            cycleDayRepository.save(CycleDay(date = date))
-                            changedDates += date
-                        }
+                historicalPeriodBoundaryDate(current.endDate, today)?.let { date ->
+                    if (cycleDayRepository.getByDate(date) == null) {
+                        daysToSave += CycleDay(date = date)
                     }
                 }
 
-                if (saveResult.isFailure) {
-                    val originalError = saveResult.exceptionOrNull()
-                    changedDates.asReversed().forEach { date ->
-                        val rollbackResult = runSuspendCatching {
-                            previousDays[date]?.let { cycleDayRepository.save(it) }
-                                ?: cycleDayRepository.delete(date)
-                        }
-                        rollbackResult.exceptionOrNull()?.let { rollbackError ->
-                            originalError?.addSuppressed(rollbackError)
-                        }
-                    }
-                }
-
-                saveResult
+                cycleDayRepository.saveAll(daysToSave)
             }
 
             if (result.isSuccess) {
