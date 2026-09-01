@@ -4,7 +4,6 @@ import com.sl.mycycle.domain.model.Cycle
 import com.sl.mycycle.domain.model.CycleStage
 import com.sl.mycycle.domain.model.DateRange
 import com.sl.mycycle.domain.model.Prediction
-import com.sl.mycycle.domain.model.PredictionMethod
 import java.time.LocalDate
 import kotlin.math.ceil
 import kotlin.math.pow
@@ -19,8 +18,6 @@ class PredictionEngine {
         private const val LUTEAL_PHASE_MAX_DAYS = 17
         private const val MAX_CYCLES_FOR_AVERAGE = 6
         private const val MIN_CYCLES_FOR_OVULATION_ESTIMATE = 3
-        private const val MIN_CONFIDENCE = 0.20f
-        private const val MAX_CONFIDENCE = 0.90f
         private const val DEFAULT_CYCLE_LENGTH = 28
         private const val DEFAULT_WINDOW_RADIUS = 14
         private const val FIRST_YEAR_WINDOW_RADIUS = 10
@@ -35,34 +32,30 @@ class PredictionEngine {
     fun predictFromOnboarding(
         lastPeriodStart: LocalDate,
         cycleLength: Int,
-        periodLength: Int,
         stage: CycleStage = CycleStage.NOT_SET
     ): Prediction {
         if (stage == CycleStage.PERIODS_STOPPED) {
-            return stoppedPrediction(periodLength, stage)
+            return stoppedPrediction(stage)
         }
 
         return calculatePrediction(
             lastPeriodStart = lastPeriodStart,
             avgCycleLength = cycleLength,
-            avgPeriodLength = periodLength,
             cycleCount = 0,
             stdDev = 0f,
             spread = 0,
-            stage = stage,
-            method = PredictionMethod.ONBOARDING_ESTIMATE
+            stage = stage
         )
     }
 
     fun predictFromHistory(
         cycles: List<Cycle>,
         fallbackCycleLength: Int,
-        fallbackPeriodLength: Int,
         referenceDate: LocalDate,
         stage: CycleStage = CycleStage.NOT_SET
     ): Prediction {
         if (stage == CycleStage.PERIODS_STOPPED) {
-            return stoppedPrediction(fallbackPeriodLength, stage)
+            return stoppedPrediction(stage)
         }
 
         val completeCycles = cycles.filter { it.isComplete }
@@ -72,45 +65,33 @@ class PredictionEngine {
             return predictFromOnboarding(
                 lastPeriodStart = lastCycle?.startDate ?: referenceDate,
                 cycleLength = fallbackCycleLength,
-                periodLength = fallbackPeriodLength,
                 stage = stage
             )
         }
 
         val recentCycles = completeCycles.takeLast(MAX_CYCLES_FOR_AVERAGE)
         val lengths = recentCycles.mapNotNull { it.length }
-        val periodLengths = recentCycles.mapNotNull { it.periodLength }
-
         val avgCycleLength = weightedAverage(lengths)
-        val avgPeriodLength = if (periodLengths.size < 2) {
-            fallbackPeriodLength
-        } else {
-            weightedAverage(periodLengths)
-        }
         val stdDev = standardDeviation(lengths)
         val spread = if (lengths.isEmpty()) 0 else lengths.max() - lengths.min()
 
         return calculatePrediction(
             lastPeriodStart = cycles.last().startDate,
             avgCycleLength = avgCycleLength,
-            avgPeriodLength = avgPeriodLength,
             cycleCount = recentCycles.size,
             stdDev = stdDev,
             spread = spread,
-            stage = stage,
-            method = PredictionMethod.WEIGHTED_AVERAGE
+            stage = stage
         )
     }
 
     private fun calculatePrediction(
         lastPeriodStart: LocalDate,
         avgCycleLength: Int,
-        avgPeriodLength: Int,
         cycleCount: Int,
         stdDev: Float,
         spread: Int,
-        stage: CycleStage,
-        method: PredictionMethod
+        stage: CycleStage
     ): Prediction {
         val highlyVariable = isHighlyVariable(stage, spread)
         val outsideCommonRange = isOutsideCommonRange(stage, avgCycleLength)
@@ -153,31 +134,20 @@ class PredictionEngine {
 
         return Prediction(
             nextPeriodStartWindow = nextPeriodStartWindow,
-            expectedPeriodLength = avgPeriodLength.coerceAtLeast(1),
             possiblePregnancyWindow = possiblePregnancyWindow,
             possibleOvulationWindow = possibleOvulationWindow,
-            confidence = calculateConfidence(cycleCount, stdDev, avgCycleLength, stage),
             basedOnCycles = cycleCount,
-            method = method,
-            estimatedCycleLength = avgCycleLength,
             highlyVariable = highlyVariable,
             outsideCommonRange = outsideCommonRange,
             stage = stage
         )
     }
 
-    private fun stoppedPrediction(
-        periodLength: Int,
-        stage: CycleStage
-    ): Prediction = Prediction(
+    private fun stoppedPrediction(stage: CycleStage): Prediction = Prediction(
         nextPeriodStartWindow = null,
-        expectedPeriodLength = periodLength.coerceAtLeast(1),
         possiblePregnancyWindow = null,
         possibleOvulationWindow = null,
-        confidence = 0f,
         basedOnCycles = 0,
-        method = PredictionMethod.ONBOARDING_ESTIMATE,
-        estimatedCycleLength = null,
         highlyVariable = true,
         outsideCommonRange = false,
         stage = stage
@@ -213,36 +183,6 @@ class PredictionEngine {
         CycleStage.YEARS_ONE_TO_THREE -> averageLength !in EARLY_YEARS_COMMON_RANGE
         CycleStage.ESTABLISHED -> averageLength !in ESTABLISHED_COMMON_RANGE
         else -> false
-    }
-
-    private fun calculateConfidence(
-        cycleCount: Int,
-        stdDev: Float,
-        avgLength: Int,
-        stage: CycleStage
-    ): Float {
-        if (cycleCount == 0) return MIN_CONFIDENCE
-
-        val dataFactor = (cycleCount.toFloat() / MAX_CYCLES_FOR_AVERAGE).coerceAtMost(1f)
-        val regularityFactor = if (avgLength > 0 && stdDev > 0) {
-            (1 - stdDev / avgLength).coerceIn(0f, 1f)
-        } else {
-            1f
-        }
-        val stageFactor = when (stage) {
-            CycleStage.NOT_SET -> 0.40f
-            CycleStage.FIRST_YEAR -> 0.45f
-            CycleStage.YEARS_ONE_TO_THREE -> 0.65f
-            CycleStage.ESTABLISHED -> 1f
-            CycleStage.LONG_TERM_UNEVEN -> 0.45f
-            CycleStage.CHANGING_WITH_AGE -> 0.55f
-            CycleStage.PERIODS_STOPPED -> 0f
-        }
-
-        val rawConfidence = (dataFactor * 0.6f + regularityFactor * 0.4f) * stageFactor
-
-        return (rawConfidence * (MAX_CONFIDENCE - MIN_CONFIDENCE) + MIN_CONFIDENCE)
-            .coerceIn(MIN_CONFIDENCE, MAX_CONFIDENCE)
     }
 
     private fun weightedAverage(values: List<Int>): Int {
