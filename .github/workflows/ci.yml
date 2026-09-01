@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  checks: read
 
 concurrency:
   group: android-ci-${{ github.workflow }}-${{ github.ref }}
@@ -39,7 +40,7 @@ jobs:
       - name: Build APKs and run unit tests
         run: |
           set -o pipefail
-          gradle --dependency-verification=strict assembleDebug assembleRelease test --stacktrace 2>&1 | tee android-build.log
+          ./gradlew --dependency-verification=strict assembleDebug assembleRelease test --stacktrace 2>&1 | tee android-build.log
 
       - name: Upload build log on failure
         if: failure()
@@ -51,10 +52,42 @@ jobs:
           retention-days: 1
 
       - name: Run lint
-        run: gradle --dependency-verification=strict lint
+        run: ./gradlew --dependency-verification=strict lint
 
       - name: Run Detekt
-        run: gradle --dependency-verification=strict detekt
+        run: ./gradlew --dependency-verification=strict detekt
+
+      - name: Require security checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          required=(CodeQL Semgrep Gitleaks Qodana)
+          for attempt in {1..120}; do
+            payload="$(gh api "/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs?per_page=100")"
+            pending=()
+            for name in "${required[@]}"; do
+              state="$(jq -r --arg name "$name" '[.check_runs[] | select(.name == $name)] | sort_by(.id) | last | [(.status // ""), (.conclusion // "")] | @tsv' <<< "$payload")"
+              status="${state%%$'\t'*}"
+              conclusion="${state#*$'\t'}"
+              if [[ "$status" == "completed" ]]; then
+                if [[ "$conclusion" != "success" ]]; then
+                  echo "$name finished with $conclusion." >&2
+                  exit 1
+                fi
+              else
+                pending+=("$name")
+              fi
+            done
+            if (( ${#pending[@]} == 0 )); then
+              echo 'All required security checks passed.'
+              exit 0
+            fi
+            echo "Waiting for: ${pending[*]}"
+            sleep 10
+          done
+          echo 'Timed out waiting for required security checks.' >&2
+          exit 1
 
       - name: Print lint report on failure
         if: failure()

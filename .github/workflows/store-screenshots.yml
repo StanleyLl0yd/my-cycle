@@ -55,7 +55,7 @@ jobs:
           gradle-version: '9.5.0'
 
       - name: Build debug APK
-        run: gradle --dependency-verification=strict assembleDebug --stacktrace
+        run: ./gradlew --dependency-verification=strict assembleDebug --stacktrace
 
       - name: Enable KVM group perms
         run: |

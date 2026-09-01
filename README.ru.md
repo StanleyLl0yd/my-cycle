@@ -13,7 +13,7 @@
 
 [📦 Файлы последнего релиза — подписанный AAB для RuStore](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Версия исходного кода: **1.1.4** · Пакет публикации: **подписанный AAB для RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
+Версия исходного кода: **1.1.5** · Пакет публикации: **подписанный AAB для RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Возможности
 
@@ -117,14 +117,12 @@ AAB предназначен для распространения через м
 - Android SDK 37
 - Gradle 9.5.0
 
-В репозитории сейчас нет `gradle-wrapper.jar`, поэтому для сборки из командной строки требуется установленный Gradle 9.5.0.
-
 ```bash
 git clone https://github.com/StanleyLl0yd/my-cycle.git
 cd my-cycle
-gradle --dependency-verification=strict assembleDebug assembleRelease test
-gradle --dependency-verification=strict lint
-gradle --dependency-verification=strict detekt
+./gradlew --dependency-verification=strict assembleDebug assembleRelease test
+./gradlew --dependency-verification=strict lint
+./gradlew --dependency-verification=strict detekt
 python3 scripts/check-source-comments.py
 ```
 
@@ -173,7 +171,7 @@ Dependabot контролирует Gradle, GitHub Actions и закреплён
 
 Язык приложения автоматически следует языку устройства.
 
-## 🚫 Чего нет в версии 1.1.4
+## 🚫 Чего нет в версии 1.1.5
 
 Текущая версия исходного кода **не поддерживает**:
 

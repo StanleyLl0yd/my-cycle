@@ -78,7 +78,7 @@ jobs:
           cache-read-only: true
 
       - name: Prepare Gradle dependencies
-        run: gradle --dependency-verification=strict --no-daemon :app:dependencies --stacktrace
+        run: ./gradlew --dependency-verification=strict --no-daemon :app:dependencies --stacktrace
 
       - name: Prepare Qodana dependency verification metadata
         run: |
