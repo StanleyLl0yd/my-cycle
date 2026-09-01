@@ -65,9 +65,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Exclude build verification metadata from Qodana import
-        run: mv gradle/verification-metadata.xml "$RUNNER_TEMP/verification-metadata.xml"
-
       - name: Run Qodana
         uses: JetBrains/qodana-action@b588768b6e7e6da579e518bc584f79de0d243692
         with:
