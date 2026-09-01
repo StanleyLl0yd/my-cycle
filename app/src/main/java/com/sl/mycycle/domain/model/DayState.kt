@@ -1,17 +1,9 @@
 package com.sl.mycycle.domain.model
 
-import java.time.LocalDate
-
 data class DayState(
-    val date: LocalDate,
-    val cycleDay: Int?,
     val periodState: PeriodState,
     val fertilityState: FertilityState,
-    val symptoms: Set<Symptom>,
-    val mood: Mood?,
-    val hasNotes: Boolean,
-    val isToday: Boolean,
-    val isCurrentMonth: Boolean
+    val isToday: Boolean
 )
 
 enum class PeriodState {
