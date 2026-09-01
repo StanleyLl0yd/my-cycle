@@ -73,18 +73,17 @@ class StoreScreenshotActivity : ComponentActivity() {
 
         cycleDayRepository.deleteAll()
         preferencesRepository.clearAll()
-
-        periodStarts.forEach { start ->
-            intensities.forEachIndexed { index, intensity ->
-                cycleDayRepository.save(
+        cycleDayRepository.saveAll(
+            periodStarts.flatMap { start ->
+                intensities.mapIndexed { index, intensity ->
                     CycleDay(
                         date = start.plusDays(index.toLong()),
                         hasPeriod = true,
                         flowIntensity = intensity,
                     )
-                )
+                }
             }
-        }
+        )
 
         preferencesRepository.completeOnboarding(
             lastPeriodDate = periodStarts.last(),

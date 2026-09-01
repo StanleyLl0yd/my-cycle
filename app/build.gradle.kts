@@ -25,8 +25,8 @@ android {
         applicationId = "com.sl.mycycle"
         minSdk = 26
         targetSdk = 37
-        versionCode = 5
-        versionName = "1.1.3"
+        versionCode = 6
+        versionName = "1.1.4"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -105,11 +105,9 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
-    implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons)
     implementation(libs.compose.animation)
-    debugImplementation(libs.compose.ui.tooling)
 
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)

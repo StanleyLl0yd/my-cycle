@@ -30,8 +30,7 @@ data class CalendarState(
     val currentMonth: YearMonth = YearMonth.now(),
     val today: LocalDate = LocalDate.now(),
     val dayStates: Map<LocalDate, DayState> = emptyMap(),
-    val prediction: Prediction? = null,
-    val isLoading: Boolean = true
+    val prediction: Prediction? = null
 )
 
 data class HistoricalPeriodState(
@@ -253,19 +252,15 @@ class CalendarViewModel(
                     month = input.month,
                     today = input.today,
                     daysMap = daysMap,
-                    lastPeriodStart = lastPeriodStart,
                     prediction = prediction
                 )
 
-                _state.update {
-                    CalendarState(
-                        currentMonth = input.month,
-                        today = input.today,
-                        dayStates = dayStatesMap,
-                        prediction = prediction,
-                        isLoading = false
-                    )
-                }
+                _state.value = CalendarState(
+                    currentMonth = input.month,
+                    today = input.today,
+                    dayStates = dayStatesMap,
+                    prediction = prediction
+                )
             }
         }
     }
@@ -274,28 +269,18 @@ class CalendarViewModel(
         month: YearMonth,
         today: LocalDate,
         daysMap: Map<LocalDate, CycleDay>,
-        lastPeriodStart: LocalDate?,
         prediction: Prediction?
     ): Map<LocalDate, DayState> {
         val result = mutableMapOf<LocalDate, DayState>()
 
         for (day in 1..month.lengthOfMonth()) {
             val date = month.atDay(day)
-            val cycleDay = lastPeriodStart
-                ?.let { ChronoUnit.DAYS.between(it, date).toInt() + 1 }
-                ?.takeIf { it > 0 }
             val existingDay = daysMap[date]
 
             result[date] = DayState(
-                date = date,
-                cycleDay = cycleDay,
                 periodState = resolvePeriodState(date, existingDay, prediction),
                 fertilityState = resolveFertilityState(date, existingDay, prediction),
-                symptoms = existingDay?.symptoms ?: emptySet(),
-                mood = existingDay?.mood,
-                hasNotes = !existingDay?.notes.isNullOrBlank(),
-                isToday = date == today,
-                isCurrentMonth = true
+                isToday = date == today
             )
         }
 

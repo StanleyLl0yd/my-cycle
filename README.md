@@ -13,7 +13,7 @@ A simple, private period diary for Android. It keeps your real dates and gives c
 
 [📦 Latest release files — signed AAB for RuStore](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.1.3** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
+Source version: **1.1.4** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Features
 
@@ -101,13 +101,11 @@ If bleeding is very heavy, you feel faint or very weak, pain is severe, you may 
 
 ## 📦 Installation
 
-The latest published signed APK is **1.1.2**.
+The current application identity, `com.sl.mycycle`, starts with release **1.1.3**. Its official GitHub release artifact is a **signed Android App Bundle (`.aab`) for RuStore publication**, together with a SHA-256 checksum and the public upload certificate.
 
-[Open My Cycle 1.1.2 on GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.1.2)
+[Open the latest My Cycle release on GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-[Download signed My-Cycle-v1.1.2.apk from GitHub](https://github.com/StanleyLl0yd/my-cycle/releases/download/v1.1.2/My-Cycle-v1.1.2.apk)
-
-SHA-256 (`My-Cycle-v1.1.2.apk`): `f77c768aa0fbc15cf72c5928ca8422dfb38d373c1406b8a6894b3c03c93ac6d7`
+An AAB is a store-distribution bundle, not a directly installable APK. Pre-1.1.3 GitHub APKs use a different Android application identity and should not be treated as an upgrade path for `com.sl.mycycle`.
 
 Android 8.0 or newer is required.
 
@@ -130,9 +128,9 @@ gradle --dependency-verification=strict detekt
 python3 scripts/check-source-comments.py
 ```
 
-Without signing environment variables, `assembleRelease` creates an unsigned release APK.
+Without signing environment variables, `assembleRelease` creates an unsigned release APK for local verification.
 
-Official release signing is configured through GitHub Repository Secrets. The keystore and passwords are never stored in the repository. Regular CI does not receive release signing secrets. The release workflow restores the key only for the signed release build, removes it immediately afterward, verifies the signer certificate and publishes the APK together with its SHA-256 checksum.
+Official release signing is configured through GitHub Repository Secrets. The keystore and passwords are never stored in the repository. Regular CI does not receive release signing secrets. The release workflow restores the key only for the signed bundle build, removes it immediately afterward, verifies the signer certificate and publishes the AAB together with its SHA-256 checksum and public upload certificate.
 
 The signing variables used by the build are `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`; `ANDROID_KEYSTORE_BASE64` is used by GitHub Actions to restore the keystore file.
 
@@ -163,11 +161,10 @@ Pull requests and pushes to `main` are automatically checked with:
 - Gitleaks, including full Git history
 - strict Gradle dependency verification
 - source-comment policy: minimum comments, only genuinely necessary comments, English only
-- unsigned release APK artifact; regular CI does not receive release signing secrets
 
 Dependabot monitors Gradle, GitHub Actions and the pinned Python security tool. Third-party GitHub Actions are pinned to immutable commit SHAs.
 
-`Android Release` can start automatically from protected `main` for release-related changes and can also be dispatched manually as a fallback. It waits for successful CI on the exact commit, restores signing material only for the signed build step, removes the keystore immediately afterward, verifies the release certificate and APK v2/v3 signatures, refuses duplicate publication and publishes the official APK. Release builds use R8 minification and resource shrinking.
+`Android Release` can start automatically from protected `main` for release-related changes and can also be dispatched manually as a fallback. It waits for successful CI on the exact commit, restores signing material only for the signed bundle build, removes the keystore immediately afterward, verifies the release certificate, avoids rebuilding an already attached bundle and publishes the official AAB, SHA-256 checksum and public upload certificate. Release builds use R8 minification and resource shrinking.
 
 ## 🌍 Languages
 
@@ -176,7 +173,7 @@ Dependabot monitors Gradle, GitHub Actions and the pinned Python security tool. 
 
 The app follows the device language automatically.
 
-## 🚫 Not included in 1.1.2
+## 🚫 Not included in 1.1.4
 
 The current source version does **not** provide:
 

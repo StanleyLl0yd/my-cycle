@@ -1,9 +1,7 @@
 package com.sl.mycycle.ui.theme
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -76,10 +74,11 @@ fun MyCycleTheme(
         else -> LightColorScheme
     }
 
+    val activity = LocalActivity.current
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = view.context.findActivity()?.window ?: return@SideEffect
+            val window = activity?.window ?: return@SideEffect
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = !darkTheme
                 isAppearanceLightNavigationBars = !darkTheme
@@ -92,10 +91,4 @@ fun MyCycleTheme(
         typography = Typography,
         content = content
     )
-}
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }
