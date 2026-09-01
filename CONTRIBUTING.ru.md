@@ -44,14 +44,13 @@ Pull Request'ы и сообщения об ошибках приветствую
 
 - JDK 21
 - Android SDK 37
-- Gradle 9.5.0
 
-В репозитории сейчас нет `gradle-wrapper.jar`, поэтому используйте установленный Gradle 9.5.0.
+Используйте проверенный Gradle Wrapper, который находится в репозитории:
 
 ```bash
-gradle --dependency-verification=strict assembleDebug assembleRelease test
-gradle --dependency-verification=strict lint
-gradle --dependency-verification=strict detekt
+./gradlew --dependency-verification=strict assembleDebug assembleRelease test
+./gradlew --dependency-verification=strict lint
+./gradlew --dependency-verification=strict detekt
 python3 scripts/check-source-comments.py
 ```
 
