@@ -61,7 +61,6 @@ class TodayViewModel(
                     predictionEngine.predictFromHistory(
                         cycles = cycles,
                         fallbackCycleLength = preferences.estimatedCycleLength,
-                        fallbackPeriodLength = preferences.estimatedPeriodLength,
                         stage = preferences.cycleStage,
                         referenceDate = today
                     )
@@ -69,14 +68,12 @@ class TodayViewModel(
                     predictionEngine.predictFromOnboarding(
                         lastPeriodStart = preferences.initialPeriodDate,
                         cycleLength = preferences.estimatedCycleLength,
-                        periodLength = preferences.estimatedPeriodLength,
                         stage = preferences.cycleStage
                     )
                 } else if (preferences.cycleStage == CycleStage.PERIODS_STOPPED) {
                     predictionEngine.predictFromOnboarding(
                         lastPeriodStart = today,
                         cycleLength = preferences.estimatedCycleLength,
-                        periodLength = preferences.estimatedPeriodLength,
                         stage = preferences.cycleStage
                     )
                 } else {
