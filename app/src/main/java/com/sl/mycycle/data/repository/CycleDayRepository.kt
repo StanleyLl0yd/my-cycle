@@ -36,23 +36,8 @@ class CycleDayRepository(
     }
 
     suspend fun saveAll(cycleDays: List<CycleDay>) {
-        if (cycleDays.isEmpty()) return
-
         database.withTransaction {
-            cycleDays.chunked(SQLITE_BIND_PARAMETER_LIMIT).forEach { batch ->
-                val createdAtByDate = dao.getByDates(batch.map { it.date })
-                    .associate { it.date to it.createdAt }
-                    .toMutableMap()
-                val entities = batch.map { cycleDay ->
-                    val now = Instant.now()
-                    val createdAt = createdAtByDate.getOrPut(cycleDay.date) { now }
-                    CycleDayEntity.fromDomain(cycleDay).copy(
-                        createdAt = createdAt,
-                        updatedAt = now
-                    )
-                }
-                dao.upsertAll(entities)
-            }
+            cycleDays.forEach { save(it) }
         }
     }
 
@@ -62,9 +47,5 @@ class CycleDayRepository(
 
     suspend fun deleteAll() {
         dao.deleteAll()
-    }
-
-    private companion object {
-        const val SQLITE_BIND_PARAMETER_LIMIT = 999
     }
 }
