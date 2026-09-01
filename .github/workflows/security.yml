@@ -71,4 +71,5 @@ jobs:
           args: --linter qodana-jvm-community --within-docker false --only-directory app/src
           upload-result: true
           use-annotations: true
+          pr-mode: false
           post-pr-comment: false
