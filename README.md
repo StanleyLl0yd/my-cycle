@@ -13,7 +13,7 @@ A simple, private period diary for Android. It keeps your real dates and gives c
 
 [📦 Latest release files — signed AAB for RuStore](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.1.3** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
+Source version: **1.1.4** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Features
 
@@ -173,7 +173,7 @@ Dependabot monitors Gradle, GitHub Actions and the pinned Python security tool. 
 
 The app follows the device language automatically.
 
-## 🚫 Not included in 1.1.3
+## 🚫 Not included in 1.1.4
 
 The current source version does **not** provide:
 
