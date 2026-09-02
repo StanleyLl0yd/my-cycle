@@ -145,23 +145,36 @@ class SettingsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isClearingData = true, hasOperationError = false) }
             val daysBeforeClear = cycleDayRepository.observeAll().first()
+            val preferencesBeforeClear = preferencesRepository.preferences.first()
             var daysDeleted = false
+            var preferencesCleared = false
 
             val result = runSuspendCatching {
                 try {
                     cycleDayRepository.deleteAll()
                     daysDeleted = true
                     preferencesRepository.clearAll()
+                    preferencesCleared = true
                     reminderScheduler.cancel()
                 } catch (error: Throwable) {
-                    if (daysDeleted && daysBeforeClear.isNotEmpty()) {
-                        withContext(NonCancellable) {
-                            try {
-                                cycleDayRepository.saveAll(daysBeforeClear)
-                            } catch (rollbackError: Exception) {
-                                error.addSuppressed(rollbackError)
-                            }
+                    withContext(NonCancellable) {
+                        if (daysDeleted && daysBeforeClear.isNotEmpty()) {
+                            runCatching { cycleDayRepository.saveAll(daysBeforeClear) }
+                                .exceptionOrNull()
+                                ?.let(error::addSuppressed)
                         }
+                        if (preferencesCleared) {
+                            runCatching {
+                                preferencesRepository.replaceAll(preferencesBeforeClear)
+                            }.exceptionOrNull()?.let(error::addSuppressed)
+                        }
+                        runCatching {
+                            reminderScheduler.sync(
+                                preferencesBeforeClear.dailyReminderEnabled,
+                                preferencesBeforeClear.reminderHour,
+                                preferencesBeforeClear.reminderMinute
+                            )
+                        }.exceptionOrNull()?.let(error::addSuppressed)
                     }
                     throw error
                 }
