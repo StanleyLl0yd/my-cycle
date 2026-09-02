@@ -17,7 +17,7 @@
     <string name="settings_import_csv">Импортировать CSV</string>
     <string name="settings_import_csv_desc">Вернуть записи из CSV «Мой Цикл»; совпадающие даты будут заменены</string>
     <string name="settings_backup">Создать полную копию</string>
-    <string name="settings_backup_desc">Сохранить дневник и настройки в файл .mycycle</string>
+    <string name="settings_backup_desc">Сохранить дневник и настройки в читаемый файл .mycycle; храните его приватно</string>
     <string name="settings_restore">Восстановить полную копию</string>
     <string name="settings_restore_desc">Заменить текущий дневник и настройки данными из .mycycle</string>
     <string name="settings_privacy_local_desc">Без аккаунта, аналитики и облачной синхронизации. Данные покидают приложение только когда вы сами сохраняете экспорт или резервную копию.</string>
