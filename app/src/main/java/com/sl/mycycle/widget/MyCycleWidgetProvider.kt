@@ -25,10 +25,14 @@ class MyCycleWidgetProvider : AppWidgetProvider() {
 
     private fun openTodayIntent(context: Context): PendingIntent = PendingIntent.getActivity(
         context,
-        1301,
+        QUICK_LOG_REQUEST_CODE,
         Intent(context, MainActivity::class.java)
             .setAction(Intent.ACTION_VIEW)
             .setData(Uri.parse("mycycle://log/today")),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
+
+    private companion object {
+        const val QUICK_LOG_REQUEST_CODE = 1301
+    }
 }
