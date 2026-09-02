@@ -352,7 +352,7 @@ fun SettingsScreen(
             SettingsItem(
                 title = stringResource(R.string.settings_reminder_time),
                 subtitle = String.format(
-                    Locale.getDefault(),
+                    Locale.ROOT,
                     "%02d:%02d",
                     state.reminderHour,
                     state.reminderMinute
