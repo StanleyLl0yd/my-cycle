@@ -70,9 +70,11 @@ class DataPortabilityService(
         )
     }
 
+    @Suppress("TooGenericExceptionCaught")
     suspend fun restoreBackup(backup: String) {
         val snapshot = BackupCodec.decode(backup)
         validateDays(snapshot.days)
+        val restoredPreferences = snapshot.preferences.copy(appLockEnabled = false)
         val oldDays = cycleDayRepository.observeAll().first()
         val oldPreferences = preferencesRepository.preferences.first()
         var daysReplaced = false
@@ -80,7 +82,7 @@ class DataPortabilityService(
         try {
             cycleDayRepository.replaceAll(snapshot.days)
             daysReplaced = true
-            preferencesRepository.replaceAll(snapshot.preferences)
+            preferencesRepository.replaceAll(restoredPreferences)
         } catch (error: Throwable) {
             withContext(NonCancellable) {
                 if (daysReplaced) {
