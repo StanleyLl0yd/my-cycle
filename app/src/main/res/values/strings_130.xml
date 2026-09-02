@@ -17,7 +17,7 @@
     <string name="settings_import_csv">Import CSV</string>
     <string name="settings_import_csv_desc">Bring back records from a My Cycle CSV file; matching dates are replaced</string>
     <string name="settings_backup">Create full backup</string>
-    <string name="settings_backup_desc">Save diary records and app settings in a .mycycle file</string>
+    <string name="settings_backup_desc">Save diary records and settings in a readable .mycycle file; keep it private</string>
     <string name="settings_restore">Restore full backup</string>
     <string name="settings_restore_desc">Replace the current diary and settings from a .mycycle backup</string>
     <string name="settings_privacy_local_desc">No account, analytics or cloud sync. Data leaves the app only when you choose an export or backup file.</string>
