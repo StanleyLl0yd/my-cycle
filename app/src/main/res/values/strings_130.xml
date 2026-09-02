@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="settings_dynamic_colors_unavailable">Available on Android 12 and newer</string>
-
     <string name="settings_privacy_security">Privacy &amp; security</string>
     <string name="settings_app_lock">App lock</string>
     <string name="settings_app_lock_desc">Require biometric unlock when you return to My Cycle</string>
