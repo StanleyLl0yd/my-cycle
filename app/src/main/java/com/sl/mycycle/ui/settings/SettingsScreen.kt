@@ -3,6 +3,7 @@ package com.sl.mycycle.ui.settings
 import android.Manifest
 import android.app.Activity
 import android.app.TimePickerDialog
+import android.content.ContentResolver
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -63,6 +64,7 @@ import com.sl.mycycle.ui.MainActivity
 import com.sl.mycycle.ui.theme.CycleColors
 import com.sl.mycycle.util.runSuspendCatching
 import java.io.OutputStreamWriter
+import java.nio.file.FileSystems
 import java.time.LocalDate
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
@@ -593,18 +595,31 @@ private fun openUrl(context: Context, url: String) {
 }
 
 private suspend fun readText(context: Context, uri: Uri): String = withContext(Dispatchers.IO) {
+    validateDocumentUri(uri)
     val input = context.contentResolver.openInputStream(uri)
         ?: error("Could not open selected file")
     input.bufferedReader(Charsets.UTF_8).use { it.readText() }
 }
 
 private suspend fun writeText(context: Context, uri: Uri, text: String) = withContext(Dispatchers.IO) {
+    validateDocumentUri(uri)
     val output = context.contentResolver.openOutputStream(uri)
         ?: error("Could not open destination")
     output.use { stream ->
         OutputStreamWriter(stream, Charsets.UTF_8).buffered().use { writer ->
             writer.write(text)
         }
+    }
+}
+
+private fun validateDocumentUri(uri: Uri) {
+    if (uri.scheme != ContentResolver.SCHEME_CONTENT || uri.authority.isNullOrBlank()) {
+        throw SecurityException("Unsupported document URI")
+    }
+    val path = uri.path ?: throw SecurityException("Document URI has no path")
+    val normalizedPath = FileSystems.getDefault().getPath(path).normalize()
+    if (normalizedPath.startsWith("/data")) {
+        throw SecurityException("Private data paths are not allowed")
     }
 }
 
