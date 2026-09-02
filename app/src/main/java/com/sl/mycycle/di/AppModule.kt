@@ -5,9 +5,11 @@ import com.sl.mycycle.data.local.AppDatabase
 import com.sl.mycycle.data.preferences.UserPreferencesRepository
 import com.sl.mycycle.data.preferences.userPreferencesDataStore
 import com.sl.mycycle.data.repository.CycleDayRepository
+import com.sl.mycycle.data.transfer.DataPortabilityService
 import com.sl.mycycle.domain.engine.CycleDetector
 import com.sl.mycycle.domain.engine.CycleNoticeEvaluator
 import com.sl.mycycle.domain.engine.PredictionEngine
+import com.sl.mycycle.reminder.ReminderScheduler
 import com.sl.mycycle.ui.calendar.CalendarViewModel
 import com.sl.mycycle.ui.daydetails.DayDetailsViewModel
 import com.sl.mycycle.ui.onboarding.OnboardingViewModel
@@ -33,6 +35,8 @@ val appModule = module {
 
     single { UserPreferencesRepository(get()) }
     single { CycleDayRepository(get()) }
+    single { DataPortabilityService(get(), get()) }
+    single { ReminderScheduler(androidContext()) }
 
     single { CycleDetector() }
     single { PredictionEngine() }
