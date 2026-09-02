@@ -74,7 +74,10 @@ class DataPortabilityService(
     suspend fun restoreBackup(backup: String) {
         val snapshot = BackupCodec.decode(backup)
         validateDays(snapshot.days)
-        val restoredPreferences = snapshot.preferences.copy(appLockEnabled = false)
+        val restoredPreferences = snapshot.preferences.copy(
+            dailyReminderEnabled = false,
+            appLockEnabled = false
+        )
         val oldDays = cycleDayRepository.observeAll().first()
         val oldPreferences = preferencesRepository.preferences.first()
         var daysReplaced = false
@@ -240,12 +243,14 @@ object BackupCodec {
             require(split > 0)
             line.substring(0, split) to line.substring(split + 1)
         }
+        val initialPeriodDate = metadata.getValue("initialPeriodDate")
+            .takeIf(String::isNotBlank)
+            ?.let(LocalDate::parse)
+        require(initialPeriodDate?.isAfter(LocalDate.now()) != true)
 
         val preferences = UserPreferences(
             onboardingCompleted = metadata.boolean("onboardingCompleted"),
-            initialPeriodDate = metadata.getValue("initialPeriodDate")
-                .takeIf(String::isNotBlank)
-                ?.let(LocalDate::parse),
+            initialPeriodDate = initialPeriodDate,
             estimatedCycleLength = metadata.int("estimatedCycleLength", 1..365),
             estimatedPeriodLength = metadata.int("estimatedPeriodLength", 1..30),
             cycleStage = CycleStage.valueOf(metadata.getValue("cycleStage")),
