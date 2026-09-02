@@ -33,6 +33,7 @@ data class SettingsState(
     val hasOperationError: Boolean = false
 )
 
+@Suppress("TooManyFunctions")
 class SettingsViewModel(
     private val preferencesRepository: UserPreferencesRepository,
     private val cycleDayRepository: CycleDayRepository,
