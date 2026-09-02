@@ -23,12 +23,12 @@
     <string name="settings_privacy_local_desc">Без аккаунта, аналитики и облачной синхронизации. Данные покидают приложение только когда вы сами сохраняете экспорт или резервную копию.</string>
 
     <string name="dialog_import_csv_title">Импортировать эти записи?</string>
-    <string name="dialog_import_csv_message">В файле %1$d записей: %2$d новых и %3$d с уже существующими датами. Совпадающие даты будут заменены.</string>
+    <string name="dialog_import_csv_message">Импорт: всего %1$d · новых %2$d · заменят существующие %3$d. Совпадающие даты будут заменены.</string>
     <string name="dialog_import_confirm">Импортировать</string>
     <string name="dialog_import_success">Записи импортированы</string>
     <string name="dialog_backup_success">Резервная копия сохранена</string>
     <string name="dialog_restore_title">Восстановить эту копию?</string>
-    <string name="dialog_restore_message">В копии %1$d записей дневника. Текущий дневник и настройки приложения будут заменены.</string>
+    <string name="dialog_restore_message">Записей в копии: %1$d. Текущий дневник и настройки приложения будут заменены.</string>
     <string name="dialog_restore_confirm">Восстановить</string>
     <string name="dialog_restore_success">Резервная копия восстановлена</string>
 
