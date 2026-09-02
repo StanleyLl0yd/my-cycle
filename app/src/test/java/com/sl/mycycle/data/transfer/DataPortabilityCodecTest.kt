@@ -27,6 +27,15 @@ class DataPortabilityCodecTest {
         assertEquals(listOf(day), CsvCodec.decodeDays(CsvCodec.encodeDays(listOf(day))))
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun csvRejectsDuplicateDates() {
+        CsvCodec.decodeDays(
+            "date,period,flow,mood,symptoms,notes\n" +
+                "2026-08-01,true,LIGHT,,,first\n" +
+                "2026-08-01,true,MEDIUM,,,second\n"
+        )
+    }
+
     @Test
     fun backupRoundTripPreservesDiaryAndSettings() {
         val preferences = UserPreferences(
@@ -57,5 +66,14 @@ class DataPortabilityCodecTest {
 
         assertEquals(preferences, restored.preferences)
         assertEquals(days, restored.days)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun backupRejectsFutureInitialPeriodDate() {
+        val preferences = UserPreferences(
+            initialPeriodDate = LocalDate.now().plusDays(1)
+        )
+
+        BackupCodec.decode(BackupCodec.encode(preferences, emptyList()))
     }
 }
