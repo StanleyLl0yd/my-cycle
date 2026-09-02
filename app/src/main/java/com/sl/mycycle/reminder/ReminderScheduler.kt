@@ -9,8 +9,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
+import androidx.core.net.toUri
 import com.sl.mycycle.R
 import com.sl.mycycle.ui.MainActivity
 import java.time.LocalDateTime
@@ -86,7 +86,7 @@ object ReminderNotifier {
             NOTIFICATION_ID,
             Intent(context, MainActivity::class.java)
                 .setAction(Intent.ACTION_VIEW)
-                .setData(Uri.parse("mycycle://log/today")),
+                .setData("mycycle://log/today".toUri()),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
