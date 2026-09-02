@@ -1,0 +1,38 @@
+package com.sl.mycycle.widget
+
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
+import android.content.Context
+import android.content.Intent
+import android.widget.RemoteViews
+import androidx.core.net.toUri
+import com.sl.mycycle.R
+import com.sl.mycycle.ui.MainActivity
+
+class MyCycleWidgetProvider : AppWidgetProvider() {
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
+        appWidgetIds.forEach { appWidgetId ->
+            val views = RemoteViews(context.packageName, R.layout.widget_quick_log)
+            views.setOnClickPendingIntent(R.id.widget_root, openTodayIntent(context))
+            appWidgetManager.updateAppWidget(appWidgetId, views)
+        }
+    }
+
+    private fun openTodayIntent(context: Context): PendingIntent = PendingIntent.getActivity(
+        context,
+        QUICK_LOG_REQUEST_CODE,
+        Intent(context, MainActivity::class.java)
+            .setAction(Intent.ACTION_VIEW)
+            .setData("mycycle://log/today".toUri()),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    private companion object {
+        const val QUICK_LOG_REQUEST_CODE = 1301
+    }
+}

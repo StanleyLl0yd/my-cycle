@@ -25,8 +25,8 @@ android {
         applicationId = "com.sl.mycycle"
         minSdk = 26
         targetSdk = 37
-        versionCode = 7
-        versionName = "1.1.5"
+        versionCode = 8
+        versionName = "1.3.0"
 
         vectorDrawables {
             useSupportLibrary = true

@@ -10,6 +10,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-09-02
+
+### 🔐 Privacy and access
+- Added optional biometric app lock on Android 9+.
+- Added optional screen protection that hides app content from screenshots and the recent-apps preview.
+- Full restore deliberately leaves app lock disabled so a backup cannot lock the user out on another device; it can be enabled again manually after restore.
+
+### 💾 Data portability
+- Added CSV import with validation, duplicate-date preview and transactional merge; matching dates are replaced only after confirmation.
+- Added a versioned `.mycycle` full backup format for diary records and app settings.
+- Added full restore with rollback across Room and DataStore if the cross-store operation fails.
+- CSV and backup files continue to be created and opened through Android's system file picker.
+
+### 🔔 Reminders and quick access
+- Added optional daily local reminders with configurable time and Android 13+ notification permission handling.
+- Reminder notifications use neutral text and do not expose period dates or cycle status.
+- Added a privacy-safe “Log today” launcher shortcut and home-screen widget that open today's diary entry directly.
+
+### 🎨 Interface, icon and quality
+- Replaced the launcher artwork with a warm adaptive cycle/calendar/petal icon without blood or medical imagery.
+- Kept the app offline-first with no Android `INTERNET` permission, account, analytics or cloud synchronization.
+- Added data-portability codec regression tests and kept debug/release builds, unit tests, Android Lint, Detekt and security scans in the release gate.
+- Updated source version to 1.3.0 (`versionCode` 8).
+
+---
+
 ## [1.1.5] - 2026-09-01
 
 ### 🛡️ Repository and release hardening

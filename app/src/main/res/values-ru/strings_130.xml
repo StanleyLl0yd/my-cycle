@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_privacy_security">Приватность и защита</string>
+    <string name="settings_app_lock">Блокировка приложения</string>
+    <string name="settings_app_lock_desc">Требовать биометрию при возвращении в «Мой Цикл»</string>
+    <string name="settings_app_lock_unavailable">Биометрическая блокировка доступна с Android 9</string>
+    <string name="settings_app_lock_error">Биометрия недоступна или разблокировка отменена</string>
+    <string name="settings_protect_screen">Защищать экран</string>
+    <string name="settings_protect_screen_desc">Скрывать содержимое на скриншотах и в превью последних приложений</string>
+
+    <string name="settings_reminders">Напоминания</string>
+    <string name="settings_daily_reminder">Ежедневное напоминание</string>
+    <string name="settings_daily_reminder_desc">Локально и без лишних деталей напомнить проверить запись за сегодня</string>
+    <string name="settings_reminder_time">Время напоминания</string>
+    <string name="settings_reminder_permission_denied">Уведомления отключены, поэтому напоминание не включено</string>
+
+    <string name="settings_import_csv">Импортировать CSV</string>
+    <string name="settings_import_csv_desc">Вернуть записи из CSV «Мой Цикл»; совпадающие даты будут заменены</string>
+    <string name="settings_backup">Создать полную копию</string>
+    <string name="settings_backup_desc">Сохранить дневник и настройки в читаемый файл .mycycle; храните его приватно</string>
+    <string name="settings_restore">Восстановить полную копию</string>
+    <string name="settings_restore_desc">Заменить текущий дневник и настройки данными из .mycycle</string>
+    <string name="settings_privacy_local_desc">Без аккаунта, аналитики и облачной синхронизации. Данные покидают приложение только когда вы сами сохраняете экспорт или резервную копию.</string>
+
+    <string name="dialog_import_csv_title">Импортировать эти записи?</string>
+    <string name="dialog_import_csv_message">Импорт: всего %1$d · новых %2$d · заменят существующие %3$d. Совпадающие даты будут заменены.</string>
+    <string name="dialog_import_confirm">Импортировать</string>
+    <string name="dialog_import_success">Записи импортированы</string>
+    <string name="dialog_backup_success">Резервная копия сохранена</string>
+    <string name="dialog_restore_title">Восстановить эту копию?</string>
+    <string name="dialog_restore_message">Записей в копии: %1$d. Текущий дневник и настройки будут заменены. Блокировка приложения и напоминания останутся выключены, пока вы не включите их на этом устройстве.</string>
+    <string name="dialog_restore_confirm">Восстановить</string>
+    <string name="dialog_restore_success">Резервная копия восстановлена</string>
+
+    <string name="reminder_channel_name">Напоминания дневника</string>
+    <string name="reminder_channel_description">Приватные локальные напоминания «Мой Цикл»</string>
+    <string name="reminder_notification_title">Пара секунд для «Мой Цикл»</string>
+    <string name="reminder_notification_text">Если хотите, добавьте запись за сегодня.</string>
+
+    <string name="shortcut_log_today">Записать сегодня</string>
+    <string name="widget_title">Мой Цикл</string>
+    <string name="widget_subtitle">Добавить запись за сегодня</string>
+
+    <string name="app_lock_prompt_title">Открыть «Мой Цикл»</string>
+    <string name="app_lock_prompt_subtitle">Подтвердите, что это вы, чтобы открыть личный дневник</string>
+    <string name="app_lock_locked_title">«Мой Цикл» заблокирован</string>
+    <string name="app_lock_locked_subtitle">Дневник скрыт, пока вы его не разблокируете.</string>
+    <string name="app_lock_unlock">Разблокировать</string>
+</resources>

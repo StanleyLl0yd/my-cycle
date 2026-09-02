@@ -26,18 +26,19 @@ class CycleDayRepository(
         dao.getByDate(date)?.toDomain()
 
     suspend fun save(cycleDay: CycleDay) {
-        val existing = dao.getByDate(cycleDay.date)
-        val now = Instant.now()
-        val entity = CycleDayEntity.fromDomain(cycleDay).copy(
-            createdAt = existing?.createdAt ?: now,
-            updatedAt = now
-        )
-        dao.upsert(entity)
+        saveInsideTransaction(cycleDay)
     }
 
     suspend fun saveAll(cycleDays: List<CycleDay>) {
         database.withTransaction {
-            cycleDays.forEach { save(it) }
+            cycleDays.forEach { saveInsideTransaction(it) }
+        }
+    }
+
+    suspend fun replaceAll(cycleDays: List<CycleDay>) {
+        database.withTransaction {
+            dao.deleteAll()
+            cycleDays.forEach { saveInsideTransaction(it) }
         }
     }
 
@@ -47,5 +48,15 @@ class CycleDayRepository(
 
     suspend fun deleteAll() {
         dao.deleteAll()
+    }
+
+    private suspend fun saveInsideTransaction(cycleDay: CycleDay) {
+        val existing = dao.getByDate(cycleDay.date)
+        val now = Instant.now()
+        val entity = CycleDayEntity.fromDomain(cycleDay).copy(
+            createdAt = existing?.createdAt ?: now,
+            updatedAt = now
+        )
+        dao.upsert(entity)
     }
 }
