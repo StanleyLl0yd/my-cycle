@@ -28,7 +28,7 @@
     <string name="dialog_import_success">Records imported</string>
     <string name="dialog_backup_success">Backup saved</string>
     <string name="dialog_restore_title">Restore this backup?</string>
-    <string name="dialog_restore_message">Backup entries: %1$d. Your current diary and app settings will be replaced.</string>
+    <string name="dialog_restore_message">Backup entries: %1$d. Your current diary and settings will be replaced. App lock and reminders stay off until you enable them on this device.</string>
     <string name="dialog_restore_confirm">Restore</string>
     <string name="dialog_restore_success">Backup restored</string>
 
