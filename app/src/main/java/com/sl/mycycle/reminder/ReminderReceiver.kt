@@ -13,6 +13,15 @@ import kotlinx.coroutines.launch
 
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        val action = intent.action
+        when (action) {
+            ReminderScheduler.ACTION_REMINDER,
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED -> Unit
+            else -> return
+        }
+
         val pendingResult = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
@@ -22,7 +31,7 @@ class ReminderReceiver : BroadcastReceiver() {
                 val scheduler = ReminderScheduler(context)
 
                 if (
-                    intent.action == ReminderScheduler.ACTION_REMINDER &&
+                    action == ReminderScheduler.ACTION_REMINDER &&
                     preferences.dailyReminderEnabled
                 ) {
                     ReminderNotifier.show(context)
