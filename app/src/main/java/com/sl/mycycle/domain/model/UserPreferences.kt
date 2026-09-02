@@ -11,7 +11,12 @@ data class UserPreferences(
     val estimatedPeriodLength: Int = 5,
     val cycleStage: CycleStage = CycleStage.NOT_SET,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val useDynamicColors: Boolean = true
+    val useDynamicColors: Boolean = true,
+    val dailyReminderEnabled: Boolean = false,
+    val reminderHour: Int = 20,
+    val reminderMinute: Int = 0,
+    val appLockEnabled: Boolean = false,
+    val protectScreenEnabled: Boolean = false
 )
 
 enum class ThemeMode(@StringRes val labelRes: Int) {
