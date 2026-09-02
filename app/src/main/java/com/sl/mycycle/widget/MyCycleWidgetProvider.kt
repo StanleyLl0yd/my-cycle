@@ -5,8 +5,8 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.widget.RemoteViews
+import androidx.core.net.toUri
 import com.sl.mycycle.R
 import com.sl.mycycle.ui.MainActivity
 
@@ -28,7 +28,7 @@ class MyCycleWidgetProvider : AppWidgetProvider() {
         QUICK_LOG_REQUEST_CODE,
         Intent(context, MainActivity::class.java)
             .setAction(Intent.ACTION_VIEW)
-            .setData(Uri.parse("mycycle://log/today")),
+            .setData("mycycle://log/today".toUri()),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
