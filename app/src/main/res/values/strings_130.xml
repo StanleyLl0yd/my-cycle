@@ -23,12 +23,12 @@
     <string name="settings_privacy_local_desc">No account, analytics or cloud sync. Data leaves the app only when you choose an export or backup file.</string>
 
     <string name="dialog_import_csv_title">Import these records?</string>
-    <string name="dialog_import_csv_message">The file contains %1$d records: %2$d new and %3$d matching existing dates. Matching dates will be replaced.</string>
+    <string name="dialog_import_csv_message">Import summary: total %1$d · new %2$d · replacing %3$d. Matching dates will be replaced.</string>
     <string name="dialog_import_confirm">Import</string>
     <string name="dialog_import_success">Records imported</string>
     <string name="dialog_backup_success">Backup saved</string>
     <string name="dialog_restore_title">Restore this backup?</string>
-    <string name="dialog_restore_message">The backup contains %1$d diary records. Your current diary and app settings will be replaced.</string>
+    <string name="dialog_restore_message">Backup entries: %1$d. Your current diary and app settings will be replaced.</string>
     <string name="dialog_restore_confirm">Restore</string>
     <string name="dialog_restore_success">Backup restored</string>
 
