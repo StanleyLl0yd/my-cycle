@@ -6,6 +6,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -43,12 +44,17 @@ class ReminderScheduler(
         context.getSystemService(AlarmManager::class.java).cancel(pendingIntent())
     }
 
-    private fun pendingIntent(): PendingIntent = PendingIntent.getBroadcast(
-        context,
-        REQUEST_CODE,
-        Intent(context, ReminderReceiver::class.java).setAction(ACTION_REMINDER),
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
+    private fun pendingIntent(): PendingIntent {
+        val intent = Intent(ACTION_REMINDER).setComponent(
+            ComponentName(context, ReminderReceiver::class.java)
+        )
+        return PendingIntent.getBroadcast(
+            context,
+            REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
 
     companion object {
         const val ACTION_REMINDER = "com.sl.mycycle.action.DAILY_REMINDER"
@@ -81,12 +87,13 @@ object ReminderNotifier {
             return
         }
 
+        val intent = Intent(Intent.ACTION_VIEW, "mycycle://log/today".toUri()).setComponent(
+            ComponentName(context, MainActivity::class.java)
+        )
         val openToday = PendingIntent.getActivity(
             context,
             NOTIFICATION_ID,
-            Intent(context, MainActivity::class.java)
-                .setAction(Intent.ACTION_VIEW)
-                .setData("mycycle://log/today".toUri()),
+            intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
