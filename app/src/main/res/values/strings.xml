@@ -3,10 +3,7 @@
     <string name="app_name">My Cycle</string>
 
     <string name="onboarding_welcome_title">Welcome to\nMy Cycle</string>
-    <string name="onboarding_welcome_subtitle">A simple private diary for periods. It helps you remember dates and gives a careful guess about what may happen next. All data stays on your device.</string>
     <string name="onboarding_welcome_button">Get started</string>
-    <string name="onboarding_stage_title">Which sounds most like you?</string>
-    <string name="onboarding_stage_subtitle">Choose one answer before you continue. You can change it later. This helps the app avoid false exact dates.</string>
 
     <string name="cycle_stage_not_set">Not chosen yet</string>
     <string name="cycle_stage_not_set_desc">Choose the option above that best fits your periods now. Until you do, the app will use a wide date range and will not guess a day when an egg may be released.</string>
@@ -23,14 +20,8 @@
     <string name="cycle_stage_periods_stopped">My periods stopped for a full year as I got older</string>
     <string name="cycle_stage_periods_stopped_desc">Choose this only if the year-long stop is part of getting older, or a doctor told you the periods have stopped for good. If they stopped for another reason, choose the closest other option and talk with a doctor.</string>
 
-    <string name="onboarding_period_title">When did your last\nperiod start?</string>
-    <string name="onboarding_period_subtitle">Choose the first day when the bleeding looked like your usual period, not just a few spots.</string>
-    <string name="onboarding_cycle_title">About how many days are there\nbetween your periods?</string>
-    <string name="onboarding_cycle_explain">Count from the first day of one real period to the first day of the next. For example, from the 1st to the 29th is 28 days.</string>
-    <string name="onboarding_cycle_subtitle">It is fine if you are not sure. Pick the closest number you know. The app will learn from the dates you add.</string>
     <string name="onboarding_cycle_days_label">days</string>
     <string name="onboarding_stopped_title">No next-period guess</string>
-    <string name="onboarding_stopped_text">Use this choice only when periods have stopped for a full year as part of getting older, or a doctor told you they have stopped for good. The app will keep your diary but will not guess another period. If periods stopped for another reason, go back, choose the closest other answer and talk with a doctor.</string>
     <string name="onboarding_continue">Continue</string>
     <string name="onboarding_done">Done</string>
     <string name="onboarding_back">Back</string>
@@ -80,11 +71,7 @@
     <string name="calendar_legend_predicted">Period may start</string>
     <string name="calendar_guess_note">Pale colors are guesses from past dates. Your body does not have to follow them.</string>
 
-    <string name="day_details_title">Log</string>
     <string name="day_details_period_section">Bleeding today</string>
-    <string name="day_details_bleeding_help">Choose “A few spots” when there is only a little blood and it does not look like your usual period. A few spots will not start a new cycle in the app.</string>
-    <string name="day_details_mood_section">How do you feel?</string>
-    <string name="day_details_symptoms_section">How your body feels</string>
     <string name="day_details_notes_section">Notes</string>
     <string name="day_details_notes_hint">Write anything you want to remember…</string>
     <string name="day_details_save">Save</string>

@@ -3,10 +3,7 @@
     <string name="app_name">Мой Цикл</string>
 
     <string name="onboarding_welcome_title">Добро пожаловать\nв Мой Цикл</string>
-    <string name="onboarding_welcome_subtitle">Это простой личный дневник месячных. Он помогает помнить даты и осторожно подсказывает, когда месячные могут прийти снова. Все записи остаются на вашем устройстве.</string>
     <string name="onboarding_welcome_button">Начать</string>
-    <string name="onboarding_stage_title">Что больше похоже на вас?</string>
-    <string name="onboarding_stage_subtitle">Перед продолжением выберите один вариант. Потом его можно изменить. Это нужно, чтобы приложение не показывало ложные «точные» даты.</string>
 
     <string name="cycle_stage_not_set">Пока не выбрано</string>
     <string name="cycle_stage_not_set_desc">Выберите выше вариант, который сейчас больше похож на ваши месячные. Пока вы не выберете, приложение будет показывать широкий примерный срок и не станет угадывать день выхода яйцеклетки.</string>
@@ -23,14 +20,8 @@
     <string name="cycle_stage_periods_stopped">С возрастом месячные прекратились на целый год</string>
     <string name="cycle_stage_periods_stopped_desc">Выбирайте это только если месячные пропали на год из-за возрастных изменений или врач сказал, что они закончились. Если месячные пропали по другой причине, выберите ближайший другой вариант и поговорите с врачом.</string>
 
-    <string name="onboarding_period_title">Когда начались\nпоследние месячные?</string>
-    <string name="onboarding_period_subtitle">Выберите первый день, когда кровь была похожа на ваши обычные месячные, а не просто на несколько пятен.</string>
-    <string name="onboarding_cycle_title">Примерно сколько дней проходит\nмежду месячными?</string>
-    <string name="onboarding_cycle_explain">Считайте от первого дня одних настоящих месячных до первого дня следующих. Например, от 1-го числа до 29-го — это 28 дней.</string>
-    <string name="onboarding_cycle_subtitle">Ничего страшного, если вы не знаете точно. Выберите примерно. Потом приложение будет учиться на тех датах, которые вы отметите.</string>
     <string name="onboarding_cycle_days_label">дней</string>
     <string name="onboarding_stopped_title">Без прогноза следующих месячных</string>
-    <string name="onboarding_stopped_text">Выбирайте этот вариант только если месячные прекратились на целый год из-за возрастных изменений или врач сказал, что они закончились. Приложение сохранит дневник, но не будет угадывать новые месячные. Если месячные пропали на год по другой причине, вернитесь назад, выберите ближайший другой вариант и поговорите с врачом.</string>
     <string name="onboarding_continue">Продолжить</string>
     <string name="onboarding_done">Готово</string>
     <string name="onboarding_back">Назад</string>
@@ -80,11 +71,7 @@
     <string name="calendar_legend_predicted">Месячные могут начаться</string>
     <string name="calendar_guess_note">Бледные цвета — только предположение по прошлым датам. Организм не обязан следовать этому календарю.</string>
 
-    <string name="day_details_title">Запись</string>
     <string name="day_details_period_section">Кровь сегодня</string>
-    <string name="day_details_bleeding_help">Выберите «Несколько пятен», если крови совсем немного и это не похоже на обычные месячные. Несколько пятен не начнут новый цикл в приложении.</string>
-    <string name="day_details_mood_section">Как вы себя чувствуете?</string>
-    <string name="day_details_symptoms_section">Что чувствуете в теле</string>
     <string name="day_details_notes_section">Заметки</string>
     <string name="day_details_notes_hint">Напишите всё, что хотите запомнить…</string>
     <string name="day_details_save">Сохранить</string>

@@ -44,14 +44,13 @@ Requirements:
 
 - JDK 21
 - Android SDK 37
-- Gradle 9.5.0
 
-The repository currently does not include `gradle-wrapper.jar`, so use an installed Gradle 9.5.0.
+Use the verified Gradle Wrapper included in the repository:
 
 ```bash
-gradle --dependency-verification=strict assembleDebug assembleRelease test
-gradle --dependency-verification=strict lint
-gradle --dependency-verification=strict detekt
+./gradlew --dependency-verification=strict assembleDebug assembleRelease test
+./gradlew --dependency-verification=strict lint
+./gradlew --dependency-verification=strict detekt
 python3 scripts/check-source-comments.py
 ```
 

@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 enum class CycleRegularity {
@@ -83,18 +82,16 @@ class StatisticsViewModel(
                     )
                 }
 
-                _state.update {
-                    StatisticsState(
-                        averageCycleLength = averageCycleLength,
-                        averagePeriodLength = averagePeriodLength,
-                        cycleVariationDays = variation,
-                        regularity = regularity,
-                        completedCycleCount = recent.size,
-                        cycles = cycles.takeLast(MAX_CYCLES_TO_DISPLAY).reversed(),
-                        cycleStage = preferences.cycleStage,
-                        isLoading = false
-                    )
-                }
+                _state.value = StatisticsState(
+                    averageCycleLength = averageCycleLength,
+                    averagePeriodLength = averagePeriodLength,
+                    cycleVariationDays = variation,
+                    regularity = regularity,
+                    completedCycleCount = recent.size,
+                    cycles = cycles.takeLast(MAX_CYCLES_TO_DISPLAY).reversed(),
+                    cycleStage = preferences.cycleStage,
+                    isLoading = false
+                )
             }
         }
     }

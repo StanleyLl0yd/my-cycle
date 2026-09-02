@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class TodayState(
@@ -113,17 +112,15 @@ class TodayViewModel(
                     bleedingToday = bleedingToday
                 )
 
-                _state.update {
-                    TodayState(
-                        today = today,
-                        cycleDay = cycleDay,
-                        isPeriodToday = isPeriodToday,
-                        prediction = prediction,
-                        cycleStage = preferences.cycleStage,
-                        notice = notice,
-                        isLoading = false
-                    )
-                }
+                _state.value = TodayState(
+                    today = today,
+                    cycleDay = cycleDay,
+                    isPeriodToday = isPeriodToday,
+                    prediction = prediction,
+                    cycleStage = preferences.cycleStage,
+                    notice = notice,
+                    isLoading = false
+                )
             }
         }
     }
