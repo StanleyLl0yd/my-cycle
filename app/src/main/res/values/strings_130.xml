@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_dynamic_colors_unavailable">Available on Android 12 and newer</string>
+
+    <string name="settings_privacy_security">Privacy &amp; security</string>
+    <string name="settings_app_lock">App lock</string>
+    <string name="settings_app_lock_desc">Require biometric unlock when you return to My Cycle</string>
+    <string name="settings_app_lock_unavailable">Biometric app lock requires Android 9 or newer</string>
+    <string name="settings_app_lock_error">Biometric unlock is not available or was cancelled</string>
+    <string name="settings_protect_screen">Protect screen</string>
+    <string name="settings_protect_screen_desc">Hide app content from screenshots and the recent-apps preview</string>
+
+    <string name="settings_reminders">Reminders</string>
+    <string name="settings_daily_reminder">Daily diary reminder</string>
+    <string name="settings_daily_reminder_desc">A private local reminder to check today’s entry</string>
+    <string name="settings_reminder_time">Reminder time</string>
+    <string name="settings_reminder_permission_denied">Notifications are off, so the reminder was not enabled</string>
+
+    <string name="settings_import_csv">Import CSV</string>
+    <string name="settings_import_csv_desc">Bring back records from a My Cycle CSV file; matching dates are replaced</string>
+    <string name="settings_backup">Create full backup</string>
+    <string name="settings_backup_desc">Save diary records and app settings in a .mycycle file</string>
+    <string name="settings_restore">Restore full backup</string>
+    <string name="settings_restore_desc">Replace the current diary and settings from a .mycycle backup</string>
+    <string name="settings_privacy_local_desc">No account, analytics or cloud sync. Data leaves the app only when you choose an export or backup file.</string>
+
+    <string name="dialog_import_csv_title">Import these records?</string>
+    <string name="dialog_import_csv_message">The file contains %1$d records: %2$d new and %3$d matching existing dates. Matching dates will be replaced.</string>
+    <string name="dialog_import_confirm">Import</string>
+    <string name="dialog_import_success">Records imported</string>
+    <string name="dialog_backup_success">Backup saved</string>
+    <string name="dialog_restore_title">Restore this backup?</string>
+    <string name="dialog_restore_message">The backup contains %1$d diary records. Your current diary and app settings will be replaced.</string>
+    <string name="dialog_restore_confirm">Restore</string>
+    <string name="dialog_restore_success">Backup restored</string>
+
+    <string name="reminder_channel_name">Diary reminders</string>
+    <string name="reminder_channel_description">Private local reminders from My Cycle</string>
+    <string name="reminder_notification_title">A moment for My Cycle</string>
+    <string name="reminder_notification_text">If you want, add today’s note.</string>
+
+    <string name="shortcut_log_today">Log today</string>
+    <string name="widget_title">My Cycle</string>
+    <string name="widget_subtitle">Add today’s note</string>
+
+    <string name="app_lock_prompt_title">Unlock My Cycle</string>
+    <string name="app_lock_prompt_subtitle">Confirm it’s you to open your private diary</string>
+    <string name="app_lock_locked_title">My Cycle is locked</string>
+    <string name="app_lock_locked_subtitle">Your diary stays hidden until you unlock it.</string>
+    <string name="app_lock_unlock">Unlock</string>
+</resources>

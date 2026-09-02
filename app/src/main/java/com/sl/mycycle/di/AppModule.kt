@@ -73,7 +73,7 @@ val appModule = module {
         )
     }
 
-    viewModel { SettingsViewModel(get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get()) }
 
     viewModel { (dateString: String) ->
         DayDetailsViewModel(dateString, get(), get())
