@@ -15,7 +15,7 @@ import javax.crypto.SecretKey
 
 object AppAuthenticator {
     private const val KEY_ALIAS = "my_cycle_app_lock"
-    private const val TRANSFORMATION = "AES/CBC/PKCS7Padding"
+    private const val TRANSFORMATION = "AES/GCM/NoPadding"
     private val challenge = "my-cycle-app-lock".toByteArray(Charsets.UTF_8)
 
     val isSupported: Boolean
@@ -92,8 +92,8 @@ object AppAuthenticator {
             KEY_ALIAS,
             KeyProperties.PURPOSE_ENCRYPT
         )
-            .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setUserAuthenticationRequired(true)
             .setInvalidatedByBiometricEnrollment(true)
 
