@@ -52,6 +52,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sl.mycycle.BuildConfig
 import com.sl.mycycle.R
@@ -590,7 +591,7 @@ fun SettingsScreen(
 
 private fun openUrl(context: Context, url: String) {
     runCatching {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
     }
 }
 
@@ -613,13 +614,15 @@ private suspend fun writeText(context: Context, uri: Uri, text: String) = withCo
 }
 
 private fun validateDocumentUri(uri: Uri) {
-    if (uri.scheme != ContentResolver.SCHEME_CONTENT || uri.authority.isNullOrBlank()) {
+    val path = uri.path
+    val pathAllowed = path != null &&
+        !FileSystems.getDefault().getPath(path).normalize().startsWith("/data")
+    if (
+        uri.scheme != ContentResolver.SCHEME_CONTENT ||
+        uri.authority.isNullOrBlank() ||
+        !pathAllowed
+    ) {
         throw SecurityException("Unsupported document URI")
-    }
-    val path = uri.path ?: throw SecurityException("Document URI has no path")
-    val normalizedPath = FileSystems.getDefault().getPath(path).normalize()
-    if (normalizedPath.startsWith("/data")) {
-        throw SecurityException("Private data paths are not allowed")
     }
 }
 
