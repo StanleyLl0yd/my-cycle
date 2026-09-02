@@ -7,6 +7,8 @@
         android:shortcutShortLabel="@string/shortcut_log_today">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="mycycle://log/today" />
+            android:data="mycycle://log/today"
+            android:targetClass="com.sl.mycycle.ui.MainActivity"
+            android:targetPackage="com.sl.mycycle" />
     </shortcut>
 </shortcuts>
