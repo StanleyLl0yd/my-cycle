@@ -13,7 +13,7 @@ A simple, private period diary for Android. It keeps your real dates and gives c
 
 [📦 Latest release files — signed AAB for RuStore](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.1.5** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
+Source version: **1.3.0** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Features
 
@@ -25,7 +25,7 @@ Source version: **1.1.5** · Distribution bundle: **signed AAB for RuStore** · 
   - periods are changing as you get older
   - periods stopped for a full year as part of getting older, or a doctor has already explained that they stopped for good
 - The choice can be changed later in Settings without deleting old records
-- Existing 1.0.0/1.1.0 records stay in place. Old “A few spots” entries are treated as spots, not as a real period
+- Existing 1.0.0/1.1.x records stay in place. Old “A few spots” entries are treated as spots, not as a real period
 - Today shows how many days have passed since the last recorded period and a **range of dates** when the next one may start
 - Any past calendar day can be opened and edited, and previous periods can be added quickly by start and end date
 - Several earlier cycles can be entered one after another with the historical “Add another” flow
@@ -38,7 +38,12 @@ Source version: **1.1.5** · Distribution bundle: **signed AAB for RuStore** · 
 - Statistics use recent history: up to 6 finished cycles for summary numbers and up to 12 cycles for the history list
 - Simple attention notes for some unusually long gaps, longer-than-usual bleeding and new bleeding after about a year without periods
 - Dark mode, better contrast and spoken calendar descriptions for TalkBack
-- CSV export through Android's system file picker
+- CSV export **and CSV import** through Android's system file picker; matching imported dates are replaced only after confirmation
+- Full `.mycycle` backup and restore for diary records and app settings, with rollback if the cross-store restore fails
+- Device-specific app lock is deliberately disabled after a restore and must be enabled again on that device
+- Optional daily local reminder with a configurable time and privacy-conscious notification text
+- Optional biometric app lock on Android 9+ and optional screenshot/recent-apps protection
+- A quick “Log today” launcher shortcut and home-screen widget that do not expose cycle details
 - Complete deletion of period records and app settings
 - System, Light and Dark themes with Material You colors on Android 12+
 - English and Russian language support
@@ -83,7 +88,9 @@ These notes do not tell you what the cause is and do not give a diagnosis.
 - App settings are stored only on the device with DataStore
 - Android app-data backup is disabled
 - App files, databases and settings are excluded from cloud backup and device-transfer extraction rules
-- Your period records leave the app only when you choose to create a CSV copy
+- Daily reminders are scheduled locally on the device; notification text does not include period dates or cycle status
+- Optional app lock and screen protection are local device settings
+- Your data leaves the app only when you explicitly create a CSV export or `.mycycle` backup file
 
 The GitHub and license links in About are opened by Android in an external app such as a web browser.
 
@@ -171,14 +178,13 @@ Dependabot monitors Gradle, GitHub Actions and the pinned Python security tool. 
 
 The app follows the device language automatically.
 
-## 🚫 Not included in 1.1.5
+## 🚫 Not included in 1.3.0
 
 The current source version does **not** provide:
 
-- notifications or reminders
-- data import
 - account registration
 - cloud synchronization or cloud storage
+- remote analytics or tracking
 - diagnosis or medical treatment advice
 - a real test for egg release or pregnancy
 
