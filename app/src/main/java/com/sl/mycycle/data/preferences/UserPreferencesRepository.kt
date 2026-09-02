@@ -42,6 +42,12 @@ class UserPreferencesRepository(
         val PROTECT_SCREEN_ENABLED = booleanPreferencesKey("protect_screen_enabled")
     }
 
+    private companion object {
+        const val DEFAULT_REMINDER_HOUR = 20
+        const val MAX_REMINDER_HOUR = 23
+        const val MAX_REMINDER_MINUTE = 59
+    }
+
     val preferences: Flow<UserPreferences> = dataStore.data
         .catch { throwable ->
             if (throwable is IOException) {
@@ -85,7 +91,7 @@ class UserPreferencesRepository(
     }
 
     suspend fun updateReminder(enabled: Boolean, hour: Int, minute: Int) {
-        require(hour in 0..23 && minute in 0..59)
+        require(hour in 0..MAX_REMINDER_HOUR && minute in 0..MAX_REMINDER_MINUTE)
         dataStore.edit { prefs ->
             prefs[Keys.DAILY_REMINDER_ENABLED] = enabled
             prefs[Keys.REMINDER_HOUR] = hour
@@ -125,8 +131,10 @@ class UserPreferencesRepository(
             ?: ThemeMode.SYSTEM,
         useDynamicColors = prefs[Keys.USE_DYNAMIC_COLORS] ?: true,
         dailyReminderEnabled = prefs[Keys.DAILY_REMINDER_ENABLED] ?: false,
-        reminderHour = (prefs[Keys.REMINDER_HOUR] ?: 20).coerceIn(0, 23),
-        reminderMinute = (prefs[Keys.REMINDER_MINUTE] ?: 0).coerceIn(0, 59),
+        reminderHour = (prefs[Keys.REMINDER_HOUR] ?: DEFAULT_REMINDER_HOUR)
+            .coerceIn(0, MAX_REMINDER_HOUR),
+        reminderMinute = (prefs[Keys.REMINDER_MINUTE] ?: 0)
+            .coerceIn(0, MAX_REMINDER_MINUTE),
         appLockEnabled = prefs[Keys.APP_LOCK_ENABLED] ?: false,
         protectScreenEnabled = prefs[Keys.PROTECT_SCREEN_ENABLED] ?: false
     )
