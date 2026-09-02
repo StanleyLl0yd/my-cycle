@@ -28,7 +28,7 @@
     <string name="dialog_import_success">Записи импортированы</string>
     <string name="dialog_backup_success">Резервная копия сохранена</string>
     <string name="dialog_restore_title">Восстановить эту копию?</string>
-    <string name="dialog_restore_message">Записей в копии: %1$d. Текущий дневник и настройки приложения будут заменены.</string>
+    <string name="dialog_restore_message">Записей в копии: %1$d. Текущий дневник и настройки будут заменены. Блокировка приложения и напоминания останутся выключены, пока вы не включите их на этом устройстве.</string>
     <string name="dialog_restore_confirm">Восстановить</string>
     <string name="dialog_restore_success">Резервная копия восстановлена</string>
 
