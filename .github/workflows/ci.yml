@@ -37,10 +37,29 @@ jobs:
       - name: Check source comment policy
         run: python3 scripts/check-source-comments.py
 
+      - name: Verify approved launcher icon
+        run: |
+          set -euo pipefail
+          ICON='app/src/main/res/mipmap-mdpi/ic_launcher.png'
+          test -f "$ICON"
+          echo '9fced763f7937d732cf17edc277a023841e94d8971b1cd32b10e7571b8fbbc28  app/src/main/res/mipmap-mdpi/ic_launcher.png' | sha256sum -c -
+          test ! -e app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          test ! -e app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          test ! -e app/src/main/res/drawable/ic_launcher_background.xml
+          test ! -e app/src/main/res/drawable/ic_launcher_foreground.xml
+
       - name: Build APKs and run unit tests
         run: |
           set -o pipefail
           ./gradlew --dependency-verification=strict assembleDebug assembleRelease test --stacktrace 2>&1 | tee android-build.log
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: my-cycle-apks
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Upload build log on failure
         if: failure()
