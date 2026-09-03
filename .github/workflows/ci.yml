@@ -37,10 +37,34 @@ jobs:
       - name: Check source comment policy
         run: python3 scripts/check-source-comments.py
 
+      - name: Verify approved launcher icon
+        run: |
+          set -euo pipefail
+          cat <<'EOF' | sha256sum -c -
+          26cf62dc67089b636df03edd7ed1c60f0db46ae7d77460c085e4069f8fe9542b  app/src/main/res/mipmap-mdpi/ic_launcher.webp
+          47ab8d3efa5cf879355dac94354ef813f0d008ca4f9f2ad9421e5e0d05e27145  app/src/main/res/mipmap-hdpi/ic_launcher.webp
+          13b5555a25333b6a1fdf7c1673dbaa68989a667fa1f313156207dbdb22abf46d  app/src/main/res/mipmap-xhdpi/ic_launcher.webp
+          84db05a886175b67c23d45a99c3fbfe20a45166151711085e08ddd4f126b0afa  app/src/main/res/mipmap-xxhdpi/ic_launcher.webp
+          feb0df2480c3826a5f17362279aea9974d30d6ad44b4852f460909be3028c8dd  app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp
+          EOF
+          test ! -e app/src/main/res/mipmap-mdpi/ic_launcher.png
+          test ! -e app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          test ! -e app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          test ! -e app/src/main/res/drawable/ic_launcher_background.xml
+          test ! -e app/src/main/res/drawable/ic_launcher_foreground.xml
+
       - name: Build APKs and run unit tests
         run: |
           set -o pipefail
           ./gradlew --dependency-verification=strict assembleDebug assembleRelease test --stacktrace 2>&1 | tee android-build.log
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: my-cycle-apks
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Upload build log on failure
         if: failure()
