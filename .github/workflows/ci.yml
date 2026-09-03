@@ -40,9 +40,14 @@ jobs:
       - name: Verify approved launcher icon
         run: |
           set -euo pipefail
-          ICON='app/src/main/res/mipmap-mdpi/ic_launcher.png'
-          test -f "$ICON"
-          echo '9fced763f7937d732cf17edc277a023841e94d8971b1cd32b10e7571b8fbbc28  app/src/main/res/mipmap-mdpi/ic_launcher.png' | sha256sum -c -
+          cat <<'EOF' | sha256sum -c -
+          26cf62dc67089b636df03edd7ed1c60f0db46ae7d77460c085e4069f8fe9542b  app/src/main/res/mipmap-mdpi/ic_launcher.webp
+          47ab8d3efa5cf879355dac94354ef813f0d008ca4f9f2ad9421e5e0d05e27145  app/src/main/res/mipmap-hdpi/ic_launcher.webp
+          13b5555a25333b6a1fdf7c1673dbaa68989a667fa1f313156207dbdb22abf46d  app/src/main/res/mipmap-xhdpi/ic_launcher.webp
+          84db05a886175b67c23d45a99c3fbfe20a45166151711085e08ddd4f126b0afa  app/src/main/res/mipmap-xxhdpi/ic_launcher.webp
+          feb0df2480c3826a5f17362279aea9974d30d6ad44b4852f460909be3028c8dd  app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp
+          EOF
+          test ! -e app/src/main/res/mipmap-mdpi/ic_launcher.png
           test ! -e app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           test ! -e app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
           test ! -e app/src/main/res/drawable/ic_launcher_background.xml
