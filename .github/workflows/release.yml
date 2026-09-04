@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   release:
-    name: Test, sign, and publish AAB
+    name: Test, sign, and publish Android packages
     runs-on: ubuntu-latest
     timeout-minutes: 50
     env:
@@ -60,6 +60,7 @@ jobs:
             exit 1
           fi
           echo "RELEASE_TAG=v$app_version" >> "$GITHUB_ENV"
+          echo "APK_NAME=My-Cycle-v$app_version.apk" >> "$GITHUB_ENV"
           echo "AAB_NAME=My-Cycle-v$app_version.aab" >> "$GITHUB_ENV"
 
       - name: Determine release state
@@ -69,28 +70,37 @@ jobs:
         run: |
           set -euo pipefail
           release_exists=false
+          apk_exists=false
           aab_exists=false
 
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             release_exists=true
-            if gh release view "$RELEASE_TAG" \
-              --repo "$GITHUB_REPOSITORY" \
-              --json assets \
-              --jq '.assets[].name' | grep -Fxq "$AAB_NAME"; then
+            assets="$(
+              gh release view "$RELEASE_TAG" \
+                --repo "$GITHUB_REPOSITORY" \
+                --json assets \
+                --jq '.assets[].name'
+            )"
+            if grep -Fxq "$APK_NAME" <<< "$assets"; then
+              apk_exists=true
+            fi
+            if grep -Fxq "$AAB_NAME" <<< "$assets"; then
               aab_exists=true
             fi
           fi
 
           echo "release_exists=$release_exists" >> "$GITHUB_OUTPUT"
-          if [[ "$aab_exists" == true ]]; then
-            echo "build_bundle=false" >> "$GITHUB_OUTPUT"
-            echo "$AAB_NAME is already attached to $RELEASE_TAG."
+          if [[ "$apk_exists" == true && "$aab_exists" == true ]]; then
+            echo "build_packages=false" >> "$GITHUB_OUTPUT"
+            echo "$APK_NAME and $AAB_NAME are already attached to $RELEASE_TAG."
           else
-            echo "build_bundle=true" >> "$GITHUB_OUTPUT"
+            echo "build_packages=true" >> "$GITHUB_OUTPUT"
+            [[ "$apk_exists" == true ]] || echo "$APK_NAME is missing and will be built."
+            [[ "$aab_exists" == true ]] || echo "$AAB_NAME is missing and will be built."
           fi
 
       - name: Require successful main quality gate
-        if: steps.release_state.outputs.build_bundle == 'true'
+        if: steps.release_state.outputs.build_packages == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -118,11 +128,11 @@ jobs:
           exit 1
 
       - name: Test and lint release source
-        if: steps.release_state.outputs.build_bundle == 'true'
+        if: steps.release_state.outputs.build_packages == 'true'
         run: ./gradlew --dependency-verification=strict test lint --stacktrace
 
       - name: Configure release signing
-        if: steps.release_state.outputs.build_bundle == 'true'
+        if: steps.release_state.outputs.build_packages == 'true'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -169,16 +179,16 @@ jobs:
             -file "$upload_cert_path"
           test -s "$upload_cert_path"
 
-      - name: Build signed release AAB
-        if: steps.release_state.outputs.build_bundle == 'true'
+      - name: Build signed release packages
+        if: steps.release_state.outputs.build_packages == 'true'
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew --dependency-verification=strict bundleRelease --stacktrace
+        run: ./gradlew --dependency-verification=strict assembleRelease bundleRelease --stacktrace
 
-      - name: Verify certificate and package AAB
-        if: steps.release_state.outputs.build_bundle == 'true'
+      - name: Verify certificates and package Android release
+        if: steps.release_state.outputs.build_packages == 'true'
         id: package
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -186,8 +196,28 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
+          source_apk="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | head -1)"
           source_aab="$(find app/build/outputs/bundle/release -maxdepth 1 -type f -name '*.aab' | head -1)"
+          test -n "$source_apk"
           test -n "$source_aab"
+
+          apksigner="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -n 1)"
+          if [[ -z "$apksigner" ]]; then
+            echo 'Android apksigner was not found.' >&2
+            exit 1
+          fi
+
+          apk_report="$RUNNER_TEMP/apksigner-report.txt"
+          "$apksigner" verify --verbose --print-certs "$source_apk" | tee "$apk_report"
+          apk_fingerprint="$(
+            awk -F': ' '/certificate SHA-256 digest:/ {print $NF; exit}' "$apk_report" |
+              tr -d ':' |
+              tr '[:upper:]' '[:lower:]'
+          )"
+          if [[ "$apk_fingerprint" != "$EXPECTED_CERT_SHA256" ]]; then
+            echo 'APK certificate fingerprint does not match the My Cycle release key.' >&2
+            exit 1
+          fi
 
           initial_report="$RUNNER_TEMP/jarsigner-initial.txt"
           jarsigner -verify -strict "$source_aab" > "$initial_report" 2>&1 || true
@@ -206,72 +236,86 @@ jobs:
           grep -F 'jar verified.' "$RUNNER_TEMP/jarsigner-report.txt"
 
           keytool -printcert -jarfile "$source_aab" > "$RUNNER_TEMP/aab-cert-report.txt"
-          actual_fingerprint="$(
+          aab_fingerprint="$(
             awk -F': ' '/SHA256:/ {print $2; exit}' "$RUNNER_TEMP/aab-cert-report.txt" |
               tr -d ': ' |
               tr '[:upper:]' '[:lower:]'
           )"
-          if [[ "$actual_fingerprint" != "$EXPECTED_CERT_SHA256" ]]; then
+          if [[ "$aab_fingerprint" != "$EXPECTED_CERT_SHA256" ]]; then
             echo 'AAB certificate fingerprint does not match the My Cycle release key.' >&2
             exit 1
           fi
 
           mkdir -p release
+          apk_path="release/$APK_NAME"
           aab_path="release/$AAB_NAME"
-          checksum_path="$aab_path.sha256"
+          apk_checksum_path="$apk_path.sha256"
+          aab_checksum_path="$aab_path.sha256"
           cert_path="release/My-Cycle-$RELEASE_TAG-upload-cert.pem"
+
+          cp "$source_apk" "$apk_path"
           cp "$source_aab" "$aab_path"
           cp "$UPLOAD_CERT_PATH" "$cert_path"
-          sha256sum "$aab_path" | tee "$checksum_path"
+          sha256sum "$apk_path" | tee "$apk_checksum_path"
+          sha256sum "$aab_path" | tee "$aab_checksum_path"
 
+          echo "apk_path=$apk_path" >> "$GITHUB_OUTPUT"
           echo "aab_path=$aab_path" >> "$GITHUB_OUTPUT"
-          echo "checksum_path=$checksum_path" >> "$GITHUB_OUTPUT"
+          echo "apk_checksum_path=$apk_checksum_path" >> "$GITHUB_OUTPUT"
+          echo "aab_checksum_path=$aab_checksum_path" >> "$GITHUB_OUTPUT"
           echo "cert_path=$cert_path" >> "$GITHUB_OUTPUT"
 
       - name: Remove release keystore
-        if: always() && steps.release_state.outputs.build_bundle == 'true'
+        if: always() && steps.release_state.outputs.build_packages == 'true'
         run: |
           rm -f "$RUNNER_TEMP/my-cycle-release.jks"
           echo 'ANDROID_KEYSTORE_PATH=' >> "$GITHUB_ENV"
 
       - name: Upload signed workflow artifact
-        if: steps.release_state.outputs.build_bundle == 'true'
+        if: steps.release_state.outputs.build_packages == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: My-Cycle-${{ env.RELEASE_TAG }}-signed-aab
+          name: My-Cycle-${{ env.RELEASE_TAG }}-signed
           path: |
+            ${{ steps.package.outputs.apk_path }}
+            ${{ steps.package.outputs.apk_checksum_path }}
             ${{ steps.package.outputs.aab_path }}
-            ${{ steps.package.outputs.checksum_path }}
+            ${{ steps.package.outputs.aab_checksum_path }}
             ${{ steps.package.outputs.cert_path }}
           if-no-files-found: error
           retention-days: 30
 
       - name: Publish or update GitHub release
-        if: steps.release_state.outputs.build_bundle == 'true'
+        if: steps.release_state.outputs.build_packages == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          apk_path="${{ steps.package.outputs.apk_path }}"
+          apk_checksum_path="${{ steps.package.outputs.apk_checksum_path }}"
           aab_path="${{ steps.package.outputs.aab_path }}"
-          checksum_path="${{ steps.package.outputs.checksum_path }}"
+          aab_checksum_path="${{ steps.package.outputs.aab_checksum_path }}"
           cert_path="${{ steps.package.outputs.cert_path }}"
           notes_file=".github/release-notes/$RELEASE_TAG.md"
 
           if [[ "${{ steps.release_state.outputs.release_exists }}" == "true" ]]; then
             gh release upload "$RELEASE_TAG" \
-              "$aab_path" "$checksum_path" "$cert_path" \
+              "$apk_path" "$apk_checksum_path" \
+              "$aab_path" "$aab_checksum_path" "$cert_path" \
               --clobber \
               --repo "$GITHUB_REPOSITORY"
           elif [[ -f "$notes_file" ]]; then
             gh release create "$RELEASE_TAG" \
-              "$aab_path" "$checksum_path" "$cert_path" \
+              "$apk_path" "$apk_checksum_path" \
+              "$aab_path" "$aab_checksum_path" "$cert_path" \
               --target "$GITHUB_SHA" \
               --title "My Cycle ${RELEASE_TAG#v}" \
               --notes-file "$notes_file" \
               --repo "$GITHUB_REPOSITORY"
           else
             gh release create "$RELEASE_TAG" \
-              "$aab_path" "$checksum_path" "$cert_path" \
+              "$apk_path" "$apk_checksum_path" \
+              "$aab_path" "$aab_checksum_path" "$cert_path" \
               --target "$GITHUB_SHA" \
               --title "My Cycle ${RELEASE_TAG#v}" \
               --generate-notes \
