@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: "23 5 * * 1"
 
 permissions: {}
 
@@ -98,30 +100,31 @@ jobs:
             cat "$REPORT"
           fi
 
-  dependency-review:
-    name: Dependency Review
-    if: github.event_name == 'pull_request'
+  dependency-audit:
+    name: OSV Dependency Scan
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: read
 
     steps:
-      - name: Review dependency changes
-        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fail-on-severity: high
-          vulnerability-check: true
-          license-check: true
-          comment-summary-in-pr: never
-          retry-on-snapshot-warnings: true
-          retry-on-snapshot-warnings-timeout: 120
-          show-patched-versions: true
+          persist-credentials: false
+
+      - name: Scan locked Gradle dependencies
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/src:ro" \
+            ghcr.io/google/osv-scanner:v2.4.0@sha256:5116601dedc01c1c580eb92371883ec052fc4c13c3fbc109d621a63ac416d475 \
+            scan source -r /src
 
   verify:
     name: Verify
     if: always()
-    needs: [build, dependency-review]
+    needs: [build, dependency-audit]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions: {}
@@ -130,13 +133,8 @@ jobs:
       - name: Enforce verification results
         env:
           BUILD_RESULT: ${{ needs.build.result }}
-          DEPENDENCY_REVIEW_RESULT: ${{ needs.dependency-review.result }}
-          EVENT_NAME: ${{ github.event_name }}
+          DEPENDENCY_AUDIT_RESULT: ${{ needs.dependency-audit.result }}
         run: |
           set -euo pipefail
           test "$BUILD_RESULT" = "success"
-          if [[ "$EVENT_NAME" == "pull_request" ]]; then
-            test "$DEPENDENCY_REVIEW_RESULT" = "success"
-          else
-            test "$DEPENDENCY_REVIEW_RESULT" = "skipped"
-          fi
+          test "$DEPENDENCY_AUDIT_RESULT" = "success"
