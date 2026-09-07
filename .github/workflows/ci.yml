@@ -168,9 +168,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
           expected=("Analyze Java and Kotlin" "Semgrep" "Gitleaks")
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            expected+=("Dependency Review")
+          fi
 
           for attempt in $(seq 1 135); do
             response="$(gh api \
@@ -207,12 +212,12 @@ jobs:
             done
 
             if [ "$pending" -eq 0 ]; then
-              echo "CodeQL, Semgrep and Gitleaks passed."
+              echo "Required security gates passed."
               exit 0
             fi
 
             sleep 20
           done
 
-          echo "Timed out waiting for CodeQL, Semgrep and Gitleaks." >&2
+          echo "Timed out waiting for required security gates." >&2
           exit 1
