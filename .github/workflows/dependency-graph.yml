@@ -37,37 +37,16 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Set up Gradle 9.5.0
-        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v5.0.0
+      - name: Generate and submit release runtime dependency graph
+        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
         with:
           gradle-version: '9.5.0'
-
-      - name: Resolve release runtime dependencies
-        run: |
-          set -euo pipefail
-          ./gradlew --dependency-verification=strict :app:dependencies \
-            --configuration releaseRuntimeClasspath \
-            --console=plain \
-            > release-runtime-dependencies.txt
-
-          python3 scripts/gradle_dependencies_to_github_snapshot.py \
-            release-runtime-dependencies.txt \
-            dependency-snapshot.json \
-            --sha "$GITHUB_SHA" \
-            --ref "$GITHUB_REF" \
-            --job-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-
-      - name: Submit dependency snapshot
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2026-03-10" \
-            --method POST \
-            "/repos/$GITHUB_REPOSITORY/dependency-graph/snapshots" \
-            --input dependency-snapshot.json
+          additional-arguments: '--dependency-verification=strict'
+          dependency-graph: generate-and-submit
+          dependency-graph-include-configurations: '^releaseRuntimeClasspath$'
+          validate-wrappers: true
+          cache-provider: basic
+          add-job-summary: on-failure
 
   pr-generate:
     name: Generate PR dependency graph
@@ -93,33 +72,15 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Set up Gradle 9.5.0
-        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v5.0.0
+      - name: Generate and save release runtime dependency graph
+        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
         with:
           gradle-version: '9.5.0'
-
-      - name: Resolve PR release runtime dependencies
-        env:
-          SNAPSHOT_SHA: ${{ github.event.pull_request.head.sha }}
-          SNAPSHOT_REF: refs/pull/${{ github.event.pull_request.number }}/head
-        run: |
-          set -euo pipefail
-          ./gradlew --dependency-verification=strict :app:dependencies \
-            --configuration releaseRuntimeClasspath \
-            --console=plain \
-            > release-runtime-dependencies.txt
-
-          python3 scripts/gradle_dependencies_to_github_snapshot.py \
-            release-runtime-dependencies.txt \
-            dependency-snapshot.json \
-            --sha "$SNAPSHOT_SHA" \
-            --ref "$SNAPSHOT_REF" \
-            --job-id "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-
-      - name: Upload dependency snapshot
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: dependency-snapshot
-          path: dependency-snapshot.json
-          if-no-files-found: error
-          retention-days: 1
+          additional-arguments: '--dependency-verification=strict'
+          dependency-graph: generate-and-upload
+          dependency-graph-include-configurations: '^releaseRuntimeClasspath$'
+          artifact-retention-days: 1
+          validate-wrappers: true
+          cache-provider: basic
+          cache-read-only: true
+          add-job-summary: on-failure
