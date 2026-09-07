@@ -484,3 +484,18 @@ The final goal is a codebase containing only the complexity required to implemen
 - Do not overwrite, recompress, optimize in place, or otherwise rewrite the canonical PNG. Keep the uploaded source unchanged.
 - Platform-required derivatives may be generated only as raster derivatives of that PNG. Resizing and required raster packaging/container formats such as PNG size variants, ICO, or ICNS are allowed, but the visible artwork must remain unchanged: no cropping, padding, color changes, removed details, or other design edits unless explicitly requested.
 - If an older icon in another format is currently canonical, keep it until the project owner explicitly supplies a replacement PNG as the new app icon. Once supplied, that PNG becomes the canonical source and the asset pipeline should derive required icons from it rather than converting it to a vector source.
+
+## GitHub security baseline
+
+- Keep every non-local GitHub Action pinned to an immutable full 40-character commit SHA; retain a nearby version comment when practical.
+- Pin literal workflow container images to both an explicit version and a SHA-256 digest.
+- Do not use `pull_request_target` for normal PR validation. Never execute untrusted PR code with repository secrets, signing credentials, write tokens, or privileged runners.
+- Default workflow permissions to `permissions: {}` and grant only the minimum job-level scopes required for that job.
+- Keep `id-token: write` and `attestations: write` limited to the release provenance job.
+- Keep Android verification, Dependency Review, CodeQL, Semgrep, and Gitleaks merge-blocking. Qodana is periodic defense-in-depth and must not become a flaky mandatory PR gate without demonstrated stability.
+- Keep strict Gradle dependency verification enabled for CI and release builds, and keep the Gradle wrapper distribution checksum pinned.
+- Never commit keystores, signing passwords, private keys, tokens, `.env`, `local.properties`, service-account credentials, or other secret material.
+- Release production APK/AAB files only from an immutable `vX.Y.Z` tag that points to a verified `main` commit. Never rebuild or replace assets of an existing release tag.
+- Verify release package identity, signing certificate, APK signature schemes, checksums, and artifact attestation before publication.
+- Preserve the protected, signed, squash-only, linear `main` change flow.
+- Run `python3 scripts/verify_ci_supply_chain.py` whenever `.github/workflows/**` or `.github/actions/**` changes.
