@@ -5,8 +5,10 @@ import sys
 
 USES = re.compile(r"^\s*uses:\s*([^\s#]+)")
 IMAGE = re.compile(r"^\s*image:\s*([^\s#]+)")
+DOCKER_RUN = re.compile(r"\bdocker\s+run\b")
 PINNED_ACTION = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.\-/]+@[0-9a-fA-F]{40}$")
 PINNED_IMAGE = re.compile(r"^.+:[^@\s]+@sha256:[0-9a-fA-F]{64}$")
+PINNED_IMAGE_IN_COMMAND = re.compile(r"\S+:[^@\s]+@sha256:[0-9a-fA-F]{64}")
 PR_TARGET = re.compile(r"^\s*pull_request_target\s*:")
 
 roots = [Path(".github/workflows"), Path(".github/actions")]
@@ -20,7 +22,12 @@ files = sorted(
 
 errors = []
 for path in files:
-    for number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+    lines = path.read_text(encoding="utf-8").splitlines()
+    commands = []
+    command_start = 0
+    command_parts = []
+
+    for number, raw in enumerate(lines, 1):
         line = raw.split("#", 1)[0]
         if PR_TARGET.match(line):
             errors.append(f"{path}:{number}: pull_request_target is prohibited")
@@ -36,6 +43,28 @@ for path in files:
             target = image.group(1).strip("'\"")
             if "${{" not in target and not PINNED_IMAGE.fullmatch(target):
                 errors.append(f"{path}:{number}: workflow container is not version-and-digest pinned: {target}")
+
+        stripped = line.strip()
+        if command_parts:
+            command_parts.append(stripped.rstrip("\\").strip())
+            if not stripped.endswith("\\"):
+                commands.append((command_start, " ".join(command_parts)))
+                command_parts = []
+        elif DOCKER_RUN.search(stripped):
+            command_start = number
+            command_parts = [stripped.rstrip("\\").strip()]
+            if not stripped.endswith("\\"):
+                commands.append((command_start, " ".join(command_parts)))
+                command_parts = []
+
+    if command_parts:
+        commands.append((command_start, " ".join(command_parts)))
+
+    for number, command in commands:
+        if not PINNED_IMAGE_IN_COMMAND.search(command):
+            errors.append(
+                f"{path}:{number}: docker run image is not version-and-digest pinned"
+            )
 
 if errors:
     print("\n".join(errors), file=sys.stderr)
