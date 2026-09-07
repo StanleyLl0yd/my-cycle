@@ -16,3 +16,7 @@ keystore.properties
 *.iml
 .DS_Store
 store/rustore/screenshots/
+key.properties
+.qodana/
+.qodana-cache/
+*.log
