@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  checks:
     name: Build checks
     runs-on: ubuntu-24.04
     timeout-minutes: 40
@@ -100,10 +100,10 @@ jobs:
             cat "$REPORT"
           fi
 
-  dependency-audit:
-    name: OSV Dependency Scan
+  osv:
+    name: OSV Runtime Dependency Scan
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: read
 
@@ -113,28 +113,106 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Scan locked Gradle dependencies
+      - name: Set up JDK 21
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v5.0.0
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle 9.5.0
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v5.0.0
+        with:
+          gradle-version: '9.5.0'
+
+      - name: Resolve release runtime dependencies
+        run: |
+          set -euo pipefail
+          ./gradlew --dependency-verification=strict :app:dependencies \
+            --configuration releaseRuntimeClasspath \
+            --console=plain \
+            > release-runtime-dependencies.txt
+          python3 scripts/gradle_dependencies_to_osv.py \
+            release-runtime-dependencies.txt \
+            osv-scanner.json
+
+      - name: Scan resolved runtime dependencies
         run: |
           set -euo pipefail
           docker run --rm \
             -v "$GITHUB_WORKSPACE:/src:ro" \
             ghcr.io/google/osv-scanner:v2.4.0@sha256:5116601dedc01c1c580eb92371883ec052fc4c13c3fbc109d621a63ac416d475 \
-            scan source -r /src
+            scan source --lockfile=osv-scanner:/src/osv-scanner.json
 
-  verify:
-    name: Verify
+  build:
+    name: build
     if: always()
-    needs: [build, dependency-audit]
+    needs: [checks, osv]
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions: {}
+    timeout-minutes: 50
+    permissions:
+      actions: read
+      checks: read
+      contents: read
 
     steps:
-      - name: Enforce verification results
+      - name: Enforce local verification results
         env:
-          BUILD_RESULT: ${{ needs.build.result }}
-          DEPENDENCY_AUDIT_RESULT: ${{ needs.dependency-audit.result }}
+          CHECKS_RESULT: ${{ needs.checks.result }}
+          OSV_RESULT: ${{ needs.osv.result }}
         run: |
           set -euo pipefail
-          test "$BUILD_RESULT" = "success"
-          test "$DEPENDENCY_AUDIT_RESULT" = "success"
+          test "$CHECKS_RESULT" = "success"
+          test "$OSV_RESULT" = "success"
+
+      - name: Wait for security gates
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          expected=("Analyze Java and Kotlin" "Semgrep" "Gitleaks")
+
+          for attempt in $(seq 1 135); do
+            response="$(gh api \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/$GITHUB_REPOSITORY/commits/$TARGET_SHA/check-runs?per_page=100")"
+            pending=0
+
+            for check in "${expected[@]}"; do
+              state="$(jq -r --arg name "$check" '
+                [.check_runs[] | select(.name == $name)]
+                | sort_by(.started_at)
+                | last
+                | if . == null then
+                    "missing"
+                  elif .status != "completed" then
+                    .status
+                  else
+                    .conclusion
+                  end
+              ' <<< "$response")"
+
+              case "$state" in
+                success)
+                  ;;
+                missing|queued|in_progress|pending|requested|waiting)
+                  pending=1
+                  ;;
+                *)
+                  echo "$check finished with unacceptable state: $state" >&2
+                  exit 1
+                  ;;
+              esac
+            done
+
+            if [ "$pending" -eq 0 ]; then
+              echo "CodeQL, Semgrep and Gitleaks passed."
+              exit 0
+            fi
+
+            sleep 20
+          done
+
+          echo "Timed out waiting for CodeQL, Semgrep and Gitleaks." >&2
+          exit 1
