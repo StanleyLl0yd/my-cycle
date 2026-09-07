@@ -20,23 +20,9 @@ jobs:
       contents: write
 
     steps:
-      - name: Download dependency snapshot
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      - name: Submit saved Gradle dependency graph
+        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
         with:
-          name: dependency-snapshot
-          path: .
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ github.token }}
-
-      - name: Submit dependency snapshot
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          test -s dependency-snapshot.json
-          gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2026-03-10" \
-            --method POST \
-            "/repos/$GITHUB_REPOSITORY/dependency-graph/snapshots" \
-            --input dependency-snapshot.json
+          dependency-graph: download-and-submit
+          cache-disabled: true
+          add-job-summary: on-failure
