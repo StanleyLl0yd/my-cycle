@@ -37,11 +37,19 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Strictly verify release runtime dependencies
+        run: |
+          set -euo pipefail
+          ./gradlew --dependency-verification=strict \
+            :app:dependencies \
+            --configuration releaseRuntimeClasspath \
+            --console=plain \
+            >/dev/null
+
       - name: Generate and submit release runtime dependency graph
-        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92
         with:
           gradle-version: '9.5.0'
-          additional-arguments: '--dependency-verification=strict'
           dependency-graph: generate-and-submit
           dependency-graph-include-configurations: '^releaseRuntimeClasspath$'
           validate-wrappers: true
@@ -72,11 +80,19 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Strictly verify release runtime dependencies
+        run: |
+          set -euo pipefail
+          ./gradlew --dependency-verification=strict \
+            :app:dependencies \
+            --configuration releaseRuntimeClasspath \
+            --console=plain \
+            >/dev/null
+
       - name: Generate and save release runtime dependency graph
-        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92
         with:
           gradle-version: '9.5.0'
-          additional-arguments: '--dependency-verification=strict'
           dependency-graph: generate-and-upload
           dependency-graph-include-configurations: '^releaseRuntimeClasspath$'
           artifact-retention-days: 1
