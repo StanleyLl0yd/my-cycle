@@ -5,9 +5,9 @@ import re
 from pathlib import Path
 
 COORDINATE_RE = re.compile(
-    r"^(?P<group>[^:\\s]+):(?P<artifact>[^:\\s]+)(?::(?P<requested>\\S+))?"
+    r"^(?P<group>[^:\s]+):(?P<artifact>[^:\s]+)(?::(?P<requested>\S+))?"
 )
-RESOLVED_RE = re.compile(r"\\s+->\\s+(?P<resolved>\\S+)")
+RESOLVED_RE = re.compile(r"\s+->\s+(?P<resolved>\S+)")
 
 
 def parse_dependency(line: str):
