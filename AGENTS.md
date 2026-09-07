@@ -492,7 +492,7 @@ The final goal is a codebase containing only the complexity required to implemen
 - Do not use `pull_request_target` for normal PR validation. Never execute untrusted PR code with repository secrets, signing credentials, write tokens, or privileged runners.
 - Default workflow permissions to `permissions: {}` and grant only the minimum job-level scopes required for that job.
 - Keep `id-token: write` and `attestations: write` limited to the release provenance job.
-- Keep Android verification, Dependency Review, CodeQL, Semgrep, and Gitleaks merge-blocking. Qodana is periodic defense-in-depth and must not become a flaky mandatory PR gate without demonstrated stability.
+- Keep Android verification, OSV dependency scanning, CodeQL, Semgrep, and Gitleaks merge-blocking. Use GitHub Dependency Review as an additional gate when the repository dependency graph supports it. Qodana is periodic defense-in-depth and must not become a flaky mandatory PR gate without demonstrated stability.
 - Keep strict Gradle dependency verification enabled for CI and release builds, and keep the Gradle wrapper distribution checksum pinned.
 - Never commit keystores, signing passwords, private keys, tokens, `.env`, `local.properties`, service-account credentials, or other secret material.
 - Release production APK/AAB files only from an immutable `vX.Y.Z` tag that points to a verified `main` commit. Never rebuild or replace assets of an existing release tag.
