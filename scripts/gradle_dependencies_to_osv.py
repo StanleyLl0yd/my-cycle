@@ -17,6 +17,8 @@ def parse_dependency(line: str):
     coordinate = line.split("--- ", 1)[1].strip()
     if coordinate.startswith("project "):
         return None
+    if coordinate.endswith(" (c)") or coordinate.endswith(" (n)"):
+        return None
     if " FAILED" in f" {coordinate}":
         raise ValueError(f"Unresolved dependency: {coordinate}")
 
