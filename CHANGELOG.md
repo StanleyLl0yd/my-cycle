@@ -10,6 +10,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-09-08
+
+### 📊 Local insights and explainable estimates
+- Statistics now show the shortest and longest recent completed cycle alongside the existing averages and variation.
+- Added local recurring-symptom patterns from recent diary history. A pattern appears only after repeated records and is described as timing/counts, never as a cause or diagnosis.
+- The Today screen now explains what the next-period date range is based on: either the setup estimate or up to 6 recent completed cycles, including their observed gap range and the weighted estimate.
+
+### 📄 Doctor report
+- Added a locally generated PDF diary summary for sharing with a doctor or keeping for personal reference.
+- The report includes recent cycle dates, cycle-length and bleeding-duration ranges, and frequently recorded symptoms.
+- Free-text private notes are deliberately excluded from the PDF. The report is generated on-device and saved only through Android's system document picker.
+
+### 🔔 Smarter private reminders
+- A daily reminder is skipped when today's diary entry already exists.
+- When the estimated start window is close, the reminder uses a different but still neutral message without exposing period dates or cycle status.
+- No new network access, analytics, account, cloud service or Android health permission was added.
+
+### 🧱 Compatibility and quality
+- Room schema, CSV format and the versioned `.mycycle` backup format are unchanged.
+- Added unit tests for recurring symptom insights and contextual reminder decisions.
+- Updated source version to 1.4.0 (`versionCode` 10).
+
+---
+
 ## [1.3.0] - 2026-09-02
 
 ### 🔐 Privacy and access
