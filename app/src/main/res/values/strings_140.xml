@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="today_prediction_basis_title">Why this range?</string>
+    <string name="today_prediction_basis_history">Based on %1$d recent completed cycles. Their gaps were %2$d–%3$d days; the weighted estimate is about %4$d days.</string>
+    <string name="today_prediction_basis_setup">This first range uses your setup estimate of about %1$d days. It will adapt as real completed cycles are recorded.</string>
+
+    <string name="stats_shortest_cycle">Shortest recent gap</string>
+    <string name="stats_longest_cycle">Longest recent gap</string>
+    <string name="stats_patterns_title">Patterns in your records</string>
+    <string name="stats_patterns_note">These are simple counts from your own diary, not causes or diagnoses.</string>
+    <string name="stats_patterns_empty">Keep recording symptoms across a few cycles and recurring patterns can appear here.</string>
+    <string name="stats_symptom_occurrences">Marked on %1$d days across %2$d recent cycles</string>
+    <string name="stats_timing_period">Most often recorded during bleeding days</string>
+    <string name="stats_timing_before_period">Most often recorded in the 3 days before bleeding started</string>
+    <string name="stats_timing_other">Most often recorded at other times in the cycle</string>
+    <string name="stats_timing_mixed">Recorded at different times without one clear pattern</string>
+
+    <string name="settings_doctor_report">Create doctor report</string>
+    <string name="settings_doctor_report_desc">Save a local PDF summary of recent cycles and symptoms; private notes are omitted</string>
+    <string name="dialog_report_success">PDF report saved</string>
+
+    <string name="report_title">My Cycle — diary summary</string>
+    <string name="report_generated">Generated: %1$s</string>
+    <string name="report_disclaimer">This document summarizes user-recorded diary data. It is not a diagnosis, medical test or treatment recommendation.</string>
+    <string name="report_summary">Summary</string>
+    <string name="report_cycle_count">Completed cycles in this report: %1$d</string>
+    <string name="report_cycle_range">Recent cycle length range: %1$d–%2$d days</string>
+    <string name="report_period_range">Recorded bleeding duration range: %1$d–%2$d days</string>
+    <string name="report_recent_cycles">Recent cycles</string>
+    <string name="report_no_cycles">No completed cycles have been recorded yet.</string>
+    <string name="report_current">current</string>
+    <string name="report_unknown">unknown</string>
+    <string name="report_cycle_row">%1$s · cycle: %2$s · bleeding days: %3$s</string>
+    <string name="report_symptoms">Frequently recorded symptoms</string>
+    <string name="report_no_symptoms">No symptoms were recorded in this period.</string>
+    <string name="report_symptom_row">%1$s — marked on %2$d days</string>
+    <string name="report_notes_omitted">Private free-text notes are intentionally omitted from this report. CSV and full backup exports remain available separately.</string>
+
+    <string name="reminder_notification_window_text">A date range you track is close. If you want, check today’s entry.</string>
+</resources>
