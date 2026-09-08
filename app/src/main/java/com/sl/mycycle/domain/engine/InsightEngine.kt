@@ -102,10 +102,9 @@ class InsightEngine {
         }
         if (
             cycles.any {
-                date in (
-                    it.startDate.minusDays(DAYS_BEFORE_PERIOD.toLong())
-                        ..it.startDate.minusDays(1)
-                    )
+                val start = it.startDate.minusDays(DAYS_BEFORE_PERIOD.toLong())
+                val end = it.startDate.minusDays(1)
+                date in start..end
             }
         ) {
             return SymptomTiming.BEFORE_PERIOD
