@@ -88,6 +88,7 @@ fun SettingsScreen(
     val exportSuccessMessage = stringResource(R.string.dialog_export_success)
     val importSuccessMessage = stringResource(R.string.dialog_import_success)
     val backupSuccessMessage = stringResource(R.string.dialog_backup_success)
+    val reportSuccessMessage = stringResource(R.string.dialog_report_success)
     val restoreSuccessMessage = stringResource(R.string.dialog_restore_success)
     val permissionDeniedMessage = stringResource(R.string.settings_reminder_permission_denied)
     val appLockErrorMessage = stringResource(R.string.settings_app_lock_error)
@@ -149,6 +150,21 @@ fun SettingsScreen(
                 }
                 dataOperationRunning = false
                 showToast(context, if (result.isSuccess) backupSuccessMessage else genericErrorMessage)
+            }
+        }
+    }
+
+    val reportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/pdf")
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                dataOperationRunning = true
+                val result = runSuspendCatching {
+                    writeBytes(context, uri, viewModel.buildDoctorReportPdf())
+                }
+                dataOperationRunning = false
+                showToast(context, if (result.isSuccess) reportSuccessMessage else genericErrorMessage)
             }
         }
     }
@@ -384,6 +400,15 @@ fun SettingsScreen(
             )
             HorizontalDivider()
             SettingsItem(
+                title = stringResource(R.string.settings_doctor_report),
+                subtitle = stringResource(R.string.settings_doctor_report_desc),
+                enabled = interactionsEnabled,
+                onClick = {
+                    reportLauncher.launch("my-cycle-report-${LocalDate.now()}.pdf")
+                }
+            )
+            HorizontalDivider()
+            SettingsItem(
                 title = stringResource(R.string.settings_import_csv),
                 subtitle = stringResource(R.string.settings_import_csv_desc),
                 enabled = interactionsEnabled,
@@ -611,6 +636,17 @@ private suspend fun writeText(context: Context, uri: Uri, text: String) = withCo
             writer.write(text)
         }
     }
+}
+
+private suspend fun writeBytes(
+    context: Context,
+    uri: Uri,
+    bytes: ByteArray
+) = withContext(Dispatchers.IO) {
+    validateDocumentUri(uri)
+    val output = context.contentResolver.openOutputStream(uri)
+        ?: error("Could not open destination")
+    output.use { it.write(bytes) }
 }
 
 private fun validateDocumentUri(uri: Uri) {

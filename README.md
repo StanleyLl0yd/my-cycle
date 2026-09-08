@@ -13,7 +13,7 @@ A simple, private period diary for Android. It keeps your real dates and gives c
 
 [📦 Latest release files — signed AAB for RuStore](https://github.com/StanleyLl0yd/my-cycle/releases/latest)
 
-Source version: **1.3.0** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
+Source version: **1.4.0** · Distribution bundle: **signed AAB for RuStore** · Min SDK: **26 (Android 8.0)** · Target SDK: **37**
 
 ## ✨ Features
 
@@ -36,12 +36,15 @@ Source version: **1.3.0** · Distribution bundle: **signed AAB for RuStore** · 
 - Calendar shows recorded bleeding and pale calendar guesses for possible future dates
 - After enough fairly similar adult cycles, the calendar may show a broad range of days when pregnancy could be more likely
 - Statistics use recent history: up to 6 finished cycles for summary numbers and up to 12 cycles for the history list
+- Statistics also surface simple recurring symptom patterns, recent shortest/longest gaps and when repeated symptoms were most often recorded, without claiming a cause or diagnosis
+- Today explains why the next-period estimate has its current range and shows the recent cycle history behind it
+- A local PDF doctor report summarizes recent cycles and frequently recorded symptoms; private free-text notes are deliberately omitted
 - Simple attention notes for some unusually long gaps, longer-than-usual bleeding and new bleeding after about a year without periods
 - Dark mode, better contrast and spoken calendar descriptions for TalkBack
 - CSV export **and CSV import** through Android's system file picker; matching imported dates are replaced only after confirmation
 - Full `.mycycle` backup and restore for diary records and app settings, with rollback if the cross-store restore fails
 - Device-specific app lock is deliberately disabled after a restore and must be enabled again on that device
-- Optional daily local reminder with a configurable time and privacy-conscious notification text
+- Optional daily local reminder with a configurable time; it skips days that are already recorded and uses a neutral contextual message when an estimated date range is close
 - Optional biometric app lock on Android 9+ and optional screenshot/recent-apps protection
 - A quick “Log today” launcher shortcut and home-screen widget that do not expose cycle details
 - Complete deletion of period records and app settings
@@ -90,7 +93,7 @@ These notes do not tell you what the cause is and do not give a diagnosis.
 - App files, databases and settings are excluded from cloud backup and device-transfer extraction rules
 - Daily reminders are scheduled locally on the device; notification text does not include period dates or cycle status
 - Optional app lock and screen protection are local device settings
-- Your data leaves the app only when you explicitly create a CSV export or `.mycycle` backup file
+- Your data leaves the app only when you explicitly create a CSV export, PDF report or `.mycycle` backup file
 
 The GitHub and license links in About are opened by Android in an external app such as a web browser.
 
@@ -178,7 +181,7 @@ Dependabot monitors Gradle, GitHub Actions and the pinned Python security tool. 
 
 The app follows the device language automatically.
 
-## 🚫 Not included in 1.3.0
+## 🚫 Not included in 1.4.0
 
 The current source version does **not** provide:
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sl.mycycle.data.preferences.UserPreferencesRepository
 import com.sl.mycycle.data.repository.CycleDayRepository
+import com.sl.mycycle.data.report.DoctorReportService
 import com.sl.mycycle.data.transfer.BackupPreview
 import com.sl.mycycle.data.transfer.CsvImportPreview
 import com.sl.mycycle.data.transfer.DataPortabilityService
@@ -38,7 +39,8 @@ class SettingsViewModel(
     private val preferencesRepository: UserPreferencesRepository,
     private val cycleDayRepository: CycleDayRepository,
     private val dataPortabilityService: DataPortabilityService,
-    private val reminderScheduler: ReminderScheduler
+    private val reminderScheduler: ReminderScheduler,
+    private val doctorReportService: DoctorReportService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsState())
@@ -125,6 +127,8 @@ class SettingsViewModel(
     }
 
     suspend fun buildBackup(): String = dataPortabilityService.buildBackup()
+
+    suspend fun buildDoctorReportPdf(): ByteArray = doctorReportService.buildPdf()
 
     fun previewBackup(backup: String): BackupPreview =
         dataPortabilityService.previewBackup(backup)

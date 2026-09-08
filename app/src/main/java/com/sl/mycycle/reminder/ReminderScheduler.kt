@@ -79,7 +79,7 @@ object ReminderNotifier {
         context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
-    fun show(context: Context) {
+    fun show(context: Context, kind: ReminderKind) {
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
@@ -97,10 +97,16 @@ object ReminderNotifier {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val textRes = when (kind) {
+            ReminderKind.NONE -> return
+            ReminderKind.DIARY -> R.string.reminder_notification_text
+            ReminderKind.PERIOD_WINDOW -> R.string.reminder_notification_window_text
+        }
+
         val notification = Notification.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(context.getString(R.string.reminder_notification_title))
-            .setContentText(context.getString(R.string.reminder_notification_text))
+            .setContentText(context.getString(textRes))
             .setContentIntent(openToday)
             .setAutoCancel(true)
             .setCategory(Notification.CATEGORY_REMINDER)

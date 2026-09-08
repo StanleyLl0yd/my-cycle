@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="today_prediction_basis_title">Почему такой диапазон?</string>
+    <string name="today_prediction_basis_history">Основано на %1$d последних законченных циклах. Промежутки были %2$d–%3$d дней; взвешенная оценка — около %4$d дней.</string>
+    <string name="today_prediction_basis_setup">Первый диапазон использует указанную при настройке оценку около %1$d дней. Он будет меняться по мере появления настоящих законченных циклов.</string>
+
+    <string name="stats_shortest_cycle">Самый короткий недавний промежуток</string>
+    <string name="stats_longest_cycle">Самый длинный недавний промежуток</string>
+    <string name="stats_patterns_title">Закономерности в ваших записях</string>
+    <string name="stats_patterns_note">Это простые подсчёты по вашему дневнику, а не причины или диагнозы.</string>
+    <string name="stats_patterns_empty">Отмечайте симптомы в течение нескольких циклов, и повторяющиеся закономерности смогут появиться здесь.</string>
+    <string name="stats_symptom_occurrences">Отмечено в %1$d днях за %2$d последних циклов</string>
+    <string name="stats_timing_period">Чаще всего отмечалось в дни с кровью</string>
+    <string name="stats_timing_before_period">Чаще всего отмечалось за 3 дня до начала кровотечения</string>
+    <string name="stats_timing_other">Чаще всего отмечалось в другое время цикла</string>
+    <string name="stats_timing_mixed">Отмечалось в разное время без одной явной закономерности</string>
+
+    <string name="settings_doctor_report">Отчёт для врача</string>
+    <string name="settings_doctor_report_desc">Сохранить локальный PDF с недавними циклами и симптомами; личные заметки не включаются</string>
+    <string name="dialog_report_success">PDF-отчёт сохранён</string>
+
+    <string name="report_title">«Мой Цикл» — сводка дневника</string>
+    <string name="report_generated">Создано: %1$s</string>
+    <string name="report_disclaimer">Документ только сводит записи пользователя из дневника. Это не диагноз, медицинское обследование и не рекомендация по лечению.</string>
+    <string name="report_summary">Краткая сводка</string>
+    <string name="report_cycle_count">Законченных циклов в отчёте: %1$d</string>
+    <string name="report_cycle_range">Недавние промежутки между месячными: %1$d–%2$d дней</string>
+    <string name="report_period_range">Записанная длительность кровотечения: %1$d–%2$d дней</string>
+    <string name="report_recent_cycles">Последние циклы</string>
+    <string name="report_no_cycles">Законченных циклов пока нет.</string>
+    <string name="report_current">текущий</string>
+    <string name="report_unknown">неизвестно</string>
+    <string name="report_cycle_row">%1$s · цикл: %2$s · дней с кровью: %3$s</string>
+    <string name="report_symptoms">Часто отмеченные симптомы</string>
+    <string name="report_no_symptoms">За этот период симптомы не отмечались.</string>
+    <string name="report_symptom_row">%1$s — отмечено в %2$d днях</string>
+    <string name="report_notes_omitted">Свободные личные заметки специально не включены в этот отчёт. CSV и полная резервная копия доступны отдельно.</string>
+
+    <string name="reminder_notification_window_text">Близко один из отслеживаемых диапазонов дат. Если хотите, проверьте запись за сегодня.</string>
+</resources>
