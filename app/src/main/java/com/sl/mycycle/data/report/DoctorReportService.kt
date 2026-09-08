@@ -42,6 +42,7 @@ class DoctorReportService(
     }
 }
 
+@Suppress("TooManyFunctions")
 private class ReportWriter(
     private val context: Context,
     private val document: PdfDocument
