@@ -27,6 +27,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sl.mycycle.R
+import com.sl.mycycle.domain.engine.SymptomInsight
+import com.sl.mycycle.domain.engine.SymptomTiming
 import com.sl.mycycle.domain.model.Cycle
 import com.sl.mycycle.domain.model.CycleStage
 import com.sl.mycycle.ui.theme.CycleColors
@@ -116,6 +118,27 @@ fun StatisticsScreen(
             }
         }
 
+        state.shortestCycleLength?.let { shortest ->
+            state.longestCycleLength?.let { longest ->
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StatCard(
+                        title = stringResource(R.string.stats_shortest_cycle),
+                        value = pluralStringResource(R.plurals.days, shortest, shortest),
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatCard(
+                        title = stringResource(R.string.stats_longest_cycle),
+                        value = pluralStringResource(R.plurals.days, longest, longest),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
         state.cycleVariationDays?.let { variation ->
             Spacer(modifier = Modifier.height(12.dp))
             val regularity = state.regularity
@@ -135,6 +158,31 @@ fun StatisticsScreen(
             )
         }
 
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = stringResource(R.string.stats_patterns_title),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = stringResource(R.string.stats_patterns_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp, bottom = 10.dp)
+        )
+
+        if (state.symptomInsights.isEmpty()) {
+            Text(
+                text = stringResource(R.string.stats_patterns_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            state.symptomInsights.forEach { insight ->
+                SymptomInsightCard(insight)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+
         if (state.cycles.isNotEmpty()) {
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -148,6 +196,46 @@ fun StatisticsScreen(
                 CycleHistoryCard(cycle)
                 Spacer(modifier = Modifier.height(8.dp))
             }
+        }
+    }
+}
+
+@Composable
+private fun SymptomInsightCard(insight: SymptomInsight) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "${insight.symptom.emoji} ${stringResource(insight.symptom.labelRes)}",
+                style = MaterialTheme.typography.titleSmall
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(
+                    R.string.stats_symptom_occurrences,
+                    insight.occurrenceDays,
+                    insight.cycleCount
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = stringResource(
+                    when (insight.timing) {
+                        SymptomTiming.PERIOD -> R.string.stats_timing_period
+                        SymptomTiming.BEFORE_PERIOD -> R.string.stats_timing_before_period
+                        SymptomTiming.OTHER -> R.string.stats_timing_other
+                        SymptomTiming.MIXED -> R.string.stats_timing_mixed
+                    }
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
