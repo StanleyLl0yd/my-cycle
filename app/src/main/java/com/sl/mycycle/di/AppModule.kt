@@ -5,10 +5,13 @@ import com.sl.mycycle.data.local.AppDatabase
 import com.sl.mycycle.data.preferences.UserPreferencesRepository
 import com.sl.mycycle.data.preferences.userPreferencesDataStore
 import com.sl.mycycle.data.repository.CycleDayRepository
+import com.sl.mycycle.data.report.DoctorReportService
 import com.sl.mycycle.data.transfer.DataPortabilityService
 import com.sl.mycycle.domain.engine.CycleDetector
 import com.sl.mycycle.domain.engine.CycleNoticeEvaluator
+import com.sl.mycycle.domain.engine.InsightEngine
 import com.sl.mycycle.domain.engine.PredictionEngine
+import com.sl.mycycle.reminder.ReminderDecisionEngine
 import com.sl.mycycle.reminder.ReminderScheduler
 import com.sl.mycycle.ui.calendar.CalendarViewModel
 import com.sl.mycycle.ui.daydetails.DayDetailsViewModel
@@ -36,11 +39,14 @@ val appModule = module {
     single { UserPreferencesRepository(get()) }
     single { CycleDayRepository(get()) }
     single { DataPortabilityService(get(), get()) }
+    single { DoctorReportService(androidContext(), get(), get()) }
     single { ReminderScheduler(androidContext()) }
 
     single { CycleDetector() }
     single { PredictionEngine() }
     single { CycleNoticeEvaluator() }
+    single { InsightEngine() }
+    single { ReminderDecisionEngine() }
 
     viewModel { OnboardingViewModel(get(), get(), get()) }
 
@@ -69,11 +75,12 @@ val appModule = module {
         StatisticsViewModel(
             cycleDayRepository = get(),
             cycleDetector = get(),
-            preferencesRepository = get()
+            preferencesRepository = get(),
+            insightEngine = get()
         )
     }
 
-    viewModel { SettingsViewModel(get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get()) }
 
     viewModel { (dateString: String) ->
         DayDetailsViewModel(dateString, get(), get())
