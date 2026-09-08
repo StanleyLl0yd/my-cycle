@@ -68,6 +68,7 @@ fun TodayScreen(
         state.prediction?.let { prediction ->
             PredictionCard(
                 prediction = prediction,
+                basis = state.predictionBasis,
                 today = state.today,
                 locale = locale
             )
@@ -171,6 +172,7 @@ private fun CycleDayCard(
 @Composable
 private fun PredictionCard(
     prediction: Prediction,
+    basis: PredictionBasis?,
     today: LocalDate,
     locale: Locale
 ) {
@@ -221,7 +223,49 @@ private fun PredictionCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            if (window != null) {
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(
+                    text = stringResource(R.string.today_prediction_basis_title),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = predictionBasisText(prediction, basis),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun predictionBasisText(
+    prediction: Prediction,
+    basis: PredictionBasis?
+): String {
+    val shortest = basis?.shortestCycleLength
+    val longest = basis?.longestCycleLength
+    return if (
+        prediction.basedOnCycles > 0 &&
+        shortest != null &&
+        longest != null
+    ) {
+        stringResource(
+            R.string.today_prediction_basis_history,
+            prediction.basedOnCycles,
+            shortest,
+            longest,
+            prediction.estimatedCycleLength ?: shortest
+        )
+    } else {
+        stringResource(
+            R.string.today_prediction_basis_setup,
+            prediction.estimatedCycleLength ?: prediction.expectedPeriodLength
+        )
     }
 }
 
