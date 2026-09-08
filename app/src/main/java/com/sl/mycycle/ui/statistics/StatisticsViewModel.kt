@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.sl.mycycle.data.preferences.UserPreferencesRepository
 import com.sl.mycycle.data.repository.CycleDayRepository
 import com.sl.mycycle.domain.engine.CycleDetector
+import com.sl.mycycle.domain.engine.InsightEngine
+import com.sl.mycycle.domain.engine.SymptomInsight
 import com.sl.mycycle.domain.model.Cycle
 import com.sl.mycycle.domain.model.CycleStage
 import kotlin.math.roundToInt
@@ -23,9 +25,13 @@ enum class CycleRegularity {
 data class StatisticsState(
     val averageCycleLength: Int? = null,
     val averagePeriodLength: Int? = null,
+    val shortestCycleLength: Int? = null,
+    val longestCycleLength: Int? = null,
     val cycleVariationDays: Int? = null,
     val regularity: CycleRegularity? = null,
     val completedCycleCount: Int = 0,
+    val trackedDayCount: Int = 0,
+    val symptomInsights: List<SymptomInsight> = emptyList(),
     val cycles: List<Cycle> = emptyList(),
     val cycleStage: CycleStage = CycleStage.NOT_SET,
     val isLoading: Boolean = true
@@ -34,7 +40,8 @@ data class StatisticsState(
 class StatisticsViewModel(
     private val cycleDayRepository: CycleDayRepository,
     private val cycleDetector: CycleDetector,
-    private val preferencesRepository: UserPreferencesRepository
+    private val preferencesRepository: UserPreferencesRepository,
+    private val insightEngine: InsightEngine
 ) : ViewModel() {
 
     companion object {
@@ -60,6 +67,7 @@ class StatisticsViewModel(
                 val recent = completed.takeLast(MAX_CYCLES_FOR_SUMMARY)
                 val lengths = recent.mapNotNull { it.length }
                 val periodLengths = recent.mapNotNull { it.periodLength }
+                val insights = insightEngine.analyze(allDays, cycles)
 
                 val averageCycleLength = lengths
                     .takeIf { it.size >= 2 }
@@ -85,9 +93,13 @@ class StatisticsViewModel(
                 _state.value = StatisticsState(
                     averageCycleLength = averageCycleLength,
                     averagePeriodLength = averagePeriodLength,
+                    shortestCycleLength = insights.shortestCycleLength,
+                    longestCycleLength = insights.longestCycleLength,
                     cycleVariationDays = variation,
                     regularity = regularity,
                     completedCycleCount = recent.size,
+                    trackedDayCount = insights.trackedDayCount,
+                    symptomInsights = insights.symptomInsights,
                     cycles = cycles.takeLast(MAX_CYCLES_TO_DISPLAY).reversed(),
                     cycleStage = preferences.cycleStage,
                     isLoading = false
