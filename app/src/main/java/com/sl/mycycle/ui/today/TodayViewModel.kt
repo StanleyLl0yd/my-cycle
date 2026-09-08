@@ -20,11 +20,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
+data class PredictionBasis(
+    val shortestCycleLength: Int?,
+    val longestCycleLength: Int?
+)
+
 data class TodayState(
     val today: LocalDate = LocalDate.now(),
     val cycleDay: Int? = null,
     val isPeriodToday: Boolean = false,
     val prediction: Prediction? = null,
+    val predictionBasis: PredictionBasis? = null,
     val cycleStage: CycleStage = CycleStage.NOT_SET,
     val notice: CycleNotice? = null,
     val isLoading: Boolean = true
@@ -38,6 +44,10 @@ class TodayViewModel(
     private val noticeEvaluator: CycleNoticeEvaluator,
     private val clockProvider: ClockProvider
 ) : ViewModel() {
+
+    companion object {
+        private const val MAX_CYCLES_FOR_PREDICTION = 6
+    }
 
     private val _state = MutableStateFlow(
         TodayState(today = clockProvider.today())
@@ -85,6 +95,17 @@ class TodayViewModel(
                     null
                 }
 
+                val recentLengths = cycles
+                    .filter { it.isComplete && it.length != null }
+                    .takeLast(MAX_CYCLES_FOR_PREDICTION)
+                    .mapNotNull { it.length }
+                val predictionBasis = prediction?.let {
+                    PredictionBasis(
+                        shortestCycleLength = recentLengths.minOrNull(),
+                        longestCycleLength = recentLengths.maxOrNull()
+                    )
+                }
+
                 val lastPeriodStart = cycles.lastOrNull()?.startDate
                     ?: preferences.initialPeriodDate
 
@@ -117,6 +138,7 @@ class TodayViewModel(
                     cycleDay = cycleDay,
                     isPeriodToday = isPeriodToday,
                     prediction = prediction,
+                    predictionBasis = predictionBasis,
                     cycleStage = preferences.cycleStage,
                     notice = notice,
                     isLoading = false
