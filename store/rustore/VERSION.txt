@@ -1,4 +1,0 @@
-My Cycle 1.4.0
-versionCode 10
-Application ID com.sl.mycycle
-RuStore publishing kit branch: store/rustore-1.4.0-publishing-kit

@@ -1,2 +1,0 @@
-Ready in git: textual RuStore publishing kit for v1.4.0.
-Not ready in git: final visual assets and downloadable combined ZIP.

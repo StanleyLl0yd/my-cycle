@@ -1,1 +1,0 @@
-Visual generation starts after inspecting the existing store screenshot workflow.

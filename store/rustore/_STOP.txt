@@ -1,1 +1,0 @@
-Stop creating text helper files; inspect screenshot workflow now.

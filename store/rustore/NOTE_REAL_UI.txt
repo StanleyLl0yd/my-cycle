@@ -1,1 +1,0 @@
-RuStore screenshots must show actual 1.4.0 UI; decorative frames/captions may be added around real screenshots only if they do not misrepresent functionality.
