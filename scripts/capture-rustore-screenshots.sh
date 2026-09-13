@@ -14,14 +14,32 @@ assert_app_foreground() {
     exit 1
 }
 
-capture_screen() {
+launch_screen() {
     local screen="$1"
-    local output="$2"
     adb shell am force-stop com.sl.mycycle.debug
     adb shell am start -W \
         -n com.sl.mycycle.debug/com.sl.mycycle.debug.StoreScreenshotActivity \
         --es store_screen "$screen"
     sleep 3
+    assert_app_foreground
+}
+
+capture_screen() {
+    local screen="$1"
+    local output="$2"
+    launch_screen "$screen"
+    adb exec-out screencap -p > "$output"
+}
+
+capture_scrolled_screen() {
+    local screen="$1"
+    local output="$2"
+    local swipes="$3"
+    launch_screen "$screen"
+    for _ in $(seq 1 "$swipes"); do
+        adb shell input swipe 540 1540 540 620 350
+        sleep 1
+    done
     assert_app_foreground
     adb exec-out screencap -p > "$output"
 }
@@ -35,9 +53,12 @@ adb shell cmd locale set-app-locales com.sl.mycycle.debug --user 0 --locales ru-
 adb shell cmd locale get-app-locales com.sl.mycycle.debug --user 0 | grep -Fq 'ru-RU'
 
 mkdir -p store/rustore/screenshots/phone
+rm -f store/rustore/screenshots/phone/*.png
+
 capture_screen today store/rustore/screenshots/phone/01-today.png
 capture_screen calendar store/rustore/screenshots/phone/02-calendar.png
-capture_screen statistics store/rustore/screenshots/phone/03-statistics.png
-capture_screen settings store/rustore/screenshots/phone/04-settings.png
+capture_scrolled_screen statistics store/rustore/screenshots/phone/03-insights.png 2
+capture_screen diary store/rustore/screenshots/phone/04-diary.png
+capture_scrolled_screen settings store/rustore/screenshots/phone/05-privacy-report.png 3
 
 python3 scripts/validate-rustore-screenshots.py
