@@ -1,0 +1,1 @@
+Text package prepared. Visual generation and external ZIP assembly pending.
