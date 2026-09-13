@@ -2,17 +2,25 @@ name: RuStore Screenshots
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/store-screenshots.yml'
+      - 'app/src/debug/**'
+      - 'scripts/capture-rustore-screenshots.sh'
+      - 'scripts/validate-rustore-screenshots.py'
 
 permissions:
   contents: read
 
 concurrency:
-  group: rustore-screenshots-${{ github.ref }}
+  group: rustore-screenshots-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   screenshots:
-    runs-on: ubuntu-latest
+    name: Generate RuStore screenshots
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
 
     steps:
@@ -78,7 +86,7 @@ jobs:
       - name: Upload screenshot artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: My-Cycle-RuStore-screenshots
+          name: My-Cycle-RuStore-screenshots-1.4.0
           path: store/rustore/screenshots/phone/*.png
           if-no-files-found: error
           retention-days: 30
