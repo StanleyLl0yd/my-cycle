@@ -1,0 +1,1 @@
+Для публикации открыть `publication-checklist.ru.md`, затем использовать `rustore-fields.ru.txt`, `listing.ru.md`, `whats-new.ru.txt` и `moderator-note.ru.txt`. Бинарники — только из immutable release v1.4.0. Визуалы должны следовать `screenshot-plan.ru.md`.
