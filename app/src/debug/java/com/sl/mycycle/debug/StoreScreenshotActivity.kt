@@ -4,17 +4,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.rememberNavController
 import com.sl.mycycle.data.preferences.UserPreferencesRepository
 import com.sl.mycycle.data.repository.CycleDayRepository
 import com.sl.mycycle.domain.model.CycleDay
 import com.sl.mycycle.domain.model.CycleStage
 import com.sl.mycycle.domain.model.FlowIntensity
+import com.sl.mycycle.domain.model.Mood
+import com.sl.mycycle.domain.model.Symptom
 import com.sl.mycycle.domain.model.ThemeMode
+import com.sl.mycycle.ui.daydetails.DayDetailsSheet
 import com.sl.mycycle.ui.navigation.MainNavHost
 import com.sl.mycycle.ui.navigation.Screen
 import com.sl.mycycle.ui.theme.MyCycleTheme
@@ -25,15 +32,20 @@ import org.koin.core.context.GlobalContext
 class StoreScreenshotActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        runBlocking { seedDemoData() }
-        val targetRoute = when (intent.getStringExtra(EXTRA_SCREEN)) {
+        val today = LocalDate.now()
+        runBlocking { seedDemoData(today) }
+        val requestedScreen = intent.getStringExtra(EXTRA_SCREEN)
+        val targetRoute = when (requestedScreen) {
             "calendar" -> Screen.Calendar.route
             "statistics" -> Screen.Statistics.route
             "settings" -> Screen.Settings.route
             else -> Screen.Today.route
         }
+        val showDiary = requestedScreen == "diary"
+        val diaryDate = today.minusDays(LAST_PERIOD_DAYS_AGO).plusDays(1)
 
         enableEdgeToEdge()
+        hideSystemBars()
         setContent {
             val navController = rememberNavController()
             LaunchedEffect(targetRoute) {
@@ -48,21 +60,38 @@ class StoreScreenshotActivity : ComponentActivity() {
                 dynamicColor = false,
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    MainNavHost(
-                        navController = navController,
-                        onDayClick = {},
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        MainNavHost(
+                            navController = navController,
+                            onDayClick = {},
+                        )
+                        if (showDiary) {
+                            DayDetailsSheet(
+                                dateString = diaryDate.toString(),
+                                onDismiss = {},
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 
-    private suspend fun seedDemoData() {
+    private fun hideSystemBars() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            hide(WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+    }
+
+    private suspend fun seedDemoData(today: LocalDate) {
         val koin = GlobalContext.get()
         val cycleDayRepository = koin.get<CycleDayRepository>()
         val preferencesRepository = koin.get<UserPreferencesRepository>()
-        val today = LocalDate.now()
-        val periodStarts = listOf(158L, 130L, 102L, 74L, 46L, 18L).map(today::minusDays)
+        val periodStarts = PERIOD_START_OFFSETS.map(today::minusDays)
+        val lastPeriodStart = periodStarts.last()
         val intensities = listOf(
             FlowIntensity.MEDIUM,
             FlowIntensity.HEAVY,
@@ -70,24 +99,55 @@ class StoreScreenshotActivity : ComponentActivity() {
             FlowIntensity.LIGHT,
             FlowIntensity.LIGHT,
         )
+        val periodDays = periodStarts.flatMap { start ->
+            intensities.mapIndexed { index, intensity ->
+                val isFeaturedDiaryDay = start == lastPeriodStart && index == 1
+                CycleDay(
+                    date = start.plusDays(index.toLong()),
+                    hasPeriod = true,
+                    flowIntensity = intensity,
+                    mood = when {
+                        isFeaturedDiaryDay -> Mood.GOOD
+                        index == 1 -> Mood.OKAY
+                        else -> null
+                    },
+                    symptoms = when {
+                        isFeaturedDiaryDay -> setOf(
+                            Symptom.CRAMPS,
+                            Symptom.BLOATING,
+                            Symptom.FATIGUE,
+                        )
+                        index == 1 -> setOf(Symptom.CRAMPS)
+                        else -> emptySet()
+                    },
+                    notes = if (isFeaturedDiaryDay) {
+                        "Небольшая усталость после рабочего дня"
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
+        val prePeriodDays = periodStarts.drop(1).flatMap { start ->
+            listOf(
+                CycleDay(
+                    date = start.minusDays(2),
+                    mood = Mood.OKAY,
+                    symptoms = setOf(Symptom.HEADACHE, Symptom.FATIGUE),
+                ),
+                CycleDay(
+                    date = start.minusDays(1),
+                    symptoms = setOf(Symptom.FATIGUE),
+                ),
+            )
+        }
 
         cycleDayRepository.deleteAll()
         preferencesRepository.clearAll()
-        cycleDayRepository.saveAll(
-            periodStarts.flatMap { start ->
-                intensities.mapIndexed { index, intensity ->
-                    CycleDay(
-                        date = start.plusDays(index.toLong()),
-                        hasPeriod = true,
-                        flowIntensity = intensity,
-                    )
-                }
-            }
-        )
-
+        cycleDayRepository.saveAll(periodDays + prePeriodDays)
         preferencesRepository.completeOnboarding(
-            lastPeriodDate = periodStarts.last(),
-            cycleLength = 28,
+            lastPeriodDate = lastPeriodStart,
+            cycleLength = 29,
             cycleStage = CycleStage.ESTABLISHED,
             periodLength = 5,
         )
@@ -95,5 +155,7 @@ class StoreScreenshotActivity : ComponentActivity() {
 
     private companion object {
         const val EXTRA_SCREEN = "store_screen"
+        const val LAST_PERIOD_DAYS_AGO = 24L
+        val PERIOD_START_OFFSETS = listOf(171L, 141L, 112L, 82L, 53L, LAST_PERIOD_DAYS_AGO)
     }
 }
