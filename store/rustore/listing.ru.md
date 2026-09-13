@@ -83,7 +83,6 @@ PDF-отчёт создаётся непосредственно на устро
 
 - **Сайт / поддержка:** https://github.com/StanleyLl0yd/my-cycle
 - **Политика конфиденциальности:** https://github.com/StanleyLl0yd/my-cycle/blob/main/PRIVACY.ru.md
-- **Пользовательское соглашение:** https://github.com/StanleyLl0yd/my-cycle/blob/main/TERMS.ru.md
 - **Исходный код:** https://github.com/StanleyLl0yd/my-cycle
 
 ## Безопасность данных / анкета RuStore
@@ -116,7 +115,7 @@ PDF-отчёт специально исключает свободные лич
 4. `My-Cycle-v1.4.0.aab.sha256` и `My-Cycle-v1.4.0.apk.sha256`.
 5. Иконка каталога 512×512 PNG/JPG без прозрачного контура.
 6. Не менее 4 вертикальных скриншотов 9:16 с актуальным интерфейсом версии 1.4.0.
-7. Тексты этой карточки, privacy policy и пользовательское соглашение.
+7. Тексты этой карточки и privacy policy.
 8. Отдельный файл `whats-new.ru.txt` с блоком «Что нового» выше.
 9. Отдельный файл `moderator-note.ru.txt` с комментарием для модератора выше.
 
