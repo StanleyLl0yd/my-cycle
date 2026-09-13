@@ -1,0 +1,1 @@
+NEXT: generate/update 1.4.0 screenshots from real UI and assemble final external ZIP with immutable release assets.
