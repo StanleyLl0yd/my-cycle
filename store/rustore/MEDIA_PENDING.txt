@@ -1,0 +1,1 @@
+Pending: run or update the repository's `store-screenshots.yml` workflow to produce 1.4.0 screenshots matching `screenshot-plan.ru.md`, then package them with the 512×512 store icon and immutable v1.4.0 release files.
