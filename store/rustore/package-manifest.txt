@@ -1,0 +1,29 @@
+TEXT FILES
+README.md
+listing.ru.md
+rustore-fields.ru.txt
+whats-new.ru.txt
+moderator-note.ru.txt
+data-safety.ru.md
+aso-keywords.ru.txt
+requirements-2026-09.md
+publication-checklist.ru.md
+screenshot-plan.ru.md
+console-order.txt
+release-assets.txt
+visual-assets-status.md
+
+RELEASE FILES FROM v1.4.0
+My-Cycle-v1.4.0.aab
+My-Cycle-v1.4.0.apk
+My-Cycle-v1.4.0-upload-cert.pem
+My-Cycle-v1.4.0.aab.sha256
+My-Cycle-v1.4.0.apk.sha256
+
+VISUAL FILES
+icon-512.png
+01-today.png
+02-calendar.png
+03-insights.png
+04-diary.png
+05-privacy-report.png
