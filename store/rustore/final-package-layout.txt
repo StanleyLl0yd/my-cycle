@@ -1,0 +1,27 @@
+My-Cycle-v1.4.0-RuStore/
+├── app/
+│   ├── My-Cycle-v1.4.0.aab
+│   ├── My-Cycle-v1.4.0.apk
+│   ├── My-Cycle-v1.4.0-upload-cert.pem
+│   ├── My-Cycle-v1.4.0.aab.sha256
+│   └── My-Cycle-v1.4.0.apk.sha256
+├── listing/
+│   ├── listing.ru.md
+│   ├── rustore-fields.ru.txt
+│   ├── whats-new.ru.txt
+│   ├── moderator-note.ru.txt
+│   ├── data-safety.ru.md
+│   ├── aso-keywords.ru.txt
+│   └── publication-checklist.ru.md
+├── media/
+│   ├── icon-512.png
+│   ├── 01-today.png
+│   ├── 02-calendar.png
+│   ├── 03-insights.png
+│   ├── 04-diary.png
+│   └── 05-privacy-report.png
+└── docs/
+    ├── PRIVACY.ru.md
+    ├── requirements-2026-09.md
+    ├── screenshot-plan.ru.md
+    └── release-assets.txt
