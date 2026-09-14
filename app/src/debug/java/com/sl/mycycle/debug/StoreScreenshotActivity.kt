@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
@@ -21,12 +20,10 @@ import com.sl.mycycle.domain.model.FlowIntensity
 import com.sl.mycycle.domain.model.Mood
 import com.sl.mycycle.domain.model.Symptom
 import com.sl.mycycle.domain.model.ThemeMode
-import com.sl.mycycle.ui.daydetails.DayDetailsSheet
 import com.sl.mycycle.ui.navigation.MainNavHost
 import com.sl.mycycle.ui.navigation.Screen
 import com.sl.mycycle.ui.theme.MyCycleTheme
 import java.time.LocalDate
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.GlobalContext
 
@@ -35,15 +32,12 @@ class StoreScreenshotActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val today = LocalDate.now()
         runBlocking { seedDemoData(today) }
-        val requestedScreen = intent.getStringExtra(EXTRA_SCREEN)
-        val targetRoute = when (requestedScreen) {
+        val targetRoute = when (intent.getStringExtra(EXTRA_SCREEN)) {
             "calendar" -> Screen.Calendar.route
             "statistics" -> Screen.Statistics.route
             "settings" -> Screen.Settings.route
             else -> Screen.Today.route
         }
-        val showDiary = requestedScreen == "diary"
-        val diaryDate = today.minusDays(LAST_PERIOD_DAYS_AGO).plusDays(1)
 
         enableEdgeToEdge()
         hideSystemBars()
@@ -56,31 +50,15 @@ class StoreScreenshotActivity : ComponentActivity() {
                     }
                 }
             }
-            LaunchedEffect(showDiary) {
-                if (showDiary) {
-                    repeat(6) {
-                        delay(250)
-                        hideSystemBars()
-                    }
-                }
-            }
             MyCycleTheme(
                 themeMode = ThemeMode.LIGHT,
                 dynamicColor = false,
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        MainNavHost(
-                            navController = navController,
-                            onDayClick = {},
-                        )
-                        if (showDiary) {
-                            DayDetailsSheet(
-                                dateString = diaryDate.toString(),
-                                onDismiss = {},
-                            )
-                        }
-                    }
+                    MainNavHost(
+                        navController = navController,
+                        onDayClick = {},
+                    )
                 }
             }
         }
@@ -110,29 +88,15 @@ class StoreScreenshotActivity : ComponentActivity() {
         )
         val periodDays = periodStarts.flatMap { start ->
             intensities.mapIndexed { index, intensity ->
-                val isFeaturedDiaryDay = start == lastPeriodStart && index == 1
                 CycleDay(
                     date = start.plusDays(index.toLong()),
                     hasPeriod = true,
                     flowIntensity = intensity,
-                    mood = when {
-                        isFeaturedDiaryDay -> Mood.GOOD
-                        index == 1 -> Mood.OKAY
-                        else -> null
-                    },
-                    symptoms = when {
-                        isFeaturedDiaryDay -> setOf(
-                            Symptom.CRAMPS,
-                            Symptom.BLOATING,
-                            Symptom.FATIGUE,
-                        )
-                        index == 1 -> setOf(Symptom.CRAMPS)
-                        else -> emptySet()
-                    },
-                    notes = if (isFeaturedDiaryDay) {
-                        "Небольшая усталость после рабочего дня"
+                    mood = if (index == 1) Mood.OKAY else null,
+                    symptoms = if (index == 1) {
+                        setOf(Symptom.CRAMPS)
                     } else {
-                        null
+                        emptySet()
                     },
                 )
             }
