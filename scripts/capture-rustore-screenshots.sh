@@ -14,6 +14,16 @@ assert_app_foreground() {
     exit 1
 }
 
+assert_no_fullscreen_tutorial() {
+    local hierarchy
+    adb shell uiautomator dump /sdcard/rustore-window.xml >/dev/null 2>&1 || return 0
+    hierarchy="$(adb exec-out cat /sdcard/rustore-window.xml 2>/dev/null || true)"
+    if grep -Fq -e 'Viewing full screen' -e 'Got it' <<< "$hierarchy"; then
+        echo 'Android immersive-mode tutorial is covering the app.' >&2
+        exit 1
+    fi
+}
+
 launch_screen() {
     local screen="$1"
     adb shell am force-stop com.sl.mycycle.debug
@@ -22,6 +32,7 @@ launch_screen() {
         --es store_screen "$screen"
     sleep 3
     assert_app_foreground
+    assert_no_fullscreen_tutorial
 }
 
 capture_screen() {
@@ -41,12 +52,15 @@ capture_scrolled_screen() {
         sleep 1
     done
     assert_app_foreground
+    assert_no_fullscreen_tutorial
     adb exec-out screencap -p > "$output"
 }
 
 adb wait-for-device
 test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1"
 adb shell settings put global hide_error_dialogs 1
+adb shell settings put secure immersive_mode_confirmations confirmed
+adb shell settings put global policy_control 'immersive.full=*'
 
 adb install -r -t app/build/outputs/apk/debug/app-debug.apk
 adb shell cmd locale set-app-locales com.sl.mycycle.debug --user 0 --locales ru-RU
