@@ -24,6 +24,6 @@ VISUAL FILES
 icon-512.png
 01-today.png
 02-calendar.png
-03-insights.png
-04-diary.png
+03-statistics.png
+04-insights.png
 05-privacy-report.png
