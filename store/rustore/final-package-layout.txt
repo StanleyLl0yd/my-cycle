@@ -15,13 +15,23 @@ My-Cycle-v1.4.0-RuStore/
 │   └── publication-checklist.ru.md
 ├── media/
 │   ├── icon-512.png
-│   ├── 01-today.png
-│   ├── 02-calendar.png
-│   ├── 03-insights.png
-│   ├── 04-diary.png
-│   └── 05-privacy-report.png
-└── docs/
-    ├── PRIVACY.ru.md
-    ├── requirements-2026-09.md
-    ├── screenshot-plan.ru.md
-    └── release-assets.txt
+│   ├── promo-1200x630.png
+│   ├── aso/
+│   │   ├── 01-today.png
+│   │   ├── 02-calendar.png
+│   │   ├── 03-statistics.png
+│   │   ├── 04-insights.png
+│   │   └── 05-privacy-report.png
+│   └── raw/
+│       ├── 01-today.png
+│       ├── 02-calendar.png
+│       ├── 03-statistics.png
+│       ├── 04-insights.png
+│       └── 05-privacy-report.png
+├── docs/
+│   ├── PRIVACY.ru.md
+│   ├── TERMS.ru.md
+│   ├── requirements-2026-09.md
+│   ├── screenshot-plan.ru.md
+│   └── release-assets.txt
+└── SHA256SUMS.txt
