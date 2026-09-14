@@ -12,6 +12,8 @@
 - `publication-checklist.ru.md` — финальный чек-лист консоли RuStore.
 - `screenshot-plan.ru.md` — порядок, подписи и требования к скриншотам.
 
+Политика конфиденциальности и пользовательское соглашение находятся в корне репозитория: `PRIVACY.ru.md` и `TERMS.ru.md`.
+
 ## Бинарные материалы
 
 Бинарники не дублируются в git. Использовать immutable GitHub Release `v1.4.0`:
@@ -29,8 +31,8 @@
 - `icon-512.png`
 - `01-today.png`
 - `02-calendar.png`
-- `03-insights.png`
-- `04-diary.png`
+- `03-statistics.png`
+- `04-insights.png`
 - `05-privacy-report.png`
 
-Все скриншоты должны быть вертикальными 9:16, показывать фактический UI версии 1.4.0 и следовать `screenshot-plan.ru.md`.
+Все скриншоты должны быть вертикальными 9:16, показывать фактический UI версии 1.4.0, не содержать Android System UI и следовать `screenshot-plan.ru.md`.
