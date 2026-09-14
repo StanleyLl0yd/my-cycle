@@ -71,8 +71,8 @@ rm -f store/rustore/screenshots/phone/*.png
 
 capture_screen today store/rustore/screenshots/phone/01-today.png
 capture_screen calendar store/rustore/screenshots/phone/02-calendar.png
-capture_scrolled_screen statistics store/rustore/screenshots/phone/03-insights.png 2
-capture_screen diary store/rustore/screenshots/phone/04-diary.png
+capture_screen statistics store/rustore/screenshots/phone/03-statistics.png
+capture_scrolled_screen statistics store/rustore/screenshots/phone/04-insights.png 2
 capture_scrolled_screen settings store/rustore/screenshots/phone/05-privacy-report.png 3
 
 python3 scripts/validate-rustore-screenshots.py
