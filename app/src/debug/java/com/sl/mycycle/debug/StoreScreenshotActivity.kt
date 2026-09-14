@@ -26,6 +26,7 @@ import com.sl.mycycle.ui.navigation.MainNavHost
 import com.sl.mycycle.ui.navigation.Screen
 import com.sl.mycycle.ui.theme.MyCycleTheme
 import java.time.LocalDate
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.GlobalContext
 
@@ -52,6 +53,14 @@ class StoreScreenshotActivity : ComponentActivity() {
                 if (targetRoute != Screen.Today.route) {
                     navController.navigate(targetRoute) {
                         launchSingleTop = true
+                    }
+                }
+            }
+            LaunchedEffect(showDiary) {
+                if (showDiary) {
+                    repeat(6) {
+                        delay(250)
+                        hideSystemBars()
                     }
                 }
             }
