@@ -1,0 +1,6 @@
+RuStore field limits used for this package:
+- app name: keep current «Мой Цикл»;
+- short description: <= 80 characters;
+- full description: <= 4000 characters;
+- phone screenshots: minimum 3, same orientation, 9:16 selected for this package;
+- icon: 512x512 target asset, PNG/JPG, square, full background.

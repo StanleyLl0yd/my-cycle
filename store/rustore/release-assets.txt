@@ -1,0 +1,16 @@
+GitHub Release: v1.4.0
+Release page: https://github.com/StanleyLl0yd/my-cycle/releases/tag/v1.4.0
+
+Required files:
+My-Cycle-v1.4.0.aab
+My-Cycle-v1.4.0.apk
+My-Cycle-v1.4.0-upload-cert.pem
+My-Cycle-v1.4.0.aab.sha256
+My-Cycle-v1.4.0.apk.sha256
+
+Known SHA-256 of release assets from GitHub Release metadata:
+AAB: dcc84eb856bc9d7aa0734dddbdd9495140a2d7b92924ddcb3277dc6f1a503865
+APK: d982026ecec3279543e1a4d2813777c2699a6414cc90bec9e0d47a1d16aa68e6
+Upload certificate asset digest: 3079ce4595d961cdbcf2198b587e26e57d62aecf29e7b6c5d9f14b9a3fba692e
+
+Release is immutable and was produced by the hardened Android Release workflow.
